@@ -1,10 +1,23 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 import { RegisterCustomerUseCase } from '../../application/use-cases/register-customer.use-case';
+import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 
-@Controller('auth')
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+    roleId: string;
+  };
+}
+
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 export class AuthController {
   constructor(
     private readonly registerCustomerUseCase: RegisterCustomerUseCase,
@@ -28,5 +41,11 @@ export class AuthController {
       email: dto.email,
       password: dto.password,
     });
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() request: AuthenticatedRequest) {
+    return request.user;
   }
 }
