@@ -4,5 +4,6 @@ export class UserEntity {
     public readonly email: string,
     public readonly passwordHash: string,
     public readonly roleId: string,
+    public readonly roleName: string,
   ) {}
 }

@@ -35,6 +35,7 @@ export class LoginUseCase {
       sub: user.id,
       email: user.email,
       roleId: user.roleId,
+      roleName: user.roleName,
     });
 
     return {
@@ -43,6 +44,7 @@ export class LoginUseCase {
         id: user.id,
         email: user.email,
         roleId: user.roleId,
+        roleName: user.roleName,
       },
     };
   }

@@ -5,6 +5,8 @@ import { RegisterCustomerUseCase } from '../../application/use-cases/register-cu
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
+import { Roles } from '../../../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../../../common/guards/roles.guard';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -44,7 +46,8 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Customer')
   getMe(@Req() request: AuthenticatedRequest) {
     return request.user;
   }

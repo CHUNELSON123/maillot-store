@@ -13,25 +13,43 @@ export class PrismaUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
+      include: {
+        role: true,
+      },
     });
 
     if (!user) {
       return null;
     }
 
-    return new UserEntity(user.id, user.email, user.password, user.role_id);
+    return new UserEntity(
+      user.id,
+      user.email,
+      user.password,
+      user.role_id,
+      user.role.name,
+    );
   }
 
   async findById(id: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        role: true,
+      },
     });
 
     if (!user) {
       return null;
     }
 
-    return new UserEntity(user.id, user.email, user.password, user.role_id);
+    return new UserEntity(
+      user.id,
+      user.email,
+      user.password,
+      user.role_id,
+      user.role.name,
+    );
   }
 
   async createCustomer(data: CreateCustomerData): Promise<UserEntity> {
@@ -58,6 +76,12 @@ export class PrismaUserRepository implements UserRepository {
       },
     });
 
-    return new UserEntity(user.id, user.email, user.password, user.role_id);
+    return new UserEntity(
+      user.id,
+      user.email,
+      user.password,
+      user.role_id,
+      customerRole.name,
+    );
   }
 }
