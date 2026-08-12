@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/client";
+import * as bcrypt from "bcrypt";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
@@ -25,6 +26,32 @@ async function main() {
       create: { name },
     });
   }
+
+    // Development Administrator
+  const administratorRole = await prisma.role.findUnique({
+    where: { name: "Administrator" },
+  });
+
+  if (!administratorRole) {
+    throw new Error("Administrator role not found");
+  }
+
+  const passwordHash = await bcrypt.hash("Admin12345", 12);
+
+  await prisma.user.upsert({
+    where: {
+      email: "admin@maillot-store.com",
+    },
+    update: {
+      password: passwordHash,
+      role_id: administratorRole.id,
+    },
+    create: {
+      email: "admin@maillot-store.com",
+      password: passwordHash,
+      role_id: administratorRole.id,
+    },
+  });
 
   // Payment methods
   const paymentMethods = [

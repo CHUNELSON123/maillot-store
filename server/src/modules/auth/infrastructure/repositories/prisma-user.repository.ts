@@ -52,6 +52,19 @@ export class PrismaUserRepository implements UserRepository {
     );
   }
 
+  async findCustomerIdByUserId(userId: string): Promise<string | null> {
+    const customer = await this.prisma.customer.findUnique({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return customer?.id ?? null;
+  }
+
   async createCustomer(data: CreateCustomerData): Promise<UserEntity> {
     const customerRole = await this.prisma.role.findUnique({
       where: { name: 'Customer' },

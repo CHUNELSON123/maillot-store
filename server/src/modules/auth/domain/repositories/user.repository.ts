@@ -13,5 +13,7 @@ export abstract class UserRepository {
 
   abstract findById(id: string): Promise<UserEntity | null>;
 
+  abstract findCustomerIdByUserId(userId: string): Promise<string | null>;
+
   abstract createCustomer(data: CreateCustomerData): Promise<UserEntity>;
 }
