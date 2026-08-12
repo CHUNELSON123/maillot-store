@@ -9,7 +9,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
 import { RewardsModule } from './modules/rewards/rewards.module';
-
+import { InfluencersModule } from './modules/influencers/influencers.module';
 @Module({
   imports: [
     DatabaseModule,
@@ -20,6 +20,7 @@ import { RewardsModule } from './modules/rewards/rewards.module';
     PaymentsModule,
     DeliveryModule,
     RewardsModule,
+    InfluencersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
