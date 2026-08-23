@@ -49,6 +49,8 @@ export abstract class InfluencerRepository {
     data: UpdateInfluencerData,
   ): Promise<InfluencerEntity>;
 
+  abstract approve(influencerId: string): Promise<InfluencerEntity>;
+
   abstract createReferral(data: CreateReferralData): Promise<ReferralEntity>;
 
   abstract findReferralsByInfluencer(
@@ -58,6 +60,8 @@ export abstract class InfluencerRepository {
   abstract findReferralByCode(
     referralCode: string,
   ): Promise<ReferralEntity | null>;
+
+  abstract findReferralById(referralId: string): Promise<ReferralEntity | null>;
 
   abstract register(data: RegisterInfluencerData): Promise<InfluencerEntity>;
 

@@ -345,6 +345,53 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
     return influencer !== null;
   }
 
+  async approve(influencerId: string): Promise<InfluencerEntity> {
+    const existingInfluencer = await this.prisma.influencer.findFirst({
+      where: {
+        id: influencerId,
+        deleted_at: null,
+      },
+    });
+
+    if (!existingInfluencer) {
+      throw new NotFoundException('Influencer not found');
+    }
+
+    if (existingInfluencer.status === 'ACTIVE') {
+      throw new ConflictException('Influencer is already active');
+    }
+
+    if (existingInfluencer.status !== 'PENDING') {
+      throw new ConflictException('Only pending influencers can be approved');
+    }
+
+    const influencer = await this.prisma.influencer.update({
+      where: {
+        id: influencerId,
+      },
+      data: {
+        status: 'ACTIVE',
+      },
+    });
+
+    return this.toInfluencerEntity(influencer);
+  }
+
+  async findReferralById(referralId: string): Promise<ReferralEntity | null> {
+    const referral = await this.prisma.referral.findFirst({
+      where: {
+        id: referralId,
+        deleted_at: null,
+      },
+    });
+
+    if (!referral) {
+      return null;
+    }
+
+    return this.toReferralEntity(referral);
+  }
+
   private toInfluencerEntity(influencer: {
     id: string;
     user_id: string;

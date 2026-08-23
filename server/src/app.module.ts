@@ -10,6 +10,11 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { DeliveryModule } from './modules/delivery/delivery.module';
 import { RewardsModule } from './modules/rewards/rewards.module';
 import { InfluencersModule } from './modules/influencers/influencers.module';
+import { SuppliersModule } from './modules/suppliers/suppliers.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { CmsModule } from './modules/cms/cms.module';
+import { ReportsModule } from './modules/reports/reports.module';
+
 @Module({
   imports: [
     DatabaseModule,
@@ -21,6 +26,10 @@ import { InfluencersModule } from './modules/influencers/influencers.module';
     DeliveryModule,
     RewardsModule,
     InfluencersModule,
+    SuppliersModule,
+    CustomersModule,
+    CmsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

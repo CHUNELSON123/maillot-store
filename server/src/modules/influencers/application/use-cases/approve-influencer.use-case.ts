@@ -20,8 +20,6 @@ export class ApproveInfluencerUseCase {
       throw new ConflictException('Only pending influencers can be approved');
     }
 
-    return this.influencerRepository.update(influencerId, {
-      status: 'ACTIVE',
-    });
+    return this.influencerRepository.approve(influencerId);
   }
 }
