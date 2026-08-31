@@ -10,6 +10,7 @@ const navigation = [
   { label: "Track Order", href: "/account/track-order" },
   { label: "Profile", href: "/account/profile" },
   { label: "Addresses", href: "/account/addresses" },
+  { label: "Notifications", href: "/account/notifications" },
 ];
 
 export function CustomerSidebar() {

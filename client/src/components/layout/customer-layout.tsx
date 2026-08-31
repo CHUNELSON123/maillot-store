@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-import { CustomerHeader } from "./customer-header";
-import { CustomerFooter } from "./customer-footer";
+import { CustomerHeader } from "@/modules/customer/components/customer-header";
+import { CustomerFooter } from "@/modules/customer/components/customer-footer";
 
 type CustomerLayoutProps = {
   children: ReactNode;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { AuthBenefits } from "./auth-benefits";
 import { AuthImagePanel } from "./auth-image-panel";
-import { NewsletterSection } from "./newsletter-section";
+import { NewsletterSection } from "@/components/shared/newsletter-section";
 
 interface AuthPageLayoutProps {
   title: string;
