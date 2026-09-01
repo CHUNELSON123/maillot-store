@@ -12,6 +12,8 @@ import {
   ProductImage,
 } from "../types/catalogue.types";
 
+import { useCart } from "@/modules/cart/hooks/use-cart";
+
 type ProductCardProps = {
   product: Product;
   image?: ProductImage;
@@ -36,7 +38,10 @@ function resolveImageUrl(imageUrl?: string) {
     return null;
   }
 
-  if (imageUrl.startsWith("http") || !imageUrl.startsWith("/uploads")) {
+  if (
+    imageUrl.startsWith("http") ||
+    !imageUrl.startsWith("/uploads")
+  ) {
     return imageUrl;
   }
 
@@ -53,9 +58,12 @@ function resolveImageUrl(imageUrl?: string) {
 
 function getProductTheme(productId: string) {
   const index =
-    productId.split("").reduce((total, character) => {
-      return total + character.charCodeAt(0);
-    }, 0) % productThemes.length;
+    productId.split("").reduce(
+      (total, character) => {
+        return total + character.charCodeAt(0);
+      },
+      0,
+    ) % productThemes.length;
 
   return productThemes[index];
 }
@@ -69,17 +77,36 @@ export function ProductCard({
   showAddToCart = true,
   badge = null,
 }: ProductCardProps) {
-  const imageUrl = resolveImageUrl(image?.imageUrl);
+  const { addItem } = useCart();
+
+  const imageUrl = resolveImageUrl(
+    image?.imageUrl,
+  );
 
   const formatPrice = (price: number) =>
     `${price.toLocaleString("en-US")} FCFA`;
 
-  const formattedPrice = formatPrice(product.price);
+  const formattedPrice = formatPrice(
+    product.price,
+  );
 
   const formattedOriginalPrice =
     originalPrice !== null
       ? formatPrice(originalPrice)
       : null;
+
+  const handleAddToCart = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    addItem({
+      product,
+      imageUrl: image?.imageUrl ?? null,
+      quantity: 1,
+    });
+  };
 
   return (
     <article className="group min-w-0 overflow-hidden rounded-[3px] border border-[#8B6A00] bg-[#101010]">
@@ -89,7 +116,10 @@ export function ProductCard({
             {imageUrl ? (
               <Image
                 src={imageUrl}
-                alt={image?.altText || product.name}
+                alt={
+                  image?.altText ||
+                  product.name
+                }
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
@@ -128,7 +158,6 @@ export function ProductCard({
               </span>
             )}
 
-            {/* Discount */}
             {discountPercentage !== null &&
               discountPercentage > 0 && (
                 <span className="absolute left-2 top-2 rounded-[2px] bg-[#E31B23] px-2 py-1 text-[8px] font-extrabold leading-none text-white">
@@ -178,13 +207,7 @@ export function ProductCard({
         {showAddToCart && (
           <button
             type="button"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              // Cart functionality will be connected
-              // when the cart module is implemented.
-            }}
+            onClick={handleAddToCart}
             className="mt-2 flex h-7 w-full items-center justify-center gap-1 rounded-[2px] border border-[#D4AF37] bg-transparent text-[7px] font-extrabold uppercase tracking-wide text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black min-[380px]:gap-1.5 min-[380px]:text-[8px] sm:text-[9px]"
           >
             <ShoppingCart
