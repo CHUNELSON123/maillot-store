@@ -7,7 +7,12 @@ export interface CreateOrderItemData {
 }
 
 export interface CreateOrderData {
-  customerId: string;
+  customerId?: string | null;
+
+  guestName?: string | null;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
+
   orderNumber: string;
   source: string;
   status: string;

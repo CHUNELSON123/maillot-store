@@ -25,7 +25,6 @@ import { AddProductImageDto } from '../dto/add-product-image.dto';
   path: 'products/:productId/images',
   version: '1',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductImageController {
   constructor(
     private readonly addProductImageUseCase: AddProductImageUseCase,
@@ -34,6 +33,7 @@ export class ProductImageController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   @UseInterceptors(
     FileInterceptor('image', {
@@ -78,12 +78,12 @@ export class ProductImageController {
   }
 
   @Get()
-  @Roles('Administrator', 'Staff', 'Customer', 'Influencer')
   findAll(@Param('productId') productId: string) {
     return this.getProductImagesUseCase.execute(productId);
   }
 
   @Delete(':imageId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator')
   remove(
     @Param('productId') productId: string,

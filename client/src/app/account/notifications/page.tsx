@@ -18,7 +18,7 @@ export default function NotificationsPage() {
   ).length;
 
   return (
-    <CustomerLayout>
+    
       <section>
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -61,6 +61,6 @@ export default function NotificationsPage() {
           />
         )}
       </section>
-    </CustomerLayout>
+    
   );
 }

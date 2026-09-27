@@ -12,6 +12,7 @@ import {
   AddToCartInput,
   CartItem,
 } from "../types/cart.types";
+import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
 
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -55,6 +56,13 @@ export function useCart() {
   const addItem = useCallback(
     (input: AddToCartInput) => {
       setItems(cartService.addItem(input));
+    },
+    [],
+  );
+
+  const updateVariant = useCallback(
+    (itemId: string, variant: ProductVariant) => {
+      setItems(cartService.updateVariant(itemId, variant));
     },
     [],
   );
@@ -120,6 +128,7 @@ export function useCart() {
     total,
     isReady,
     addItem,
+    updateVariant,
     updateQuantity,
     removeItem,
     clearCart,

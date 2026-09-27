@@ -8,8 +8,6 @@ export class MarkAllNotificationsReadUseCase {
   ) {}
 
   execute(userId: string) {
-    return this.notificationRepository.markAllAsRead(
-      userId,
-    );
+    return this.notificationRepository.markAllAsRead(userId);
   }
 }

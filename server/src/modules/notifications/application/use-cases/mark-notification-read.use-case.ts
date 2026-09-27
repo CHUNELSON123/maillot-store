@@ -7,13 +7,7 @@ export class MarkNotificationReadUseCase {
     private readonly notificationRepository: NotificationRepository,
   ) {}
 
-  execute(
-    userId: string,
-    notificationId: string,
-  ) {
-    return this.notificationRepository.markAsRead(
-      userId,
-      notificationId,
-    );
+  execute(userId: string, notificationId: string) {
+    return this.notificationRepository.markAsRead(userId, notificationId);
   }
 }

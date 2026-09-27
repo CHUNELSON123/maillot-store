@@ -12,7 +12,9 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   app.enableCors();
-  app.useStaticAssets(join(process.cwd(), 'uploads'));
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   app.enableVersioning({
     type: VersioningType.URI,

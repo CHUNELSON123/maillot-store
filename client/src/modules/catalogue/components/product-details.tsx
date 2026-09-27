@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Check,
   ChevronLeft,
@@ -17,9 +18,11 @@ import {
 } from "lucide-react";
 
 import { CustomerLayout } from "@/modules/customer/components/customer-layout";
+import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useCatalogue } from "../hooks/use-catalogue";
 import {
   ProductDetails as ProductDetailsType,
+  ProductVariant,
 } from "../types/catalogue.types";
 import { ProductCard } from "./product-card";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
@@ -29,8 +32,10 @@ type Props = {
 };
 
 export function ProductDetails({ product }: Props) {
+  const { addItem } = useCart();
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null,
   );
   const [quantity, setQuantity] = useState(1);
@@ -40,19 +45,16 @@ export function ProductDetails({ product }: Props) {
   const images = product.images ?? [];
   const variants = product.variants ?? [];
 
-  const sizes = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          variants
-            .map((variant) => variant.size)
-            .filter(
-              (size): size is string => Boolean(size),
-            ),
-        ),
-      ),
-    [variants],
+  const purchasableVariants = variants.filter(
+    (variant): variant is ProductVariant & { price: number } =>
+      typeof variant.price === "number" &&
+      Number.isFinite(variant.price) &&
+      variant.price >= 0,
   );
+
+  const selectedVariant = purchasableVariants.find(
+    (variant) => variant.id === selectedVariantId,
+  ) ?? (purchasableVariants.length === 1 ? purchasableVariants[0] : null);
 
   const activeImage = images[selectedImage];
 
@@ -61,11 +63,19 @@ export function ProductDetails({ product }: Props) {
       return null;
     }
 
-    if (url.startsWith("http")) {
+    if (url.startsWith("http") || !url.startsWith("/uploads")) {
       return url;
     }
 
-    return `${process.env.NEXT_PUBLIC_API_URL ?? ""}${url}`;
+    try {
+      const apiOrigin = new URL(
+        process.env.NEXT_PUBLIC_API_URL ?? "",
+      ).origin;
+
+      return `${apiOrigin}${url}`;
+    } catch {
+      return url;
+    }
   };
 
   const mainImageUrl = getImageUrl(
@@ -79,7 +89,24 @@ export function ProductDetails({ product }: Props) {
       currency: "XAF",
       maximumFractionDigits: 0,
     },
-  ).format(product.price);
+  ).format(selectedVariant?.price ?? product.price);
+
+  const handleAddToCart = (buyNow = false) => {
+    if (!selectedVariant) {
+      return;
+    }
+
+    addItem({
+      product: { ...product, price: selectedVariant.price },
+      variant: selectedVariant,
+      imageUrl: mainImageUrl,
+      quantity,
+    });
+
+    if (buyNow) {
+      router.push("/checkout");
+    }
+  };
 
   const moveImage = (
     direction: "next" | "previous",
@@ -320,12 +347,12 @@ export function ProductDetails({ product }: Props) {
 
             <div className="my-6 h-px bg-neutral-200" />
 
-            {/* Size */}
-            {sizes.length > 0 && (
+            {/* Variant */}
+            {variants.length > 0 && (
               <div>
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-bold">
-                    Size:
+                    Variant:
                   </p>
 
                   <button
@@ -337,24 +364,38 @@ export function ProductDetails({ product }: Props) {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  {sizes.map((size) => (
+                  {variants.map((variant) => (
                     <button
-                      key={size}
+                      key={variant.id}
                       type="button"
+                      disabled={!purchasableVariants.some(
+                        (item) => item.id === variant.id,
+                      )}
+                      aria-pressed={selectedVariant?.id === variant.id}
                       onClick={() =>
-                        setSelectedSize(size)
+                        setSelectedVariantId(variant.id)
                       }
-                      className={`flex h-10 min-w-[48px] items-center justify-center rounded-md border px-4 text-sm font-semibold ${
-                        selectedSize === size
+                      className={`flex min-h-10 min-w-[48px] items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${
+                        selectedVariant?.id === variant.id
                           ? "border-black bg-black text-white"
                           : "border-neutral-300 bg-white hover:border-black"
                       }`}
                     >
-                      {size}
+                      {[variant.size, variant.color, variant.edition, variant.sku]
+                        .filter(Boolean)
+                        .join(" / ")}
                     </button>
                   ))}
                 </div>
               </div>
+            )}
+
+            {!selectedVariant && (
+              <p className="mt-3 text-sm text-neutral-600">
+                {purchasableVariants.length === 0
+                  ? "This product is currently unavailable."
+                  : "Please select a variant before adding to cart."}
+              </p>
             )}
 
             {/* Quantity */}
@@ -399,7 +440,9 @@ export function ProductDetails({ product }: Props) {
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
-                className="flex h-12 items-center justify-center gap-2 rounded-lg bg-[#D4AF37] text-sm font-bold text-black hover:bg-[#c49d2e]"
+                onClick={() => handleAddToCart()}
+                disabled={!selectedVariant}
+                className="flex h-12 items-center justify-center gap-2 rounded-lg bg-[#D4AF37] text-sm font-bold text-black hover:bg-[#c49d2e] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingCart size={18} />
                 ADD TO CART
@@ -407,7 +450,9 @@ export function ProductDetails({ product }: Props) {
 
               <button
                 type="button"
-                className="flex h-12 items-center justify-center gap-2 rounded-lg bg-black text-sm font-bold text-white"
+                onClick={() => handleAddToCart(true)}
+                disabled={!selectedVariant}
+                className="flex h-12 items-center justify-center gap-2 rounded-lg bg-black text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Zap
                   size={18}

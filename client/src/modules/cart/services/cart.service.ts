@@ -2,6 +2,7 @@ import {
   AddToCartInput,
   CartItem,
 } from "../types/cart.types";
+import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
 
 const CART_STORAGE_KEY = "maillot-store-cart";
 
@@ -99,6 +100,52 @@ export const cartService = {
     };
 
     const updatedItems = [...items, newItem];
+
+    saveCart(updatedItems);
+
+    return updatedItems;
+  },
+
+  updateVariant(
+    itemId: string,
+    variant: ProductVariant,
+  ): CartItem[] {
+    const items = readCart();
+    const item = items.find((item) => item.id === itemId);
+
+    if (!item) {
+      return items;
+    }
+
+    if (
+      !variant.id ||
+      variant.productId !== item.product.id ||
+      typeof variant.price !== "number" ||
+      !Number.isFinite(variant.price) ||
+      variant.price < 0
+    ) {
+      throw new Error("Please select an available variant for this product.");
+    }
+
+    const price = variant.price;
+    const updatedId = createCartItemId(item.product.id, variant.id);
+    const matchingItem = items.find(
+      (other) => other.id === updatedId && other.id !== itemId,
+    );
+
+    const updatedItems = items
+      .filter((other) => other.id !== matchingItem?.id)
+      .map((other) =>
+        other.id === itemId
+          ? {
+              ...other,
+              id: updatedId,
+              product: { ...other.product, price },
+              variant,
+              quantity: other.quantity + (matchingItem?.quantity ?? 0),
+            }
+          : other,
+      );
 
     saveCart(updatedItems);
 

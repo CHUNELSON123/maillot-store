@@ -12,10 +12,14 @@ export interface CreateOrderItemInput {
 }
 
 export interface CreateOrderInput {
-  userId: string;
+  userId?: string;
   source: string;
   items: CreateOrderItemInput[];
   influencerDiscountAmount?: number;
+
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
 }
 
 @Injectable()
@@ -26,16 +30,40 @@ export class CreateOrderUseCase {
   ) {}
 
   async execute(input: CreateOrderInput) {
-    const customerId = await this.userRepository.findCustomerIdByUserId(
-      input.userId,
-    );
-
-    if (!customerId) {
-      throw new NotFoundException('Customer profile not found');
-    }
-
     if (!input.items.length) {
       throw new BadRequestException('Order must contain at least one item');
+    }
+
+    let customerId: string | null = null;
+
+    // Logged-in customer
+    if (input.userId) {
+      customerId = await this.userRepository.findCustomerIdByUserId(
+        input.userId,
+      );
+
+      if (!customerId) {
+        throw new NotFoundException('Customer profile not found');
+      }
+    } else {
+      // Guest checkout
+      if (!input.guestName) {
+        throw new BadRequestException(
+          'Guest name is required for guest checkout',
+        );
+      }
+
+      if (!input.guestEmail) {
+        throw new BadRequestException(
+          'Guest email is required for guest checkout',
+        );
+      }
+
+      if (!input.guestPhone) {
+        throw new BadRequestException(
+          'Guest phone is required for guest checkout',
+        );
+      }
     }
 
     const orderNumber = `ORD-${Date.now()}`;
@@ -44,6 +72,9 @@ export class CreateOrderUseCase {
     // current ProductVariant prices.
     return this.orderRepository.create({
       customerId,
+      guestName: input.guestName ?? null,
+      guestEmail: input.guestEmail ?? null,
+      guestPhone: input.guestPhone ?? null,
       orderNumber,
       source: input.source,
       status: 'PENDING',

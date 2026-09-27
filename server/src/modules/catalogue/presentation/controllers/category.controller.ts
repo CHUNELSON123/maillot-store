@@ -23,7 +23,6 @@ import { UpdateCategoryDto } from '../dto/update-category.dto';
   path: 'categories',
   version: '1',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class CategoryController {
   constructor(
     private readonly createCategoryUseCase: CreateCategoryUseCase,
@@ -34,6 +33,7 @@ export class CategoryController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   create(@Body() dto: CreateCategoryDto) {
     return this.createCategoryUseCase.execute({
@@ -43,18 +43,17 @@ export class CategoryController {
   }
 
   @Get()
-  @Roles('Administrator', 'Staff', 'Customer', 'Influencer')
   findAll() {
     return this.getCategoriesUseCase.execute();
   }
 
   @Get(':id')
-  @Roles('Administrator', 'Staff', 'Customer', 'Influencer')
   findOne(@Param('id') id: string) {
     return this.getCategoryUseCase.execute(id);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
     return this.updateCategoryUseCase.execute(id, {
@@ -64,6 +63,7 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator')
   remove(@Param('id') id: string) {
     return this.deleteCategoryUseCase.execute(id);

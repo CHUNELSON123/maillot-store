@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 
 import { CartItem } from "../../types/cart.types";
+import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
+import { catalogueService } from "@/modules/catalogue/services/catalogue.service";
 
 type Props = {
   items: CartItem[];
@@ -12,6 +15,7 @@ type Props = {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  onVariantChange: (itemId: string, variant: ProductVariant) => void;
 };
 
 function resolveImageUrl(
@@ -49,6 +53,7 @@ export function CheckoutOrderSummary({
   subtotal,
   deliveryFee,
   total,
+  onVariantChange,
 }: Props) {
   return (
     <aside className="rounded-[8px] border border-neutral-200 p-4">
@@ -124,6 +129,13 @@ export function CheckoutOrderSummary({
                 <p className="mt-1 text-[9px] font-semibold">
                   Qty: {item.quantity}
                 </p>
+
+                {!item.variant?.id && (
+                  <MissingCartVariant
+                    item={item}
+                    onVariantChange={onVariantChange}
+                  />
+                )}
               </div>
 
               <p className="shrink-0 text-[10px] font-bold">
@@ -180,5 +192,119 @@ export function CheckoutOrderSummary({
         </div>
       </div>
     </aside>
+  );
+}
+
+function MissingCartVariant({
+  item,
+  onVariantChange,
+}: {
+  item: CartItem;
+  onVariantChange: Props["onVariantChange"];
+}) {
+  const [variants, setVariants] = useState<ProductVariant[] | null>(null);
+  const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVariants() {
+      setError("");
+      setVariants(null);
+
+      try {
+        const availableVariants = (
+          await catalogueService.getProductVariants(item.product.id)
+        ).filter(
+          (variant) =>
+            typeof variant.price === "number" &&
+            Number.isFinite(variant.price) &&
+            variant.price >= 0,
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        setVariants(availableVariants);
+
+        if (availableVariants.length === 1) {
+          onVariantChange(item.id, availableVariants[0]);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(
+            error instanceof Error ? error.message : "Unable to load variants.",
+          );
+        }
+      }
+    }
+
+    void loadVariants();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [item.id, item.product.id, onVariantChange, retryCount]);
+
+  if (error) {
+    return (
+      <div className="mt-2 text-[10px] text-red-700" role="alert">
+        <p>{error}</p>
+        <button
+          type="button"
+          className="mt-1 font-semibold underline"
+          onClick={() => setRetryCount((count) => count + 1)}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (variants === null) {
+    return <p className="mt-2 text-[10px]">Loading variants...</p>;
+  }
+
+  if (variants.length === 0) {
+    return (
+      <p className="mt-2 text-[10px] text-red-700">
+        No variants are available. Remove this item from your cart to continue.
+      </p>
+    );
+  }
+
+  return (
+    <label className="mt-2 block text-[10px] font-semibold">
+      Choose a variant
+      <select
+        aria-label={`Variant for ${item.product.name}`}
+        value=""
+        onChange={(event) => {
+          const variant = variants.find((variant) => variant.id === event.target.value);
+
+          if (variant) {
+            try {
+              onVariantChange(item.id, variant);
+            } catch (error) {
+              setError(
+                error instanceof Error ? error.message : "Unable to update your cart.",
+              );
+            }
+          }
+        }}
+        className="mt-1 w-full rounded-[4px] border border-neutral-300 p-1 font-normal"
+      >
+        <option value="" disabled>Select size / color</option>
+        {variants.map((variant) => (
+          <option key={variant.id} value={variant.id}>
+            {[variant.size, variant.color, variant.edition, variant.sku]
+              .filter(Boolean)
+              .join(" / ")} - {formatPrice(variant.price!)}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

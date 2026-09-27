@@ -522,10 +522,12 @@ export type CustomerCreateNestedOneWithoutOrdersInput = {
   connect?: Prisma.CustomerWhereUniqueInput
 }
 
-export type CustomerUpdateOneRequiredWithoutOrdersNestedInput = {
+export type CustomerUpdateOneWithoutOrdersNestedInput = {
   create?: Prisma.XOR<Prisma.CustomerCreateWithoutOrdersInput, Prisma.CustomerUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOrdersInput
   upsert?: Prisma.CustomerUpsertWithoutOrdersInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
   connect?: Prisma.CustomerWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutOrdersInput, Prisma.CustomerUpdateWithoutOrdersInput>, Prisma.CustomerUncheckedUpdateWithoutOrdersInput>
 }

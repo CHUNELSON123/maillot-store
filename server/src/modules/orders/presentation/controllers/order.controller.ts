@@ -8,18 +8,21 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
+
 import { CreateOrderUseCase } from '../../application/use-cases/create-order.use-case';
 import { GetOrdersUseCase } from '../../application/use-cases/get-orders.use-case';
 import { GetOrderUseCase } from '../../application/use-cases/get-order.use-case';
 import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-order-status.use-case';
+
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
 
 interface AuthenticatedRequest {
-  user: {
+  user?: {
     id: string;
   };
 }
@@ -28,7 +31,6 @@ interface AuthenticatedRequest {
   path: 'orders',
   version: '1',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class OrderController {
   constructor(
     private readonly createOrderUseCase: CreateOrderUseCase,
@@ -38,35 +40,40 @@ export class OrderController {
   ) {}
 
   @Post()
-  @Roles('Customer')
   create(@Req() request: AuthenticatedRequest, @Body() dto: CreateOrderDto) {
     return this.createOrderUseCase.execute({
-      userId: request.user.id,
+      userId: request?.user?.id,
       source: dto.source,
       items: dto.items.map((item) => ({
         variantId: item.variantId,
         quantity: item.quantity,
       })),
       influencerDiscountAmount: dto.influencerDiscountAmount,
+      guestName: dto.guestName,
+      guestEmail: dto.guestEmail,
+      guestPhone: dto.guestPhone,
     });
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Customer')
   getMyOrders(@Req() request: AuthenticatedRequest) {
-    return this.getOrdersUseCase.execute(request.user.id);
+    return this.getOrdersUseCase.execute(request.user!.id);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Customer')
   getMyOrder(
     @Req() request: AuthenticatedRequest,
     @Param('id') orderId: string,
   ) {
-    return this.getOrderUseCase.execute(request.user.id, orderId);
+    return this.getOrderUseCase.execute(request.user!.id, orderId);
   }
 
   @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   updateStatus(
     @Param('id') orderId: string,

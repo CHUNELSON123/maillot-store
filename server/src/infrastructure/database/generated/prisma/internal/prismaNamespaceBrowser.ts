@@ -359,13 +359,13 @@ export const OrderScalarFieldEnum = {
   source: 'source',
   status: 'status',
   total_amount: 'total_amount',
+  influencer_discount_amount: 'influencer_discount_amount',
+  guest_name: 'guest_name',
+  guest_email: 'guest_email',
+  guest_phone: 'guest_phone',
   created_at: 'created_at',
   updated_at: 'updated_at',
-  deleted_at: 'deleted_at',
-  created_by: 'created_by',
-  updated_by: 'updated_by',
-  deleted_by: 'deleted_by',
-  influencer_discount_amount: 'influencer_discount_amount'
+  deleted_at: 'deleted_at'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]

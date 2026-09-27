@@ -60,7 +60,10 @@ export class PrismaOrderRepository implements OrderRepository {
 
       const order = await tx.order.create({
         data: {
-          customer_id: data.customerId,
+          customer_id: data.customerId ?? null,
+          guest_name: data.guestName ?? null,
+          guest_email: data.guestEmail ?? null,
+          guest_phone: data.guestPhone ?? null,
           order_number: data.orderNumber,
           source: data.source,
           status: data.status,
@@ -215,7 +218,10 @@ export class PrismaOrderRepository implements OrderRepository {
 
   private toEntity(order: {
     id: string;
-    customer_id: string;
+    customer_id: string | null;
+    guest_name: string | null;
+    guest_email: string | null;
+    guest_phone: string | null;
     order_number: string;
     source: string;
     status: string;
@@ -249,6 +255,9 @@ export class PrismaOrderRepository implements OrderRepository {
     return new OrderEntity(
       order.id,
       order.customer_id,
+      order.guest_name,
+      order.guest_email,
+      order.guest_phone,
       order.order_number,
       order.source,
       order.status,

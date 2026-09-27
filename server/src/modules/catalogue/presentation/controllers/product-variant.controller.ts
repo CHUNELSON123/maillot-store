@@ -23,7 +23,6 @@ import { UpdateProductVariantDto } from '../dto/update-product-variant.dto';
   path: 'products/:productId/variants',
   version: '1',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductVariantController {
   constructor(
     private readonly createProductVariantUseCase: CreateProductVariantUseCase,
@@ -34,6 +33,7 @@ export class ProductVariantController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   create(
     @Param('productId') productId: string,
@@ -51,12 +51,12 @@ export class ProductVariantController {
   }
 
   @Get()
-  @Roles('Administrator', 'Staff', 'Customer', 'Influencer')
   findAll(@Param('productId') productId: string) {
     return this.getProductVariantsUseCase.execute(productId);
   }
 
   @Get(':variantId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff', 'Customer', 'Influencer')
   findOne(
     @Param('productId') productId: string,
@@ -66,6 +66,7 @@ export class ProductVariantController {
   }
 
   @Patch(':variantId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   update(
     @Param('productId') productId: string,
@@ -83,6 +84,7 @@ export class ProductVariantController {
   }
 
   @Delete(':variantId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator')
   remove(
     @Param('productId') productId: string,

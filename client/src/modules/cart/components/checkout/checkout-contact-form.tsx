@@ -2,7 +2,23 @@
 
 import { UserRound } from "lucide-react";
 
-export function CheckoutContactForm() {
+type Props = {
+  fullName: string;
+  phone: string;
+  email: string;
+  onFullNameChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+};
+
+export function CheckoutContactForm({
+  fullName,
+  phone,
+  email,
+  onFullNameChange,
+  onPhoneChange,
+  onEmailChange,
+}: Props) {
   return (
     <section>
       <div className="mb-3 flex items-center gap-2">
@@ -23,6 +39,10 @@ export function CheckoutContactForm() {
 
           <input
             type="text"
+            value={fullName}
+            onChange={(event) =>
+              onFullNameChange(event.target.value)
+            }
             placeholder="John Doe"
             className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
           />
@@ -30,12 +50,15 @@ export function CheckoutContactForm() {
 
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold">
-            Phone Number{" "}
-            <span className="text-red-500">*</span>
+            Phone Number <span className="text-red-500">*</span>
           </span>
 
           <input
             type="tel"
+            value={phone}
+            onChange={(event) =>
+              onPhoneChange(event.target.value)
+            }
             placeholder="670 12 34 56"
             className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
           />
@@ -43,12 +66,15 @@ export function CheckoutContactForm() {
 
         <label className="block">
           <span className="mb-1 block text-[10px] font-semibold">
-            Email Address{" "}
-            <span className="text-red-500">*</span>
+            Email Address <span className="text-red-500">*</span>
           </span>
 
           <input
             type="email"
+            value={email}
+            onChange={(event) =>
+              onEmailChange(event.target.value)
+            }
             placeholder="john.doe@email.com"
             className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
           />

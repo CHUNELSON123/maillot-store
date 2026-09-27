@@ -1,4 +1,5 @@
 import {
+  IsEmail,
   IsInt,
   IsNumber,
   IsOptional,
@@ -32,4 +33,18 @@ export class CreateOrderDto {
   @IsNumber()
   @Min(0)
   influencerDiscountAmount?: number;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  guestName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  guestEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(5, 30)
+  guestPhone?: string;
 }

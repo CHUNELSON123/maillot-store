@@ -17,6 +17,7 @@ export type ProductVariant = {
   size: string | null;
   color: string | null;
   edition: string | null;
+  price: number | null;
   status: string;
   createdAt: string;
   updatedAt: string;

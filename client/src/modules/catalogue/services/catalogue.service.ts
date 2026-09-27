@@ -1,5 +1,4 @@
 import { apiClient } from "@/services/api/api-client";
-import { authStorage } from "@/lib/auth/auth-storage";
 import {
   Product,
   ProductDetails,
@@ -7,28 +6,16 @@ import {
   ProductVariant,
 } from "../types/catalogue.types";
 
-function getToken(): string {
-  const token = authStorage.getToken();
-
-  if (!token) {
-    throw new Error("No authentication token found.");
-  }
-
-  return token;
-}
-
 export const catalogueService = {
   async getProducts(): Promise<Product[]> {
     return apiClient<Product[]>("/products", {
       method: "GET",
-      token: getToken(),
     });
   },
 
   async getProduct(id: string): Promise<Product> {
     return apiClient<Product>(`/products/${id}`, {
       method: "GET",
-      token: getToken(),
     });
   },
 
@@ -39,7 +26,6 @@ export const catalogueService = {
       `/products/${productId}/variants`,
       {
         method: "GET",
-        token: getToken(),
       },
     );
   },
@@ -51,7 +37,6 @@ export const catalogueService = {
       `/products/${productId}/images`,
       {
         method: "GET",
-        token: getToken(),
       },
     );
   },

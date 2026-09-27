@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
@@ -33,12 +26,8 @@ export class NotificationController {
   ) {}
 
   @Get()
-  getNotifications(
-    @Req() request: AuthenticatedRequest,
-  ) {
-    return this.getNotificationsUseCase.execute(
-      request.user.id,
-    );
+  getNotifications(@Req() request: AuthenticatedRequest) {
+    return this.getNotificationsUseCase.execute(request.user.id);
   }
 
   @Patch(':id/read')
@@ -53,11 +42,7 @@ export class NotificationController {
   }
 
   @Patch('read-all')
-  markAllAsRead(
-    @Req() request: AuthenticatedRequest,
-  ) {
-    return this.markAllNotificationsReadUseCase.execute(
-      request.user.id,
-    );
+  markAllAsRead(@Req() request: AuthenticatedRequest) {
+    return this.markAllNotificationsReadUseCase.execute(request.user.id);
   }
 }

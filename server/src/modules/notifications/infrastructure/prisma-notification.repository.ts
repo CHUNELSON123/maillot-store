@@ -4,26 +4,19 @@ import { NotificationRepository } from '../domain/repositories/notification.repo
 import { NotificationEntity } from '../domain/entities/notification.entity';
 
 @Injectable()
-export class PrismaNotificationRepository
-  implements NotificationRepository
-{
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+export class PrismaNotificationRepository implements NotificationRepository {
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findByUserId(
-    userId: string,
-  ): Promise<NotificationEntity[]> {
-    const notifications =
-      await this.prisma.notification.findMany({
-        where: {
-          user_id: userId,
-          deleted_at: null,
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
-      });
+  async findByUserId(userId: string): Promise<NotificationEntity[]> {
+    const notifications = await this.prisma.notification.findMany({
+      where: {
+        user_id: userId,
+        deleted_at: null,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
 
     return notifications.map(
       (notification) =>
@@ -44,30 +37,26 @@ export class PrismaNotificationRepository
     userId: string,
     notificationId: string,
   ): Promise<NotificationEntity> {
-    const notification =
-      await this.prisma.notification.findFirst({
-        where: {
-          id: notificationId,
-          user_id: userId,
-          deleted_at: null,
-        },
-      });
+    const notification = await this.prisma.notification.findFirst({
+      where: {
+        id: notificationId,
+        user_id: userId,
+        deleted_at: null,
+      },
+    });
 
     if (!notification) {
-      throw new NotFoundException(
-        'Notification not found.',
-      );
+      throw new NotFoundException('Notification not found.');
     }
 
-    const updated =
-      await this.prisma.notification.update({
-        where: {
-          id: notificationId,
-        },
-        data: {
-          is_read: true,
-        },
-      });
+    const updated = await this.prisma.notification.update({
+      where: {
+        id: notificationId,
+      },
+      data: {
+        is_read: true,
+      },
+    });
 
     return new NotificationEntity(
       updated.id,
@@ -81,9 +70,7 @@ export class PrismaNotificationRepository
     );
   }
 
-  async markAllAsRead(
-    userId: string,
-  ): Promise<void> {
+  async markAllAsRead(userId: string): Promise<void> {
     await this.prisma.notification.updateMany({
       where: {
         user_id: userId,

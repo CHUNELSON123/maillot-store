@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -10,9 +12,11 @@ import {
 import {
   Product,
   ProductImage,
+  ProductVariant,
 } from "../types/catalogue.types";
 
 import { useCart } from "@/modules/cart/hooks/use-cart";
+import { catalogueService } from "../services/catalogue.service";
 
 type ProductCardProps = {
   product: Product;
@@ -78,6 +82,10 @@ export function ProductCard({
   badge = null,
 }: ProductCardProps) {
   const { addItem } = useCart();
+  const router = useRouter();
+  const [isAdding, setIsAdding] = useState(false);
+  const [isUnavailable, setIsUnavailable] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const imageUrl = resolveImageUrl(
     image?.imageUrl,
@@ -95,17 +103,59 @@ export function ProductCard({
       ? formatPrice(originalPrice)
       : null;
 
-  const handleAddToCart = (
+  const handleAddToCart = async (
     event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     event.preventDefault();
     event.stopPropagation();
 
-    addItem({
-      product,
-      imageUrl: image?.imageUrl ?? null,
-      quantity: 1,
-    });
+    if (isAdding || isUnavailable) {
+      return;
+    }
+
+    setIsAdding(true);
+    setErrorMessage("");
+
+    try {
+      const variants = await catalogueService.getProductVariants(
+        product.id,
+      );
+
+      const purchasableVariants = variants.filter(
+        (variant): variant is ProductVariant & { price: number } =>
+          typeof variant.price === "number" &&
+          Number.isFinite(variant.price) &&
+          variant.price >= 0,
+      );
+
+      if (purchasableVariants.length === 0) {
+        setIsUnavailable(true);
+        setErrorMessage("This product is currently unavailable.");
+        return;
+      }
+
+      if (purchasableVariants.length > 1) {
+        router.push(`/shop/${product.id}`);
+        return;
+      }
+
+      const variant = purchasableVariants[0];
+
+      addItem({
+        product: { ...product, price: variant.price },
+        variant,
+        imageUrl,
+        quantity: 1,
+      });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to add this product. Please try again.",
+      );
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -208,15 +258,26 @@ export function ProductCard({
           <button
             type="button"
             onClick={handleAddToCart}
-            className="mt-2 flex h-7 w-full items-center justify-center gap-1 rounded-[2px] border border-[#D4AF37] bg-transparent text-[7px] font-extrabold uppercase tracking-wide text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black min-[380px]:gap-1.5 min-[380px]:text-[8px] sm:text-[9px]"
+            disabled={isAdding || isUnavailable}
+            className="mt-2 flex h-7 w-full items-center justify-center gap-1 rounded-[2px] border border-[#D4AF37] bg-transparent text-[7px] font-extrabold uppercase tracking-wide text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black disabled:cursor-not-allowed disabled:opacity-50 min-[380px]:gap-1.5 min-[380px]:text-[8px] sm:text-[9px]"
           >
             <ShoppingCart
               size={12}
               strokeWidth={2}
             />
 
-            ADD TO CART
+            {isAdding
+              ? "ADDING..."
+              : isUnavailable
+                ? "UNAVAILABLE"
+                : "ADD TO CART"}
           </button>
+        )}
+
+        {errorMessage && (
+          <p role="alert" className="mt-2 text-[10px] text-red-400">
+            {errorMessage}
+          </p>
         )}
       </div>
     </article>

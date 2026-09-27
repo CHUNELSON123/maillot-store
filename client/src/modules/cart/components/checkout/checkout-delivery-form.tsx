@@ -6,14 +6,24 @@ import type { DeliveryMethod } from "./checkout-page-content";
 
 type Props = {
   deliveryMethod: DeliveryMethod;
-  onDeliveryMethodChange: (
-    method: DeliveryMethod,
-  ) => void;
+  onDeliveryMethodChange: (method: DeliveryMethod) => void;
+  address: string;
+  city: string;
+  postalCode: string;
+  onAddressChange: (value: string) => void;
+  onCityChange: (value: string) => void;
+  onPostalCodeChange: (value: string) => void;
 };
 
 export function CheckoutDeliveryForm({
   deliveryMethod,
   onDeliveryMethodChange,
+  address,
+  city,
+  postalCode,
+  onAddressChange,
+  onCityChange,
+  onPostalCodeChange,
 }: Props) {
   return (
     <section className="mt-4">
@@ -28,7 +38,6 @@ export function CheckoutDeliveryForm({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        {/* Address */}
         <div>
           <label className="block">
             <span className="mb-1 block text-[10px] font-semibold">
@@ -38,6 +47,10 @@ export function CheckoutDeliveryForm({
 
             <input
               type="text"
+              value={address}
+              onChange={(event) =>
+                onAddressChange(event.target.value)
+              }
               placeholder="Quarter Mile 2, Opposite Buea Mountain Hotel"
               className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
             />
@@ -52,6 +65,10 @@ export function CheckoutDeliveryForm({
 
               <input
                 type="text"
+                value={city}
+                onChange={(event) =>
+                  onCityChange(event.target.value)
+                }
                 placeholder="Buea"
                 className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
               />
@@ -67,6 +84,10 @@ export function CheckoutDeliveryForm({
 
               <input
                 type="text"
+                value={postalCode}
+                onChange={(event) =>
+                  onPostalCodeChange(event.target.value)
+                }
                 placeholder="00237"
                 className="h-8 w-full rounded-[4px] border border-neutral-300 px-3 text-[11px] outline-none transition focus:border-[#D4AF37]"
               />
@@ -74,7 +95,6 @@ export function CheckoutDeliveryForm({
           </div>
         </div>
 
-        {/* Delivery options */}
         <div className="rounded-[6px] border border-neutral-300 p-3">
           <h3 className="text-[11px] font-bold">
             Delivery Option{" "}
