@@ -27,6 +27,8 @@ import {
 import { ProductCard } from "./product-card";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
 
+import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
+
 type Props = {
   product: ProductDetailsType;
 };
@@ -40,7 +42,9 @@ export function ProductDetails({ product }: Props) {
   );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { toggleItem, isInWishlist } = useWishlist();
+
+  const isFavorite = isInWishlist(product.id);
 
   const images = product.images ?? [];
   const variants = product.variants ?? [];
@@ -190,10 +194,15 @@ export function ProductDetails({ product }: Props) {
               <button
                 type="button"
                 onClick={() =>
-                  setIsFavorite(!isFavorite)
+                  toggleItem(product, activeImage ?? null)
                 }
-                className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm"
-                aria-label="Add to wishlist"
+                className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm transition hover:scale-105"
+                aria-label={
+                  isFavorite
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
+                aria-pressed={isFavorite}
               >
                 <Heart
                   size={22}

@@ -81,7 +81,8 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   SystemSetting: 'SystemSetting',
   CustomerRewardRule: 'CustomerRewardRule',
-  CustomerReward: 'CustomerReward'
+  CustomerReward: 'CustomerReward',
+  WishlistItem: 'WishlistItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -640,6 +641,18 @@ export const CustomerRewardScalarFieldEnum = {
 } as const
 
 export type CustomerRewardScalarFieldEnum = (typeof CustomerRewardScalarFieldEnum)[keyof typeof CustomerRewardScalarFieldEnum]
+
+
+export const WishlistItemScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  product_id: 'product_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
 
 
 export const SortOrder = {

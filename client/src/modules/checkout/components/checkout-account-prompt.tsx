@@ -48,14 +48,14 @@ export function CheckoutAccountPrompt({
             </button>
 
             <Link
-              href="/register"
+              href="/register?returnUrl=%2Fcheckout"
               className="flex h-10 w-full items-center justify-center rounded-[4px] border border-neutral-800 text-[10px] font-extrabold uppercase text-neutral-950 transition hover:bg-neutral-50"
             >
               CREATE AN ACCOUNT
             </Link>
 
             <Link
-              href="/login"
+              href="/login?returnUrl=%2Fcheckout"
               className="mt-1 text-[10px] font-semibold text-neutral-600 underline underline-offset-2 transition hover:text-[#D4AF37]"
             >
               Already have an account? Log in

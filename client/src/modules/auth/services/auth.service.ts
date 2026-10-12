@@ -7,6 +7,8 @@ import {
   RegisterRequest,
 } from "../types/auth.types";
 
+import { wishlistService } from "@/modules/wishlist/services/wishlist.service";
+
 export const authService = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await apiClient<AuthResponse>(
@@ -18,6 +20,12 @@ export const authService = {
     );
 
     authStorage.setToken(response.accessToken);
+
+    try {
+        await wishlistService.syncGuestItems();
+      } catch (error) {
+        console.error("Failed to merge guest wishlist:", error);
+      }
 
     return response;
   },

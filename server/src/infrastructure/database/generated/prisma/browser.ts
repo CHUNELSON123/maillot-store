@@ -172,3 +172,8 @@ export type CustomerRewardRule = Prisma.CustomerRewardRuleModel
  * 
  */
 export type CustomerReward = Prisma.CustomerRewardModel
+/**
+ * Model WishlistItem
+ * 
+ */
+export type WishlistItem = Prisma.WishlistItemModel

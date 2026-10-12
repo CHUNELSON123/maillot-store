@@ -9,38 +9,25 @@ import {
   UserRound,
   ChevronDown,
   X,
+  Heart,
 } from "lucide-react";
 
+import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
+import { useCart } from "@/modules/cart/hooks/use-cart";
+
 const navItems = [
-  {
-    name: "HOME",
-    href: "/",
-  },
-  {
-    name: "SHOP",
-    href: "/shop",
-  },
-  {
-    name: "CATEGORIES",
-    href: "/categories",
-    dropdown: true,
-  },
-  {
-    name: "PROMOTIONS",
-    href: "/promotions",
-  },
-  {
-    name: "ABOUT US",
-    href: "/about",
-  },
-  {
-    name: "CONTACT",
-    href: "/contact",
-  },
+  { name: "HOME", href: "/" },
+  { name: "SHOP", href: "/shop" },
+  { name: "CATEGORIES", href: "/categories", dropdown: true },
+  { name: "PROMOTIONS", href: "/promotions" },
+  { name: "ABOUT US", href: "/about" },
+  { name: "CONTACT", href: "/contact" },
 ];
 
 export function CustomerHeader() {
   const pathname = usePathname();
+  const { itemCount: wishlistCount, isReady: wishlistReady } = useWishlist();
+  const { itemCount: cartCount } = useCart();
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -52,13 +39,11 @@ export function CustomerHeader() {
 
   return (
     <header className="w-full overflow-x-hidden">
-      {/* =========================================================
-          ANNOUNCEMENT BAR
-         ========================================================= */}
+      {/* Announcement bar */}
       <div className="relative flex min-h-[23px] items-center justify-center bg-[#D4AF37] px-10 py-1 text-[8px] font-extrabold uppercase tracking-wide text-black sm:h-[24px] sm:px-12 sm:py-0 sm:text-[10px]">
         <div className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
           <span className="whitespace-nowrap">
-            NEW ARRIVALS & SPECIAL OFFERS
+            NEW ARRIVALS &amp; SPECIAL OFFERS
           </span>
 
           <span className="text-black/70">|</span>
@@ -69,7 +54,6 @@ export function CustomerHeader() {
 
           <span className="hidden h-[19px] w-px bg-black/30 sm:block" />
 
-          {/* SHOP NOW */}
           <Link
             href="/shop"
             className="inline-flex h-[18px] shrink-0 items-center justify-center bg-black px-2.5 text-[7px] font-extrabold text-[#D4AF37] transition hover:bg-neutral-800 sm:h-[19px] sm:px-4 sm:text-[9px]"
@@ -81,7 +65,6 @@ export function CustomerHeader() {
           </Link>
         </div>
 
-        {/* Close */}
         <button
           type="button"
           aria-label="Close announcement"
@@ -91,15 +74,10 @@ export function CustomerHeader() {
         </button>
       </div>
 
-      {/* =========================================================
-          MAIN NAVIGATION
-         ========================================================= */}
+      {/* Main navigation */}
       <div className="border-b border-neutral-800 bg-[#070707] text-white">
         <div className="mx-auto flex min-h-[65px] max-w-[1200px] items-center gap-3 px-3 sm:h-[65px] sm:px-8">
-
-          {/* =====================================================
-              LOGO
-             ===================================================== */}
+          {/* Logo */}
           <Link
             href="/"
             aria-label="Maillot Store home"
@@ -115,9 +93,7 @@ export function CustomerHeader() {
             />
           </Link>
 
-          {/* =====================================================
-              DESKTOP NAVIGATION
-             ===================================================== */}
+          {/* Desktop navigation */}
           <nav className="ml-auto hidden h-full items-center lg:flex">
             {navItems.map((item) => {
               const active = isActive(item.href);
@@ -135,13 +111,9 @@ export function CustomerHeader() {
                   {item.name}
 
                   {item.dropdown && (
-                    <ChevronDown
-                      size={12}
-                      strokeWidth={2}
-                    />
+                    <ChevronDown size={12} strokeWidth={2} />
                   )}
 
-                  {/* Active gold underline */}
                   {active && (
                     <span className="absolute bottom-[8px] left-1/2 h-[2px] w-[31px] -translate-x-1/2 bg-[#D4AF37]" />
                   )}
@@ -150,11 +122,8 @@ export function CustomerHeader() {
             })}
           </nav>
 
-          {/* =====================================================
-              RIGHT ACTIONS
-             ===================================================== */}
+          {/* Right actions */}
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-4 lg:ml-5">
-
             {/* Search */}
             <div className="flex h-[27px] w-[105px] min-w-0 items-center border border-neutral-700 bg-[#151515] px-2 sm:h-[29px] sm:w-[166px] sm:px-2.5">
               <input
@@ -181,46 +150,69 @@ export function CustomerHeader() {
                   : "text-white hover:text-[#D4AF37]"
               }`}
             >
-              <UserRound
-                size={18}
-                strokeWidth={1.7}
-              />
+              <UserRound size={18} strokeWidth={1.7} />
 
               <span className="hidden text-[10px] font-semibold sm:inline">
                 Account
               </span>
             </Link>
 
+            {/* Wishlist */}
+            <Link
+              href="/wishlist"
+              aria-label={`Wishlist${wishlistReady ? `, ${wishlistCount} items` : ""}`}
+              aria-current={isActive("/wishlist") ? "page" : undefined}
+              className={`relative flex shrink-0 items-center gap-1.5 transition ${
+                isActive("/wishlist")
+                  ? "text-[#D4AF37]"
+                  : "text-white hover:text-[#D4AF37]"
+              }`}
+            >
+              <Heart
+                size={20}
+                strokeWidth={1.7}
+                className={
+                  isActive("/wishlist") ? "fill-[#D4AF37]" : ""
+                }
+              />
+
+              <span className="hidden text-[10px] font-semibold sm:inline">
+                Wishlist
+              </span>
+
+              {wishlistReady && wishlistCount > 0 && (
+                <span className="absolute -right-[5px] -top-[7px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#D4AF37] px-1 text-[7px] font-extrabold leading-none text-black">
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
+            </Link>
+
             {/* Cart */}
             <Link
               href="/cart"
-              aria-label="Cart"
+              aria-label={`Cart, ${cartCount} items`}
               className={`relative flex shrink-0 items-center gap-1.5 transition ${
                 isActive("/cart")
                   ? "text-[#D4AF37]"
                   : "text-white hover:text-[#D4AF37]"
               }`}
             >
-              <ShoppingCart
-                size={20}
-                strokeWidth={1.7}
-              />
+              <ShoppingCart size={20} strokeWidth={1.7} />
 
               <span className="hidden text-[10px] font-semibold sm:inline">
                 Cart
               </span>
 
-              {/* Cart count */}
-              <span className="absolute -right-[5px] -top-[7px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#D4AF37] px-1 text-[7px] font-extrabold leading-none text-black">
-                2
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -right-[5px] -top-[7px] flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#D4AF37] px-1 text-[7px] font-extrabold leading-none text-black">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>
 
-        {/* =======================================================
-            MOBILE NAVIGATION
-           ======================================================= */}
+        {/* Mobile navigation */}
         <div className="border-t border-neutral-800 lg:hidden">
           <nav className="mx-auto flex max-w-[1200px] gap-5 overflow-x-auto px-3 py-2.5 scrollbar-none sm:gap-6 sm:px-8">
             {navItems.map((item) => {

@@ -6,6 +6,7 @@ import { Mail } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
 import { AuthInput } from "./auth-input";
 import { AuthPasswordInput } from "./auth-password-input";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -26,7 +27,7 @@ export function LoginForm() {
 
     try {
       await login({ email, password });
-      window.location.href = "/";
+      window.location.href = getRedirectUrl();
     } catch (error) {
       setError(
         error instanceof Error
@@ -37,6 +38,23 @@ export function LoginForm() {
       setIsSubmitting(false);
     }
   };
+
+  const searchParams = useSearchParams();
+
+const returnUrl = searchParams.get("returnUrl");
+
+const getRedirectUrl = () => {
+  if (
+    returnUrl &&
+    returnUrl.startsWith("/") &&
+    !returnUrl.startsWith("//") &&
+    !returnUrl.includes("\\")
+  ) {
+    return returnUrl;
+  }
+
+  return "/";
+};
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
@@ -117,7 +135,11 @@ export function LoginForm() {
           </p>
 
           <Link
-            href="/register"
+            href={
+                returnUrl
+                  ? `/register?returnUrl=${encodeURIComponent(returnUrl)}`
+                  : "/register"
+              }
             className="flex h-11 w-full items-center justify-center rounded-md border border-neutral-500 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50"
           >
             CREATE ACCOUNT

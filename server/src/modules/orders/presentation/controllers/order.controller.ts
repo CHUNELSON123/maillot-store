@@ -21,6 +21,8 @@ import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-ord
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
 
+import { OptionalJwtAuthGuard } from '../../../../common/guards/optional-jwt-auth.guard';
+
 interface AuthenticatedRequest {
   user?: {
     id: string;
@@ -40,6 +42,7 @@ export class OrderController {
   ) {}
 
   @Post()
+  @UseGuards(OptionalJwtAuthGuard)
   create(@Req() request: AuthenticatedRequest, @Body() dto: CreateOrderDto) {
     return this.createOrderUseCase.execute({
       userId: request?.user?.id,

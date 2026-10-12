@@ -131,7 +131,7 @@ export function CustomerFooter() {
               </Link>
 
               <Link
-                href="/account"
+                href="/wishlist"
                 className="block transition hover:text-white"
               >
                 Wishlist

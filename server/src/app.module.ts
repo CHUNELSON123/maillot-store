@@ -15,6 +15,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { CmsModule } from './modules/cms/cms.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     CmsModule,
     ReportsModule,
     NotificationsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -16,6 +17,7 @@ import {
 } from "../types/catalogue.types";
 
 import { useCart } from "@/modules/cart/hooks/use-cart";
+import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
 import { catalogueService } from "../services/catalogue.service";
 
 type ProductCardProps = {
@@ -82,10 +84,14 @@ export function ProductCard({
   badge = null,
 }: ProductCardProps) {
   const { addItem } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
   const router = useRouter();
+
   const [isAdding, setIsAdding] = useState(false);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const isFavorite = isInWishlist(product.id);
 
   const imageUrl = resolveImageUrl(
     image?.imageUrl,
@@ -221,13 +227,24 @@ export function ProductCard({
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
+                  toggleItem(product, image ?? null);
                 }}
-                className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/40 text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
-                aria-label={`Add ${product.name} to wishlist`}
+                className={`absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border transition ${
+                  isFavorite
+                    ? "border-[#D4AF37] bg-[#D4AF37] text-black"
+                    : "border-white/70 bg-black/40 text-white hover:border-[#D4AF37] hover:text-[#D4AF37]"
+                }`}
+                aria-label={
+                  isFavorite
+                    ? `Remove ${product.name} from wishlist`
+                    : `Add ${product.name} to wishlist`
+                }
+                aria-pressed={isFavorite}
               >
                 <Heart
                   size={15}
                   strokeWidth={1.7}
+                  fill={isFavorite ? "currentColor" : "none"}
                 />
               </button>
             )}

@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useAuth } from "@/modules/auth/hooks/use-auth";
 import { AuthInput } from "./auth-input";
 import { AuthPasswordInput } from "./auth-password-input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 
 export function RegisterForm() {
   const router = useRouter();
@@ -64,7 +65,7 @@ export function RegisterForm() {
 );
 
 setTimeout(() => {
-  router.push("/login");
+  router.push(getLoginUrl());
 }, 1200);
 
     } catch (error) {
@@ -75,6 +76,22 @@ setTimeout(() => {
       );
     }
   };
+
+  const searchParams = useSearchParams();
+const returnUrl = searchParams.get("returnUrl");
+
+const getLoginUrl = () => {
+  if (
+    returnUrl &&
+    returnUrl.startsWith("/") &&
+    !returnUrl.startsWith("//") &&
+    !returnUrl.includes("\\")
+  ) {
+    return `/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+  }
+
+  return "/login";
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -181,7 +198,7 @@ setTimeout(() => {
       <p className="text-center text-sm text-neutral-700">
         Already have an account?{" "}
         <Link
-          href="/login"
+          href={getLoginUrl()}
           className="font-medium text-blue-700 hover:underline"
         >
           Sign In

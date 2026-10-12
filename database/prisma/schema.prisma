@@ -86,6 +86,7 @@ model Customer {
   addresses CustomerAddress[]
   orders    Order[]
   rewards   CustomerReward[]
+  wishlist_items WishlistItem[]
 
   @@map("customers")
 }
@@ -162,6 +163,7 @@ model Product {
   brand    Brand            @relation(fields: [brand_id], references: [id])
   variants ProductVariant[]
   images   ProductImage[]
+  wishlist_items WishlistItem[]
 
   @@index([category_id])
   @@index([brand_id])
@@ -655,4 +657,21 @@ model CustomerReward {
   @@index([reward_rule_id])
   @@index([status])
   @@map("customer_rewards")
+}
+
+model WishlistItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  customer_id String   @db.Uuid
+  product_id  String   @db.Uuid
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  deleted_at  DateTime?
+
+  customer Customer @relation(fields: [customer_id], references: [id])
+  product  Product  @relation(fields: [product_id], references: [id])
+
+  @@unique([customer_id, product_id])
+  @@index([product_id])
+  @@index([customer_id])
+  @@map("wishlist_items")
 }
