@@ -12,7 +12,7 @@ export class CreateInventoryMovementDto {
   variantId!: string;
 
   @IsInt()
-  @Min(1)
+  @Min(0)
   quantity!: number;
 
   @IsString()

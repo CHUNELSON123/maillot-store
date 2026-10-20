@@ -59,6 +59,13 @@ $ npm run test:cov
 
 ## Deployment
 
+Product images are stored on the API server filesystem and served from `/uploads/`.
+Set `UPLOADS_DIR` to a persistent mounted directory in deployments that support
+volumes. The default is `./uploads` relative to the server working directory.
+If the deployment filesystem is ephemeral and no persistent volume is attached,
+uploaded images can be lost on restart or redeploy. No external storage service is
+configured by this project.
+
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:

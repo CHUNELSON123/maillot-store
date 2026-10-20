@@ -1,84 +1,66 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { CustomerLayout } from "@/components/layout/customer-layout";
-import { useCatalogue } from "@/modules/catalogue/hooks/use-catalogue";
-import { ProductGrid } from "@/modules/catalogue/components/product-grid";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
+import { useCategories } from "@/modules/catalogue/hooks/use-categories";
+import { useShopCatalogue } from "@/modules/catalogue/hooks/use-shop-catalogue";
+import { ProductGrid } from "@/modules/catalogue/components/product-grid";
 
-import { ShopHero } from "./shop-hero";
-import { ShopFilters } from "./shop-filters";
 import { ShopCategories } from "./shop-categories";
+import { ShopFilters } from "./shop-filters";
+import { ShopHero } from "./shop-hero";
 
 export function ShopPageContent() {
-  const {
-    products,
-    images,
-    isLoading,
-    error,
-  } = useCatalogue();
-
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
+  const [categoryId, setCategoryId] = useState("all");
   const [sort, setSort] = useState("Featured");
-
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    if (search.trim()) {
-      const query = search.toLowerCase();
-
-      result = result.filter((product) =>
-        `${product.name} ${product.description ?? ""}`
-          .toLowerCase()
-          .includes(query),
-      );
-    }
-
-    if (category !== "All") {
-      result = result.filter((product) =>
-        product.description
-          ?.toLowerCase()
-          .includes(category.toLowerCase()),
-      );
-    }
-
-    if (sort === "Price: Low to High") {
-      result.sort((a, b) => a.price - b.price);
-    }
-
-    if (sort === "Price: High to Low") {
-      result.sort((a, b) => b.price - a.price);
-    }
-
-    return result;
-  }, [products, search, category, sort]);
+  const [page, setPage] = useState(1);
+  const { categories, error: categoriesError } = useCategories();
+  const { products, images, total, totalPages, isLoading, error } =
+    useShopCatalogue({ page, categoryId, search, sort });
 
   const clearFilters = () => {
     setSearch("");
-    setCategory("All");
+    setCategoryId("all");
     setSort("Featured");
+    setPage(1);
   };
 
   return (
     <CustomerLayout>
       <main className="min-h-screen bg-white text-neutral-950">
         <ShopHero />
-
         <section className="mx-auto max-w-6xl px-5 pt-6 sm:px-8">
           <ShopFilters
             search={search}
             sort={sort}
-            onSearchChange={setSearch}
-            onSortChange={setSort}
+            onSearchChange={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            onSortChange={(value) => {
+              setSort(value);
+              setPage(1);
+            }}
             onClear={clearFilters}
           />
 
           <ShopCategories
-            selectedCategory={category}
-            onCategoryChange={setCategory}
+            categories={categories}
+            selectedCategoryId={categoryId}
+            onCategoryChange={(value) => {
+              setCategoryId(value);
+              setPage(1);
+            }}
           />
+
+          {categoriesError && (
+            <p role="status" className="-mt-3 pb-4 text-xs text-amber-700">
+              Categories are unavailable; showing all products.
+            </p>
+          )}
 
           <div className="pb-12">
             {isLoading && (
@@ -86,47 +68,46 @@ export function ShopPageContent() {
                 Loading products...
               </div>
             )}
-
             {!isLoading && error && (
-              <div className="border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">
+              <div role="alert" className="border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">
                 {error}
               </div>
             )}
-
             {!isLoading && !error && (
-              <ProductGrid
-                products={filteredProducts}
-                images={images}
-              />
-            )}
-
-            {!isLoading &&
-              !error &&
-              filteredProducts.length > 0 && (
-                <div className="mt-6 flex flex-col items-center gap-5">
-                  <button
-                    type="button"
-                    className="flex h-11 min-w-80 items-center justify-center border border-neutral-400 text-sm font-semibold hover:bg-neutral-50"
-                  >
-                    LOAD MORE PRODUCTS
-                  </button>
-
-                  <div className="flex items-center gap-7 text-sm">
-                    <button className="border-b-2 border-[#D4AF37] pb-1 font-semibold">
-                      1
+              <>
+                <p className="mb-4 text-xs text-neutral-500">
+                  {total === 0
+                    ? "No products found."
+                    : `Showing ${(page - 1) * 12 + 1}–${Math.min(page * 12, total)} of ${total} products`}
+                </p>
+                <ProductGrid products={products} images={images} />
+                {totalPages > 1 && (
+                  <nav aria-label="Product pages" className="mt-8 flex items-center justify-center gap-4">
+                    <button
+                      type="button"
+                      disabled={page <= 1 || isLoading}
+                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      className="rounded border border-neutral-300 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Previous
                     </button>
-
-                    <button>2</button>
-                    <button>3</button>
-                    <button>4</button>
-                    <button>5</button>
-                    <button>→</button>
-                  </div>
-                </div>
-              )}
+                    <span aria-live="polite" className="text-sm text-neutral-600">
+                      Page {page} of {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={page >= totalPages || isLoading}
+                      onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                      className="rounded border border-neutral-300 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                )}
+              </>
+            )}
           </div>
         </section>
-
         <NewsletterSection />
       </main>
     </CustomerLayout>

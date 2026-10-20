@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 
@@ -21,6 +22,7 @@ import { UpdateProductUseCase } from '../../application/use-cases/update-product
 
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
+import { ListProductsDto } from '../dto/list-products.dto';
 
 @Controller({
   path: 'products',
@@ -50,8 +52,22 @@ export class ProductController {
   }
 
   @Get()
-  findAll() {
-    return this.getProductsUseCase.execute();
+  findAll(@Query() query: ListProductsDto) {
+    const hasListQuery = Object.values(query).some(
+      (value) => value !== undefined,
+    );
+
+    if (!hasListQuery) {
+      return this.getProductsUseCase.execute();
+    }
+
+    return this.getProductsUseCase.executePage({
+      page: query.page ?? 1,
+      limit: query.limit ?? 12,
+      categoryId: query.categoryId,
+      search: query.search?.trim() || undefined,
+      sort: query.sort,
+    });
   }
 
   @Get(':id')

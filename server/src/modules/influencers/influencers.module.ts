@@ -36,6 +36,11 @@ import { GetInfluencerWithdrawalsUseCase } from './application/use-cases/get-inf
 import { UpdateWithdrawalStatusUseCase } from './application/use-cases/update-withdrawal-status.use-case';
 
 import { WithdrawalController } from './presentation/controllers/withdrawal.controller';
+import { GetInfluencerPortalUseCase } from './application/use-cases/get-influencer-portal.use-case';
+import { UpdateInfluencerProfileUseCase } from './application/use-cases/update-influencer-profile.use-case';
+import { CreateReferralClickUseCase } from './application/use-cases/create-referral-click.use-case';
+import { ReferralClickController } from './presentation/controllers/referral-click.controller';
+import { InfluencerPhotoController } from './presentation/controllers/influencer-photo.controller';
 
 @Module({
   imports: [AuthModule, OrdersModule],
@@ -44,6 +49,8 @@ import { WithdrawalController } from './presentation/controllers/withdrawal.cont
     InfluencerRegistrationController,
     CommissionController,
     WithdrawalController,
+    ReferralClickController,
+    InfluencerPhotoController,
   ],
   providers: [
     PrismaInfluencerRepository,
@@ -68,6 +75,9 @@ import { WithdrawalController } from './presentation/controllers/withdrawal.cont
     GetWithdrawalRequestUseCase,
     GetInfluencerWithdrawalsUseCase,
     UpdateWithdrawalStatusUseCase,
+    GetInfluencerPortalUseCase,
+    UpdateInfluencerProfileUseCase,
+    CreateReferralClickUseCase,
 
     {
       provide: InfluencerRepository,

@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import {
+  applyInventoryDelta,
+  setInventoryQuantity,
+} from '../../../../infrastructure/database/inventory-stock';
 import { InventoryEntity } from '../../domain/entities/inventory.entity';
 import {
   CreateInventoryData,
@@ -12,12 +16,35 @@ export class PrismaInventoryRepository implements InventoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateInventoryData): Promise<InventoryEntity> {
-    const inventory = await this.prisma.inventory.create({
-      data: {
-        variant_id: data.variantId,
-        quantity: data.quantity ?? 0,
-        min_stock: data.minStock ?? 0,
-      },
+    if (
+      data.quantity !== undefined &&
+      (!Number.isSafeInteger(data.quantity) || data.quantity < 0)
+    ) {
+      throw new BadRequestException(
+        'Inventory quantity must be a non-negative integer',
+      );
+    }
+
+    const inventory = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.inventory.create({
+        data: {
+          variant_id: data.variantId,
+          quantity: 0,
+          min_stock: data.minStock ?? 0,
+        },
+      });
+
+      if ((data.quantity ?? 0) > 0) {
+        await applyInventoryDelta(
+          tx,
+          data.variantId,
+          data.quantity!,
+          'STOCK_IN',
+          'Initial stock',
+        );
+      }
+
+      return tx.inventory.findUniqueOrThrow({ where: { id: created.id } });
     });
 
     return new InventoryEntity(
@@ -56,18 +83,22 @@ export class PrismaInventoryRepository implements InventoryRepository {
     variantId: string,
     data: UpdateInventoryData,
   ): Promise<InventoryEntity> {
-    const inventory = await this.prisma.inventory.update({
-      where: {
-        variant_id: variantId,
-      },
-      data: {
-        ...(data.quantity !== undefined && {
-          quantity: data.quantity,
-        }),
-        ...(data.minStock !== undefined && {
-          min_stock: data.minStock,
-        }),
-      },
+    const inventory = await this.prisma.$transaction(async (tx) => {
+      if (data.quantity !== undefined) {
+        await setInventoryQuantity(
+          tx,
+          variantId,
+          data.quantity,
+          'Manual inventory quantity adjustment',
+        );
+      }
+
+      return tx.inventory.update({
+        where: { variant_id: variantId },
+        data: {
+          ...(data.minStock !== undefined && { min_stock: data.minStock }),
+        },
+      });
     });
 
     return new InventoryEntity(
@@ -107,39 +138,18 @@ export class PrismaInventoryRepository implements InventoryRepository {
     quantity: number,
     reference: string,
   ): Promise<InventoryEntity> {
-    const inventory = await this.prisma.inventory.findFirst({
-      where: {
-        variant_id: variantId,
-        deleted_at: null,
-      },
-    });
-
-    if (!inventory) {
-      throw new Error('Inventory not found');
-    }
-
-    if (inventory.quantity < quantity) {
-      throw new Error('Insufficient stock');
-    }
-
-    const updatedInventory = await this.prisma.inventory.update({
-      where: {
-        variant_id: variantId,
-      },
-      data: {
-        quantity: {
-          decrement: quantity,
-        },
-      },
-    });
-
-    await this.prisma.inventoryMovement.create({
-      data: {
-        variant_id: variantId,
-        quantity,
-        movement_type: 'STOCK_OUT',
+    const updatedInventory = await this.prisma.$transaction(async (tx) => {
+      await applyInventoryDelta(
+        tx,
+        variantId,
+        -quantity,
+        'STOCK_OUT',
         reference,
-      },
+      );
+
+      return tx.inventory.findFirstOrThrow({
+        where: { variant_id: variantId, deleted_at: null },
+      });
     });
 
     return new InventoryEntity(

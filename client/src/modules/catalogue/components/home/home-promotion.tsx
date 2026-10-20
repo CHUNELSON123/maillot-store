@@ -39,18 +39,24 @@ export function HomePromotion({
 }: HomePromotionProps) {
   const imageUrl = resolveImageUrl(banner?.imageUrl);
 
-  const discountText =
-    promotion &&
-    promotion.discountType.toLowerCase() === "percentage"
-      ? `UP TO ${promotion.discountValue}% OFF`
-      : "UP TO 20% OFF";
+  const discountText = (() => {
+    if (!promotion || !Number.isFinite(promotion.discountValue) || promotion.discountValue <= 0) {
+      return null;
+    }
+
+    switch (promotion.discountType.trim().toLowerCase()) {
+      case "percentage":
+      case "percent":
+        return `${promotion.discountValue}% OFF`;
+      default:
+        return null;
+    }
+  })();
 
   const promotionTitle =
-    promotion?.title || "ON SELECTED JERSEYS";
+    promotion?.title || banner?.title || "FEATURED COLLECTION";
 
-  const description =
-    promotion?.description ||
-    "Don't miss out on our special discounts. Offer valid for a limited time only!";
+  const description = promotion?.description;
 
   const link =
     banner?.linkUrl || "/shop";
@@ -76,26 +82,30 @@ export function HomePromotion({
           <div className="relative z-10 flex min-h-[190px] items-start px-4 py-5 min-[380px]:px-5 sm:min-h-[155px] sm:items-center sm:px-9 sm:py-4 lg:min-h-[130px] lg:px-12">
             <div className="w-full max-w-[340px] sm:w-[48%] lg:w-[43%]">
               <p className="text-[8px] font-extrabold uppercase tracking-[0.18em] text-[#D4AF37] sm:text-[9px]">
-                LIMITED-TIME OFFER
+                {promotion ? "CURRENT PROMOTION" : "FEATURED COLLECTION"}
               </p>
 
-              <h2 className="mt-1 text-[24px] font-black uppercase leading-[0.9] tracking-normal text-white min-[380px]:text-[27px] sm:text-[31px]">
-                {discountText}
-              </h2>
+              {discountText && (
+                <h2 className="mt-1 text-[24px] font-black uppercase leading-[0.9] tracking-normal text-white min-[380px]:text-[27px] sm:text-[31px]">
+                  {discountText}
+                </h2>
+              )}
 
               <h3 className="mt-1 text-[12px] font-black uppercase leading-none text-[#D4AF37] sm:text-[14px]">
                 {promotionTitle}
               </h3>
 
-              <p className="mt-1 max-w-[300px] text-[8px] leading-[1.45] text-white/80 sm:text-[9px]">
-                {description}
-              </p>
+              {description && (
+                <p className="mt-1 max-w-[300px] text-[8px] leading-[1.45] text-white/80 sm:text-[9px]">
+                  {description}
+                </p>
+              )}
 
               <Link
                 href={link}
                 className="mt-3 inline-flex h-[25px] min-w-[128px] items-center justify-center bg-[#D4AF37] px-4 text-[8px] font-black uppercase text-black transition hover:bg-[#e2bf4c] sm:px-5"
               >
-                SHOP PROMOTION
+                {promotion ? "SHOP PROMOTION" : "SHOP NOW"}
               </Link>
             </div>
           </div>

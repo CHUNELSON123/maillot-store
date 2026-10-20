@@ -1,7 +1,9 @@
 export type OrderConfirmationData = {
   id: string;
+  guestAccessToken?: string;
   orderNumber: string;
   orderDate: string;
+  orderStatus: string;
 
   customer: {
     fullName: string;
@@ -16,7 +18,8 @@ export type OrderConfirmationData = {
     postalCode: string;
   };
 
-  paymentMethod: "mtn" | "orange" | "card" | "cash";
+  paymentMethod: "mtn" | "orange" | "card" | "cash" | "not-recorded";
+  paymentStatus: string;
 
   items: Array<{
     id: string;
@@ -36,6 +39,7 @@ export type OrderConfirmationData = {
   }>;
 
   subtotal: number;
+  discount: number;
   deliveryFee: number;
   total: number;
 };
@@ -63,7 +67,28 @@ export const orderConfirmationStorage = {
     }
 
     try {
-      return JSON.parse(stored) as OrderConfirmationData;
+      const parsed = JSON.parse(stored) as Partial<OrderConfirmationData>;
+
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        typeof parsed.id !== "string" ||
+        typeof parsed.orderNumber !== "string"
+      ) {
+        sessionStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+
+      return {
+        ...parsed,
+        orderStatus: parsed.orderStatus ?? "PENDING",
+        paymentMethod:
+          parsed.paymentStatus === undefined
+            ? "not-recorded"
+            : (parsed.paymentMethod ?? "not-recorded"),
+        paymentStatus: parsed.paymentStatus ?? "NOT_RECORDED",
+        discount: parsed.discount ?? 0,
+      } as OrderConfirmationData;
     } catch {
       sessionStorage.removeItem(STORAGE_KEY);
       return null;

@@ -6,6 +6,10 @@ import { CheckCircle2, Home, Mail, MapPin, Phone } from "lucide-react";
 
 import { CustomerLayout } from "@/modules/customer/components/customer-layout";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
+import { authStorage } from "@/lib/auth/auth-storage";
+import { orderService } from "@/modules/customer/services/order.service";
+import { customerService } from "@/modules/customer/services/customer.service";
+import { authService } from "@/modules/auth/services/auth.service";
 import { orderConfirmationStorage } from "../../services/order-confirmation-storage";
 import type { OrderConfirmationData } from "../../services/order-confirmation-storage";
 
@@ -29,9 +33,11 @@ function getPaymentLabel(paymentMethod: string) {
     case "orange":
       return "Orange Money";
     case "card":
-      return "Card";
+      return "Bank Card";
     case "cash":
       return "Cash Before Delivery";
+    case "not-recorded":
+      return "Not recorded";
     default:
       return paymentMethod;
   }
@@ -41,9 +47,105 @@ export function OrderConfirmationPageContent() {
   const [confirmation, setConfirmation] = useState<
     OrderConfirmationData | null | undefined
   >(undefined);
+  const [verificationError, setVerificationError] = useState("");
 
   useEffect(() => {
-    setConfirmation(orderConfirmationStorage.get());
+    const savedConfirmation = orderConfirmationStorage.get();
+    if (!savedConfirmation) {
+      setConfirmation(null);
+      return;
+    }
+
+    const loadPersistedConfirmation = async () => {
+      try {
+        const accessToken = authStorage.getToken();
+        const order = accessToken
+          ? await orderService.getOrder(savedConfirmation.id)
+          : savedConfirmation.guestAccessToken
+            ? await orderService.getGuestOrderConfirmation(
+                savedConfirmation.id,
+                savedConfirmation.guestAccessToken,
+              )
+            : null;
+
+        if (!order) {
+          throw new Error("This guest order cannot be verified on this device.");
+        }
+
+        const [profile, user] = accessToken
+          ? await Promise.all([
+              customerService.getProfile().catch(() => null),
+              authService.getMe().catch(() => null),
+            ])
+          : [null, null];
+        const paymentMethod = {
+          "MTN Mobile Money": "mtn",
+          "Orange Money": "orange",
+          "Bank Card": "card",
+          "Cash Before Delivery": "cash",
+        }[order.payment?.paymentMethod ?? ""] as
+          OrderConfirmationData["paymentMethod"] | undefined;
+
+        const persistedConfirmation: OrderConfirmationData = {
+          id: order.id,
+          guestAccessToken: savedConfirmation.guestAccessToken,
+          orderNumber: order.orderNumber,
+          orderDate: order.createdAt,
+          orderStatus: order.status,
+          customer: {
+            fullName:
+              [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") ||
+              order.guestName ||
+              "Customer",
+            email: user?.email ?? order.guestEmail ?? "",
+            phone: profile?.phone ?? order.guestPhone ?? "",
+          },
+          delivery: {
+            method: order.deliveryMethod === "DELIVERY" ? "delivery" : "pickup",
+            address: order.deliveryAddress ?? "",
+            city: order.deliveryCity ?? "",
+            postalCode: order.deliveryPostalCode ?? "",
+          },
+          paymentMethod: paymentMethod ?? "not-recorded",
+          paymentStatus: order.payment?.status ?? "NOT_RECORDED",
+          items: order.items.map((item) => ({
+            id: item.id,
+            product: {
+              id: item.variantId,
+              name: item.productName ?? "Product",
+              price: item.unitPrice,
+            },
+            variant: {
+              id: item.variantId,
+              size: item.size ?? null,
+              color: item.color ?? null,
+              sku: item.sku ?? item.variantId,
+            },
+            imageUrl: item.imageUrl ?? null,
+            quantity: item.quantity,
+          })),
+          subtotal: order.items.reduce(
+            (total, item) => total + item.quantity * item.unitPrice,
+            0,
+          ),
+          discount: order.influencerDiscountAmount,
+          deliveryFee: order.deliveryFee ?? 0,
+          total: order.totalAmount,
+        };
+
+        orderConfirmationStorage.save(persistedConfirmation);
+        setConfirmation(persistedConfirmation);
+      } catch (error) {
+        setVerificationError(
+          error instanceof Error
+            ? error.message
+            : "Unable to verify your order right now.",
+        );
+        setConfirmation(null);
+      }
+    };
+
+    void loadPersistedConfirmation();
   }, []);
 
   if (confirmation === undefined) {
@@ -60,13 +162,10 @@ export function OrderConfirmationPageContent() {
                 <CheckCircle2 className="h-8 w-8 text-neutral-400" />
               </div>
 
-              <h1 className="text-2xl font-semibold">
-                No Order Found
-              </h1>
+              <h1 className="text-2xl font-semibold">No Order Found</h1>
 
               <p className="mt-3 text-sm leading-6 text-neutral-500">
-                We could not find recent order information on this device.
-                Please return to the shop and place an order.
+                {verificationError || "We could not find a verifiable recent order on this device."}
               </p>
 
               <Link
@@ -101,9 +200,7 @@ export function OrderConfirmationPageContent() {
 
               <span>/</span>
 
-              <span className="text-neutral-900">
-                Order Confirmed
-              </span>
+              <span className="text-neutral-900">Order Confirmed</span>
             </div>
           </div>
         </section>
@@ -120,8 +217,8 @@ export function OrderConfirmationPageContent() {
             </h1>
 
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-neutral-600 sm:text-base">
-              Your order has been received successfully. We will process it
-              and keep you updated about its progress.
+              Your order has been received successfully. We will process it and
+              keep you updated about its progress.
             </p>
 
             <div className="mt-6">
@@ -142,9 +239,7 @@ export function OrderConfirmationPageContent() {
             <div className="space-y-8">
               {/* Order Details */}
               <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-6">
-                <h2 className="text-lg font-semibold">
-                  Order Details
-                </h2>
+                <h2 className="text-lg font-semibold">Order Details</h2>
 
                 <div className="mt-5 grid gap-5 sm:grid-cols-2">
                   <div>
@@ -179,7 +274,16 @@ export function OrderConfirmationPageContent() {
                       Order Status
                     </p>
                     <p className="mt-1 inline-flex rounded-full bg-[#D4AF37]/15 px-3 py-1 text-xs font-semibold text-neutral-900">
-                      Pending
+                      {confirmation.orderStatus.replaceAll("_", " ")}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                      Payment Status
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {confirmation.paymentStatus.replaceAll("_", " ")}
                     </p>
                   </div>
                 </div>
@@ -251,9 +355,7 @@ export function OrderConfirmationPageContent() {
 
               {/* Order Timeline */}
               <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-6">
-                <h2 className="text-lg font-semibold">
-                  Order Status
-                </h2>
+                <h2 className="text-lg font-semibold">Order Status</h2>
 
                 <div className="mt-6">
                   <OrderConfirmationTimeline />
@@ -283,6 +385,7 @@ export function OrderConfirmationPageContent() {
               <OrderConfirmationSummary
                 items={confirmation.items}
                 subtotal={confirmation.subtotal}
+                discount={confirmation.discount}
                 deliveryFee={confirmation.deliveryFee}
                 total={confirmation.total}
               />

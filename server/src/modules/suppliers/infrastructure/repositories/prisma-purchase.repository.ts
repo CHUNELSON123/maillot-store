@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import { applyInventoryDelta } from '../../../../infrastructure/database/inventory-stock';
 import { PurchaseEntity } from '../../domain/entities/purchase.entity';
 import { PurchaseItemEntity } from '../../domain/entities/purchase-item.entity';
 import {
@@ -196,50 +197,34 @@ export class PrismaPurchaseRepository implements PurchaseRepository {
       const shouldAddInventory =
         existingPurchase.status === 'PENDING' && status === 'CONFIRMED';
 
+      const statusClaim = await tx.purchase.updateMany({
+        where: {
+          id: purchaseId,
+          status: existingPurchase.status,
+        },
+        data: { status },
+      });
+
+      if (statusClaim.count === 0) {
+        throw new ConflictException(
+          'Purchase status changed; reload and retry',
+        );
+      }
+
       if (shouldAddInventory) {
         for (const item of existingPurchase.items) {
-          const inventory = await tx.inventory.findFirst({
-            where: {
-              variant_id: item.variant_id,
-              deleted_at: null,
-            },
-          });
-
-          if (!inventory) {
-            throw new NotFoundException(
-              `Inventory not found for variant ${item.variant_id}`,
-            );
-          }
-
-          await tx.inventory.update({
-            where: {
-              variant_id: item.variant_id,
-            },
-            data: {
-              quantity: {
-                increment: item.quantity,
-              },
-            },
-          });
-
-          await tx.inventoryMovement.create({
-            data: {
-              variant_id: item.variant_id,
-              quantity: item.quantity,
-              movement_type: 'STOCK_IN',
-              reference: `Purchase ${existingPurchase.purchase_number}`,
-            },
-          });
+          await applyInventoryDelta(
+            tx,
+            item.variant_id,
+            item.quantity,
+            'STOCK_IN',
+            `Purchase ${existingPurchase.purchase_number}`,
+          );
         }
       }
 
-      const purchase = await tx.purchase.update({
-        where: {
-          id: purchaseId,
-        },
-        data: {
-          status,
-        },
+      const purchase = await tx.purchase.findUniqueOrThrow({
+        where: { id: purchaseId },
         include: {
           items: {
             where: {

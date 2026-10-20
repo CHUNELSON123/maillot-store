@@ -5,8 +5,10 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
@@ -19,6 +21,10 @@ import { UpdateWithdrawalStatusUseCase } from '../../application/use-cases/updat
 
 import { CreateWithdrawalRequestDto } from '../dto/create-withdrawal-request.dto';
 import { UpdateWithdrawalStatusDto } from '../dto/update-withdrawal-status.dto';
+
+interface AuthenticatedRequest extends Request {
+  user: { id: string };
+}
 
 @Controller({
   path: 'withdrawals',
@@ -33,8 +39,23 @@ export class WithdrawalController {
     private readonly updateWithdrawalStatusUseCase: UpdateWithdrawalStatusUseCase,
   ) {}
 
+  @Post('me')
+  @Roles('Influencer')
+  createMine(
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: CreateWithdrawalRequestDto,
+  ) {
+    return this.createWithdrawalRequestUseCase.executeForUser(request.user.id, dto.amount);
+  }
+
+  @Get('me')
+  @Roles('Influencer')
+  getMine(@Req() request: AuthenticatedRequest) {
+    return this.getInfluencerWithdrawalsUseCase.executeForUser(request.user.id);
+  }
+
   @Post('influencer/:influencerId')
-  @Roles('Administrator', 'Staff', 'Influencer')
+  @Roles('Administrator', 'Staff')
   create(
     @Param('influencerId') influencerId: string,
     @Body() dto: CreateWithdrawalRequestDto,
@@ -46,13 +67,13 @@ export class WithdrawalController {
   }
 
   @Get(':id')
-  @Roles('Administrator', 'Staff', 'Influencer')
+  @Roles('Administrator', 'Staff')
   getOne(@Param('id') withdrawalId: string) {
     return this.getWithdrawalRequestUseCase.execute(withdrawalId);
   }
 
   @Get('influencer/:influencerId')
-  @Roles('Administrator', 'Staff', 'Influencer')
+  @Roles('Administrator', 'Staff')
   getByInfluencer(@Param('influencerId') influencerId: string) {
     return this.getInfluencerWithdrawalsUseCase.execute(influencerId);
   }

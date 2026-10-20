@@ -42,6 +42,23 @@ export type InfluencerMinAggregateOutputType = {
   referral_code: string | null
   status: string | null
   commission_rate: runtime.Decimal | null
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  country: string | null
+  date_of_birth: Date | null
+  gender: string | null
+  city: string | null
+  occupation: string | null
+  bio: string | null
+  application_note: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
+  youtube_url: string | null
+  facebook_url: string | null
+  x_url: string | null
+  profile_picture_url: string | null
+  terms_accepted_at: Date | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -57,6 +74,23 @@ export type InfluencerMaxAggregateOutputType = {
   referral_code: string | null
   status: string | null
   commission_rate: runtime.Decimal | null
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  country: string | null
+  date_of_birth: Date | null
+  gender: string | null
+  city: string | null
+  occupation: string | null
+  bio: string | null
+  application_note: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
+  youtube_url: string | null
+  facebook_url: string | null
+  x_url: string | null
+  profile_picture_url: string | null
+  terms_accepted_at: Date | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -72,6 +106,23 @@ export type InfluencerCountAggregateOutputType = {
   referral_code: number
   status: number
   commission_rate: number
+  first_name: number
+  last_name: number
+  phone: number
+  country: number
+  date_of_birth: number
+  gender: number
+  city: number
+  occupation: number
+  bio: number
+  application_note: number
+  instagram_url: number
+  tiktok_url: number
+  youtube_url: number
+  facebook_url: number
+  x_url: number
+  profile_picture_url: number
+  terms_accepted_at: number
   created_at: number
   updated_at: number
   deleted_at: number
@@ -99,6 +150,23 @@ export type InfluencerMinAggregateInputType = {
   referral_code?: true
   status?: true
   commission_rate?: true
+  first_name?: true
+  last_name?: true
+  phone?: true
+  country?: true
+  date_of_birth?: true
+  gender?: true
+  city?: true
+  occupation?: true
+  bio?: true
+  application_note?: true
+  instagram_url?: true
+  tiktok_url?: true
+  youtube_url?: true
+  facebook_url?: true
+  x_url?: true
+  profile_picture_url?: true
+  terms_accepted_at?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -114,6 +182,23 @@ export type InfluencerMaxAggregateInputType = {
   referral_code?: true
   status?: true
   commission_rate?: true
+  first_name?: true
+  last_name?: true
+  phone?: true
+  country?: true
+  date_of_birth?: true
+  gender?: true
+  city?: true
+  occupation?: true
+  bio?: true
+  application_note?: true
+  instagram_url?: true
+  tiktok_url?: true
+  youtube_url?: true
+  facebook_url?: true
+  x_url?: true
+  profile_picture_url?: true
+  terms_accepted_at?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -129,6 +214,23 @@ export type InfluencerCountAggregateInputType = {
   referral_code?: true
   status?: true
   commission_rate?: true
+  first_name?: true
+  last_name?: true
+  phone?: true
+  country?: true
+  date_of_birth?: true
+  gender?: true
+  city?: true
+  occupation?: true
+  bio?: true
+  application_note?: true
+  instagram_url?: true
+  tiktok_url?: true
+  youtube_url?: true
+  facebook_url?: true
+  x_url?: true
+  profile_picture_url?: true
+  terms_accepted_at?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -231,6 +333,23 @@ export type InfluencerGroupByOutputType = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  country: string | null
+  date_of_birth: Date | null
+  gender: string | null
+  city: string | null
+  occupation: string | null
+  bio: string | null
+  application_note: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
+  youtube_url: string | null
+  facebook_url: string | null
+  x_url: string | null
+  profile_picture_url: string | null
+  terms_accepted_at: Date | null
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
@@ -269,6 +388,23 @@ export type InfluencerWhereInput = {
   referral_code?: Prisma.StringFilter<"Influencer"> | string
   status?: Prisma.StringFilter<"Influencer"> | string
   commission_rate?: Prisma.DecimalFilter<"Influencer"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  last_name?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  phone?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  country?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  date_of_birth?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
+  gender?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  city?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  occupation?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  bio?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  application_note?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  instagram_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  tiktok_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  youtube_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  facebook_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  x_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  profile_picture_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  terms_accepted_at?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"Influencer"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Influencer"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
@@ -288,6 +424,23 @@ export type InfluencerOrderByWithRelationInput = {
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commission_rate?: Prisma.SortOrder
+  first_name?: Prisma.SortOrderInput | Prisma.SortOrder
+  last_name?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  date_of_birth?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  bio?: Prisma.SortOrderInput | Prisma.SortOrder
+  application_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  instagram_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  tiktok_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtube_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  facebook_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  x_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  profile_picture_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  terms_accepted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -310,6 +463,23 @@ export type InfluencerWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.InfluencerWhereInput | Prisma.InfluencerWhereInput[]
   status?: Prisma.StringFilter<"Influencer"> | string
   commission_rate?: Prisma.DecimalFilter<"Influencer"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  last_name?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  phone?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  country?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  date_of_birth?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
+  gender?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  city?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  occupation?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  bio?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  application_note?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  instagram_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  tiktok_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  youtube_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  facebook_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  x_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  profile_picture_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  terms_accepted_at?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"Influencer"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Influencer"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Influencer"> | Date | string | null
@@ -329,6 +499,23 @@ export type InfluencerOrderByWithAggregationInput = {
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commission_rate?: Prisma.SortOrder
+  first_name?: Prisma.SortOrderInput | Prisma.SortOrder
+  last_name?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  country?: Prisma.SortOrderInput | Prisma.SortOrder
+  date_of_birth?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  bio?: Prisma.SortOrderInput | Prisma.SortOrder
+  application_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  instagram_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  tiktok_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  youtube_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  facebook_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  x_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  profile_picture_url?: Prisma.SortOrderInput | Prisma.SortOrder
+  terms_accepted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -352,6 +539,23 @@ export type InfluencerScalarWhereWithAggregatesInput = {
   referral_code?: Prisma.StringWithAggregatesFilter<"Influencer"> | string
   status?: Prisma.StringWithAggregatesFilter<"Influencer"> | string
   commission_rate?: Prisma.DecimalWithAggregatesFilter<"Influencer"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  last_name?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  country?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  date_of_birth?: Prisma.DateTimeNullableWithAggregatesFilter<"Influencer"> | Date | string | null
+  gender?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  occupation?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  bio?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  application_note?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  instagram_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  tiktok_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  youtube_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  facebook_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  x_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  profile_picture_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  terms_accepted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Influencer"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Influencer"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Influencer"> | Date | string
   deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Influencer"> | Date | string | null
@@ -366,6 +570,23 @@ export type InfluencerCreateInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -385,6 +606,23 @@ export type InfluencerUncheckedCreateInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -402,6 +640,23 @@ export type InfluencerUpdateInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -421,6 +676,23 @@ export type InfluencerUncheckedUpdateInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -439,6 +711,23 @@ export type InfluencerCreateManyInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -453,6 +742,23 @@ export type InfluencerUpdateManyMutationInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -468,6 +774,23 @@ export type InfluencerUncheckedUpdateManyInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -488,6 +811,23 @@ export type InfluencerCountOrderByAggregateInput = {
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commission_rate?: Prisma.SortOrder
+  first_name?: Prisma.SortOrder
+  last_name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  date_of_birth?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  application_note?: Prisma.SortOrder
+  instagram_url?: Prisma.SortOrder
+  tiktok_url?: Prisma.SortOrder
+  youtube_url?: Prisma.SortOrder
+  facebook_url?: Prisma.SortOrder
+  x_url?: Prisma.SortOrder
+  profile_picture_url?: Prisma.SortOrder
+  terms_accepted_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -508,6 +848,23 @@ export type InfluencerMaxOrderByAggregateInput = {
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commission_rate?: Prisma.SortOrder
+  first_name?: Prisma.SortOrder
+  last_name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  date_of_birth?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  application_note?: Prisma.SortOrder
+  instagram_url?: Prisma.SortOrder
+  tiktok_url?: Prisma.SortOrder
+  youtube_url?: Prisma.SortOrder
+  facebook_url?: Prisma.SortOrder
+  x_url?: Prisma.SortOrder
+  profile_picture_url?: Prisma.SortOrder
+  terms_accepted_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -523,6 +880,23 @@ export type InfluencerMinOrderByAggregateInput = {
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
   commission_rate?: Prisma.SortOrder
+  first_name?: Prisma.SortOrder
+  last_name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  country?: Prisma.SortOrder
+  date_of_birth?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  bio?: Prisma.SortOrder
+  application_note?: Prisma.SortOrder
+  instagram_url?: Prisma.SortOrder
+  tiktok_url?: Prisma.SortOrder
+  youtube_url?: Prisma.SortOrder
+  facebook_url?: Prisma.SortOrder
+  x_url?: Prisma.SortOrder
+  profile_picture_url?: Prisma.SortOrder
+  terms_accepted_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -621,6 +995,23 @@ export type InfluencerCreateWithoutUserInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -638,6 +1029,23 @@ export type InfluencerUncheckedCreateWithoutUserInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -671,6 +1079,23 @@ export type InfluencerUpdateWithoutUserInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -688,6 +1113,23 @@ export type InfluencerUncheckedUpdateWithoutUserInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -705,6 +1147,23 @@ export type InfluencerCreateWithoutReferralsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -723,6 +1182,23 @@ export type InfluencerUncheckedCreateWithoutReferralsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -755,6 +1231,23 @@ export type InfluencerUpdateWithoutReferralsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -773,6 +1266,23 @@ export type InfluencerUncheckedUpdateWithoutReferralsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -789,6 +1299,23 @@ export type InfluencerCreateWithoutCommissionsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -807,6 +1334,23 @@ export type InfluencerUncheckedCreateWithoutCommissionsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -839,6 +1383,23 @@ export type InfluencerUpdateWithoutCommissionsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -857,6 +1418,23 @@ export type InfluencerUncheckedUpdateWithoutCommissionsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -873,6 +1451,23 @@ export type InfluencerCreateWithoutWithdrawalsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -891,6 +1486,23 @@ export type InfluencerUncheckedCreateWithoutWithdrawalsInput = {
   referral_code: string
   status: string
   commission_rate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: string | null
+  last_name?: string | null
+  phone?: string | null
+  country?: string | null
+  date_of_birth?: Date | string | null
+  gender?: string | null
+  city?: string | null
+  occupation?: string | null
+  bio?: string | null
+  application_note?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
+  youtube_url?: string | null
+  facebook_url?: string | null
+  x_url?: string | null
+  profile_picture_url?: string | null
+  terms_accepted_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -923,6 +1535,23 @@ export type InfluencerUpdateWithoutWithdrawalsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -941,6 +1570,23 @@ export type InfluencerUncheckedUpdateWithoutWithdrawalsInput = {
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   commission_rate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  first_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date_of_birth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  facebook_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  x_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profile_picture_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terms_accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1007,6 +1653,23 @@ export type InfluencerSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   referral_code?: boolean
   status?: boolean
   commission_rate?: boolean
+  first_name?: boolean
+  last_name?: boolean
+  phone?: boolean
+  country?: boolean
+  date_of_birth?: boolean
+  gender?: boolean
+  city?: boolean
+  occupation?: boolean
+  bio?: boolean
+  application_note?: boolean
+  instagram_url?: boolean
+  tiktok_url?: boolean
+  youtube_url?: boolean
+  facebook_url?: boolean
+  x_url?: boolean
+  profile_picture_url?: boolean
+  terms_accepted_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -1027,6 +1690,23 @@ export type InfluencerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   referral_code?: boolean
   status?: boolean
   commission_rate?: boolean
+  first_name?: boolean
+  last_name?: boolean
+  phone?: boolean
+  country?: boolean
+  date_of_birth?: boolean
+  gender?: boolean
+  city?: boolean
+  occupation?: boolean
+  bio?: boolean
+  application_note?: boolean
+  instagram_url?: boolean
+  tiktok_url?: boolean
+  youtube_url?: boolean
+  facebook_url?: boolean
+  x_url?: boolean
+  profile_picture_url?: boolean
+  terms_accepted_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -1043,6 +1723,23 @@ export type InfluencerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   referral_code?: boolean
   status?: boolean
   commission_rate?: boolean
+  first_name?: boolean
+  last_name?: boolean
+  phone?: boolean
+  country?: boolean
+  date_of_birth?: boolean
+  gender?: boolean
+  city?: boolean
+  occupation?: boolean
+  bio?: boolean
+  application_note?: boolean
+  instagram_url?: boolean
+  tiktok_url?: boolean
+  youtube_url?: boolean
+  facebook_url?: boolean
+  x_url?: boolean
+  profile_picture_url?: boolean
+  terms_accepted_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -1059,6 +1756,23 @@ export type InfluencerSelectScalar = {
   referral_code?: boolean
   status?: boolean
   commission_rate?: boolean
+  first_name?: boolean
+  last_name?: boolean
+  phone?: boolean
+  country?: boolean
+  date_of_birth?: boolean
+  gender?: boolean
+  city?: boolean
+  occupation?: boolean
+  bio?: boolean
+  application_note?: boolean
+  instagram_url?: boolean
+  tiktok_url?: boolean
+  youtube_url?: boolean
+  facebook_url?: boolean
+  x_url?: boolean
+  profile_picture_url?: boolean
+  terms_accepted_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -1068,7 +1782,7 @@ export type InfluencerSelectScalar = {
   customer_discount_rate?: boolean
 }
 
-export type InfluencerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "referral_code" | "status" | "commission_rate" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by" | "customer_discount_rate", ExtArgs["result"]["influencer"]>
+export type InfluencerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "referral_code" | "status" | "commission_rate" | "first_name" | "last_name" | "phone" | "country" | "date_of_birth" | "gender" | "city" | "occupation" | "bio" | "application_note" | "instagram_url" | "tiktok_url" | "youtube_url" | "facebook_url" | "x_url" | "profile_picture_url" | "terms_accepted_at" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by" | "customer_discount_rate", ExtArgs["result"]["influencer"]>
 export type InfluencerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referrals?: boolean | Prisma.Influencer$referralsArgs<ExtArgs>
@@ -1097,6 +1811,23 @@ export type $InfluencerPayload<ExtArgs extends runtime.Types.Extensions.Internal
     referral_code: string
     status: string
     commission_rate: runtime.Decimal
+    first_name: string | null
+    last_name: string | null
+    phone: string | null
+    country: string | null
+    date_of_birth: Date | null
+    gender: string | null
+    city: string | null
+    occupation: string | null
+    bio: string | null
+    application_note: string | null
+    instagram_url: string | null
+    tiktok_url: string | null
+    youtube_url: string | null
+    facebook_url: string | null
+    x_url: string | null
+    profile_picture_url: string | null
+    terms_accepted_at: Date | null
     created_at: Date
     updated_at: Date
     deleted_at: Date | null
@@ -1536,6 +2267,23 @@ export interface InfluencerFieldRefs {
   readonly referral_code: Prisma.FieldRef<"Influencer", 'String'>
   readonly status: Prisma.FieldRef<"Influencer", 'String'>
   readonly commission_rate: Prisma.FieldRef<"Influencer", 'Decimal'>
+  readonly first_name: Prisma.FieldRef<"Influencer", 'String'>
+  readonly last_name: Prisma.FieldRef<"Influencer", 'String'>
+  readonly phone: Prisma.FieldRef<"Influencer", 'String'>
+  readonly country: Prisma.FieldRef<"Influencer", 'String'>
+  readonly date_of_birth: Prisma.FieldRef<"Influencer", 'DateTime'>
+  readonly gender: Prisma.FieldRef<"Influencer", 'String'>
+  readonly city: Prisma.FieldRef<"Influencer", 'String'>
+  readonly occupation: Prisma.FieldRef<"Influencer", 'String'>
+  readonly bio: Prisma.FieldRef<"Influencer", 'String'>
+  readonly application_note: Prisma.FieldRef<"Influencer", 'String'>
+  readonly instagram_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly tiktok_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly youtube_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly facebook_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly x_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly profile_picture_url: Prisma.FieldRef<"Influencer", 'String'>
+  readonly terms_accepted_at: Prisma.FieldRef<"Influencer", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"Influencer", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Influencer", 'DateTime'>
   readonly deleted_at: Prisma.FieldRef<"Influencer", 'DateTime'>

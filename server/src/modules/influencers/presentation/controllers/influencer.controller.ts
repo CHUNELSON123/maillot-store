@@ -5,8 +5,10 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import { Request } from 'express';
 
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
@@ -19,10 +21,17 @@ import { UpdateInfluencerUseCase } from '../../application/use-cases/update-infl
 import { CreateReferralUseCase } from '../../application/use-cases/create-referral.use-case';
 import { GetReferralsUseCase } from '../../application/use-cases/get-referrals.use-case';
 import { ApproveInfluencerUseCase } from '../../application/use-cases/approve-influencer.use-case';
+import { GetInfluencerPortalUseCase } from '../../application/use-cases/get-influencer-portal.use-case';
+import { UpdateInfluencerProfileUseCase } from '../../application/use-cases/update-influencer-profile.use-case';
 
 import { CreateInfluencerDto } from '../dto/create-influencer.dto';
 import { UpdateInfluencerDto } from '../dto/update-influencer.dto';
 import { CreateReferralDto } from '../dto/create-referral.dto';
+import { UpdateInfluencerProfileDto } from '../dto/update-influencer-profile.dto';
+
+interface AuthenticatedRequest extends Request {
+  user: { id: string; roleName: string };
+}
 
 @Controller({
   path: 'influencers',
@@ -38,7 +47,24 @@ export class InfluencerController {
     private readonly createReferralUseCase: CreateReferralUseCase,
     private readonly getReferralsUseCase: GetReferralsUseCase,
     private readonly approveInfluencerUseCase: ApproveInfluencerUseCase,
+    private readonly getPortalUseCase: GetInfluencerPortalUseCase,
+    private readonly updateProfileUseCase: UpdateInfluencerProfileUseCase,
   ) {}
+
+  @Get('me/portal')
+  @Roles('Influencer', 'Customer')
+  getPortal(@Req() request: AuthenticatedRequest) {
+    return this.getPortalUseCase.execute(request.user.id);
+  }
+
+  @Patch('me')
+  @Roles('Influencer', 'Customer')
+  updateMyProfile(
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: UpdateInfluencerProfileDto,
+  ) {
+    return this.updateProfileUseCase.execute(request.user.id, dto);
+  }
 
   @Post()
   @Roles('Administrator', 'Staff')

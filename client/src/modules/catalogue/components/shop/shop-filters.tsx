@@ -78,18 +78,6 @@ export function ShopFilters({
           Filter:
         </span>
 
-        <select className="h-10 border border-neutral-300 bg-white px-4 text-sm">
-          <option>Category</option>
-        </select>
-
-        <select className="h-10 border border-neutral-300 bg-white px-4 text-sm">
-          <option>Price</option>
-        </select>
-
-        <select className="h-10 border border-neutral-300 bg-white px-4 text-sm">
-          <option>Size</option>
-        </select>
-
         <button
           type="button"
           onClick={onClear}

@@ -1,7 +1,7 @@
 import {
   IsEmail,
+  IsIn,
   IsInt,
-  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -30,9 +30,17 @@ export class CreateOrderDto {
   items!: CreateOrderItemDto[];
 
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  influencerDiscountAmount?: number;
+  @IsString()
+  @Length(1, 64)
+  referralCode?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(64, 64)
+  referralAttributionToken?: string;
+
+  @IsIn(['mtn', 'orange', 'card', 'cash'])
+  paymentMethod!: 'mtn' | 'orange' | 'card' | 'cash';
 
   @IsOptional()
   @IsString()
@@ -47,4 +55,27 @@ export class CreateOrderDto {
   @IsString()
   @Length(5, 30)
   guestPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(64, 128)
+  guestAccessToken?: string;
+
+  @IsIn(['DELIVERY', 'PICKUP'])
+  deliveryMethod!: 'DELIVERY' | 'PICKUP';
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 255)
+  deliveryAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  deliveryCity?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 30)
+  deliveryPostalCode?: string;
 }

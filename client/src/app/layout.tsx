@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ReferralAttributionTracker } from "@/modules/influencers/components/referral-attribution-tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-screen bg-white text-neutral-900">
+        <Suspense fallback={null}><ReferralAttributionTracker /></Suspense>
         {children}
       </body>
     </html>

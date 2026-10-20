@@ -65,50 +65,86 @@ export class PrismaDeliveryRepository implements DeliveryRepository {
     return this.toEntity(delivery);
   }
 
+  async findByOrderIdForCustomer(
+    orderId: string,
+    userId: string,
+  ): Promise<DeliveryEntity | null> {
+    const delivery = await this.prisma.delivery.findFirst({
+      where: {
+        order_id: orderId,
+        deleted_at: null,
+        order: {
+          deleted_at: null,
+          customer: { user_id: userId, deleted_at: null },
+        },
+      },
+    });
+
+    return delivery ? this.toEntity(delivery) : null;
+  }
+
   async update(
     deliveryId: string,
     data: UpdateDeliveryData,
   ): Promise<DeliveryEntity> {
-    const existingDelivery = await this.prisma.delivery.findFirst({
-      where: {
-        id: deliveryId,
-        deleted_at: null,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const existingDelivery = await tx.delivery.findFirst({
+        where: { id: deliveryId, deleted_at: null },
+      });
+
+      if (!existingDelivery) {
+        throw new NotFoundException('Delivery not found');
+      }
+
+      const deliveryStatus = data.deliveryStatus?.toUpperCase();
+      const deliveredAt =
+        deliveryStatus === 'DELIVERED'
+          ? (existingDelivery.delivered_at ?? new Date())
+          : existingDelivery.delivered_at;
+
+      const delivery = await tx.delivery.update({
+        where: { id: deliveryId },
+        data: {
+          ...(deliveryStatus !== undefined && {
+            delivery_status: deliveryStatus,
+          }),
+          ...(data.address !== undefined && { address: data.address }),
+          ...(data.trackingNumber !== undefined && {
+            tracking_number: data.trackingNumber,
+          }),
+          ...(data.provider !== undefined && { provider: data.provider }),
+          delivered_at: deliveredAt,
+        },
+      });
+
+      if (
+        deliveryStatus &&
+        deliveryStatus !== existingDelivery.delivery_status
+      ) {
+        const order = await tx.order.findFirst({
+          where: { id: existingDelivery.order_id, deleted_at: null },
+          select: { customer_id: true, order_number: true },
+        });
+        if (order?.customer_id) {
+          const customer = await tx.customer.findUnique({
+            where: { id: order.customer_id },
+            select: { user_id: true },
+          });
+          if (customer) {
+            await tx.notification.create({
+              data: {
+                user_id: customer.user_id,
+                title: 'Delivery update',
+                message: `Delivery for order ${order.order_number} is now ${deliveryStatus.toLowerCase().replaceAll('_', ' ')}.`,
+                type: 'DELIVERY',
+              },
+            });
+          }
+        }
+      }
+
+      return this.toEntity(delivery);
     });
-
-    if (!existingDelivery) {
-      throw new NotFoundException('Delivery not found');
-    }
-
-    const deliveryStatus = data.deliveryStatus?.toUpperCase();
-
-    const deliveredAt =
-      deliveryStatus === 'DELIVERED'
-        ? (existingDelivery.delivered_at ?? new Date())
-        : existingDelivery.delivered_at;
-
-    const delivery = await this.prisma.delivery.update({
-      where: {
-        id: deliveryId,
-      },
-      data: {
-        ...(deliveryStatus !== undefined && {
-          delivery_status: deliveryStatus,
-        }),
-        ...(data.address !== undefined && {
-          address: data.address,
-        }),
-        ...(data.trackingNumber !== undefined && {
-          tracking_number: data.trackingNumber,
-        }),
-        ...(data.provider !== undefined && {
-          provider: data.provider,
-        }),
-        delivered_at: deliveredAt,
-      },
-    });
-
-    return this.toEntity(delivery);
   }
 
   private toEntity(delivery: {

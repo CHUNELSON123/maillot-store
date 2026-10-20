@@ -175,6 +175,16 @@ export type Promotion = Prisma.PromotionModel
  */
 export type Notification = Prisma.NotificationModel
 /**
+ * Model ContactMessage
+ * 
+ */
+export type ContactMessage = Prisma.ContactMessageModel
+/**
+ * Model NewsletterSubscription
+ * 
+ */
+export type NewsletterSubscription = Prisma.NewsletterSubscriptionModel
+/**
  * Model AuditLog
  * 
  */
@@ -199,3 +209,8 @@ export type CustomerReward = Prisma.CustomerRewardModel
  * 
  */
 export type WishlistItem = Prisma.WishlistItemModel
+/**
+ * Model CartItem
+ * 
+ */
+export type CartItem = Prisma.CartItemModel

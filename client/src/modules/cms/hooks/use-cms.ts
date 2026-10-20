@@ -32,8 +32,8 @@ export function useCms() {
 
       const [banners, promotions] =
         await Promise.all([
-          cmsService.getBanners(true),
-          cmsService.getPromotions(true),
+          cmsService.getBanners(),
+          cmsService.getPromotions(),
         ]);
 
       setBanners(banners);

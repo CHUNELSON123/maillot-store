@@ -18,6 +18,11 @@ export abstract class DeliveryRepository {
 
   abstract findByOrderId(orderId: string): Promise<DeliveryEntity | null>;
 
+  abstract findByOrderIdForCustomer(
+    orderId: string,
+    userId: string,
+  ): Promise<DeliveryEntity | null>;
+
   abstract update(
     deliveryId: string,
     data: UpdateDeliveryData,

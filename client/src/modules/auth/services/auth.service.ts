@@ -8,6 +8,7 @@ import {
 } from "../types/auth.types";
 
 import { wishlistService } from "@/modules/wishlist/services/wishlist.service";
+import { cartService } from "@/modules/cart/services/cart.service";
 
 export const authService = {
   async login(data: LoginRequest): Promise<AuthResponse> {
@@ -20,11 +21,20 @@ export const authService = {
     );
 
     authStorage.setToken(response.accessToken);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("maillot-auth-updated"));
+    }
 
     try {
         await wishlistService.syncGuestItems();
       } catch (error) {
         console.error("Failed to merge guest wishlist:", error);
+      }
+
+    try {
+        await cartService.syncGuestItems();
+      } catch (error) {
+        console.error("Failed to merge guest cart:", error);
       }
 
     return response;
@@ -60,5 +70,10 @@ export const authService = {
 
   logout(): void {
     authStorage.removeToken();
+    cartService.resetCache();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("maillot-cart-updated"));
+      window.dispatchEvent(new Event("maillot-auth-updated"));
+    }
   },
 };

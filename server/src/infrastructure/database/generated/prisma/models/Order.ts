@@ -29,21 +29,30 @@ export type AggregateOrder = {
 export type OrderAvgAggregateOutputType = {
   total_amount: runtime.Decimal | null
   influencer_discount_amount: runtime.Decimal | null
+  delivery_fee: runtime.Decimal | null
 }
 
 export type OrderSumAggregateOutputType = {
   total_amount: runtime.Decimal | null
   influencer_discount_amount: runtime.Decimal | null
+  delivery_fee: runtime.Decimal | null
 }
 
 export type OrderMinAggregateOutputType = {
   id: string | null
   customer_id: string | null
+  guest_access_token_hash: string | null
   order_number: string | null
   source: string | null
   status: string | null
   total_amount: runtime.Decimal | null
   influencer_discount_amount: runtime.Decimal | null
+  inventory_deducted: boolean | null
+  delivery_method: string | null
+  delivery_fee: runtime.Decimal | null
+  delivery_address: string | null
+  delivery_city: string | null
+  delivery_postal_code: string | null
   guest_name: string | null
   guest_email: string | null
   guest_phone: string | null
@@ -55,11 +64,18 @@ export type OrderMinAggregateOutputType = {
 export type OrderMaxAggregateOutputType = {
   id: string | null
   customer_id: string | null
+  guest_access_token_hash: string | null
   order_number: string | null
   source: string | null
   status: string | null
   total_amount: runtime.Decimal | null
   influencer_discount_amount: runtime.Decimal | null
+  inventory_deducted: boolean | null
+  delivery_method: string | null
+  delivery_fee: runtime.Decimal | null
+  delivery_address: string | null
+  delivery_city: string | null
+  delivery_postal_code: string | null
   guest_name: string | null
   guest_email: string | null
   guest_phone: string | null
@@ -71,11 +87,18 @@ export type OrderMaxAggregateOutputType = {
 export type OrderCountAggregateOutputType = {
   id: number
   customer_id: number
+  guest_access_token_hash: number
   order_number: number
   source: number
   status: number
   total_amount: number
   influencer_discount_amount: number
+  inventory_deducted: number
+  delivery_method: number
+  delivery_fee: number
+  delivery_address: number
+  delivery_city: number
+  delivery_postal_code: number
   guest_name: number
   guest_email: number
   guest_phone: number
@@ -89,21 +112,30 @@ export type OrderCountAggregateOutputType = {
 export type OrderAvgAggregateInputType = {
   total_amount?: true
   influencer_discount_amount?: true
+  delivery_fee?: true
 }
 
 export type OrderSumAggregateInputType = {
   total_amount?: true
   influencer_discount_amount?: true
+  delivery_fee?: true
 }
 
 export type OrderMinAggregateInputType = {
   id?: true
   customer_id?: true
+  guest_access_token_hash?: true
   order_number?: true
   source?: true
   status?: true
   total_amount?: true
   influencer_discount_amount?: true
+  inventory_deducted?: true
+  delivery_method?: true
+  delivery_fee?: true
+  delivery_address?: true
+  delivery_city?: true
+  delivery_postal_code?: true
   guest_name?: true
   guest_email?: true
   guest_phone?: true
@@ -115,11 +147,18 @@ export type OrderMinAggregateInputType = {
 export type OrderMaxAggregateInputType = {
   id?: true
   customer_id?: true
+  guest_access_token_hash?: true
   order_number?: true
   source?: true
   status?: true
   total_amount?: true
   influencer_discount_amount?: true
+  inventory_deducted?: true
+  delivery_method?: true
+  delivery_fee?: true
+  delivery_address?: true
+  delivery_city?: true
+  delivery_postal_code?: true
   guest_name?: true
   guest_email?: true
   guest_phone?: true
@@ -131,11 +170,18 @@ export type OrderMaxAggregateInputType = {
 export type OrderCountAggregateInputType = {
   id?: true
   customer_id?: true
+  guest_access_token_hash?: true
   order_number?: true
   source?: true
   status?: true
   total_amount?: true
   influencer_discount_amount?: true
+  inventory_deducted?: true
+  delivery_method?: true
+  delivery_fee?: true
+  delivery_address?: true
+  delivery_city?: true
+  delivery_postal_code?: true
   guest_name?: true
   guest_email?: true
   guest_phone?: true
@@ -234,11 +280,18 @@ export type OrderGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type OrderGroupByOutputType = {
   id: string
   customer_id: string | null
+  guest_access_token_hash: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal
   influencer_discount_amount: runtime.Decimal
+  inventory_deducted: boolean
+  delivery_method: string
+  delivery_fee: runtime.Decimal
+  delivery_address: string | null
+  delivery_city: string | null
+  delivery_postal_code: string | null
   guest_name: string | null
   guest_email: string | null
   guest_phone: string | null
@@ -273,11 +326,18 @@ export type OrderWhereInput = {
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   id?: Prisma.UuidFilter<"Order"> | string
   customer_id?: Prisma.UuidNullableFilter<"Order"> | string | null
+  guest_access_token_hash?: Prisma.StringNullableFilter<"Order"> | string | null
   order_number?: Prisma.StringFilter<"Order"> | string
   source?: Prisma.StringFilter<"Order"> | string
   status?: Prisma.StringFilter<"Order"> | string
   total_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFilter<"Order"> | boolean
+  delivery_method?: Prisma.StringFilter<"Order"> | string
+  delivery_fee?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_city?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_postal_code?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_name?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_email?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_phone?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -294,11 +354,18 @@ export type OrderWhereInput = {
 export type OrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   customer_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  guest_access_token_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   order_number?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  inventory_deducted?: Prisma.SortOrder
+  delivery_method?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
+  delivery_address?: Prisma.SortOrderInput | Prisma.SortOrder
+  delivery_city?: Prisma.SortOrderInput | Prisma.SortOrder
+  delivery_postal_code?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_name?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_email?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_phone?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -314,6 +381,7 @@ export type OrderOrderByWithRelationInput = {
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  guest_access_token_hash?: string
   order_number?: string
   AND?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   OR?: Prisma.OrderWhereInput[]
@@ -323,6 +391,12 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"Order"> | string
   total_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFilter<"Order"> | boolean
+  delivery_method?: Prisma.StringFilter<"Order"> | string
+  delivery_fee?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_city?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_postal_code?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_name?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_email?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_phone?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -334,16 +408,23 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   payment?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
   delivery?: Prisma.XOR<Prisma.DeliveryNullableScalarRelationFilter, Prisma.DeliveryWhereInput> | null
   referrals?: Prisma.ReferralListRelationFilter
-}, "id" | "order_number">
+}, "id" | "guest_access_token_hash" | "order_number">
 
 export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   customer_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  guest_access_token_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   order_number?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  inventory_deducted?: Prisma.SortOrder
+  delivery_method?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
+  delivery_address?: Prisma.SortOrderInput | Prisma.SortOrder
+  delivery_city?: Prisma.SortOrderInput | Prisma.SortOrder
+  delivery_postal_code?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_name?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_email?: Prisma.SortOrderInput | Prisma.SortOrder
   guest_phone?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -363,11 +444,18 @@ export type OrderScalarWhereWithAggregatesInput = {
   NOT?: Prisma.OrderScalarWhereWithAggregatesInput | Prisma.OrderScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Order"> | string
   customer_id?: Prisma.UuidNullableWithAggregatesFilter<"Order"> | string | null
+  guest_access_token_hash?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   order_number?: Prisma.StringWithAggregatesFilter<"Order"> | string
   source?: Prisma.StringWithAggregatesFilter<"Order"> | string
   status?: Prisma.StringWithAggregatesFilter<"Order"> | string
   total_amount?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolWithAggregatesFilter<"Order"> | boolean
+  delivery_method?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  delivery_fee?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  delivery_city?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  delivery_postal_code?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   guest_name?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   guest_email?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   guest_phone?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
@@ -378,11 +466,18 @@ export type OrderScalarWhereWithAggregatesInput = {
 
 export type OrderCreateInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -399,11 +494,18 @@ export type OrderCreateInput = {
 export type OrderUncheckedCreateInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -418,11 +520,18 @@ export type OrderUncheckedCreateInput = {
 
 export type OrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -439,11 +548,18 @@ export type OrderUpdateInput = {
 export type OrderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -459,11 +575,18 @@ export type OrderUncheckedUpdateInput = {
 export type OrderCreateManyInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -474,11 +597,18 @@ export type OrderCreateManyInput = {
 
 export type OrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -490,11 +620,18 @@ export type OrderUpdateManyMutationInput = {
 export type OrderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -516,11 +653,18 @@ export type OrderOrderByRelationAggregateInput = {
 export type OrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   customer_id?: Prisma.SortOrder
+  guest_access_token_hash?: Prisma.SortOrder
   order_number?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  inventory_deducted?: Prisma.SortOrder
+  delivery_method?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
+  delivery_address?: Prisma.SortOrder
+  delivery_city?: Prisma.SortOrder
+  delivery_postal_code?: Prisma.SortOrder
   guest_name?: Prisma.SortOrder
   guest_email?: Prisma.SortOrder
   guest_phone?: Prisma.SortOrder
@@ -532,16 +676,24 @@ export type OrderCountOrderByAggregateInput = {
 export type OrderAvgOrderByAggregateInput = {
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
 }
 
 export type OrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   customer_id?: Prisma.SortOrder
+  guest_access_token_hash?: Prisma.SortOrder
   order_number?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  inventory_deducted?: Prisma.SortOrder
+  delivery_method?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
+  delivery_address?: Prisma.SortOrder
+  delivery_city?: Prisma.SortOrder
+  delivery_postal_code?: Prisma.SortOrder
   guest_name?: Prisma.SortOrder
   guest_email?: Prisma.SortOrder
   guest_phone?: Prisma.SortOrder
@@ -553,11 +705,18 @@ export type OrderMaxOrderByAggregateInput = {
 export type OrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   customer_id?: Prisma.SortOrder
+  guest_access_token_hash?: Prisma.SortOrder
   order_number?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  inventory_deducted?: Prisma.SortOrder
+  delivery_method?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
+  delivery_address?: Prisma.SortOrder
+  delivery_city?: Prisma.SortOrder
+  delivery_postal_code?: Prisma.SortOrder
   guest_name?: Prisma.SortOrder
   guest_email?: Prisma.SortOrder
   guest_phone?: Prisma.SortOrder
@@ -569,6 +728,7 @@ export type OrderMinOrderByAggregateInput = {
 export type OrderSumOrderByAggregateInput = {
   total_amount?: Prisma.SortOrder
   influencer_discount_amount?: Prisma.SortOrder
+  delivery_fee?: Prisma.SortOrder
 }
 
 export type OrderScalarRelationFilter = {
@@ -683,11 +843,18 @@ export type OrderUpdateOneWithoutReferralsNestedInput = {
 
 export type OrderCreateWithoutCustomerInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -702,11 +869,18 @@ export type OrderCreateWithoutCustomerInput = {
 
 export type OrderUncheckedCreateWithoutCustomerInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -751,11 +925,18 @@ export type OrderScalarWhereInput = {
   NOT?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
   id?: Prisma.UuidFilter<"Order"> | string
   customer_id?: Prisma.UuidNullableFilter<"Order"> | string | null
+  guest_access_token_hash?: Prisma.StringNullableFilter<"Order"> | string | null
   order_number?: Prisma.StringFilter<"Order"> | string
   source?: Prisma.StringFilter<"Order"> | string
   status?: Prisma.StringFilter<"Order"> | string
   total_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFilter<"Order"> | boolean
+  delivery_method?: Prisma.StringFilter<"Order"> | string
+  delivery_fee?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_city?: Prisma.StringNullableFilter<"Order"> | string | null
+  delivery_postal_code?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_name?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_email?: Prisma.StringNullableFilter<"Order"> | string | null
   guest_phone?: Prisma.StringNullableFilter<"Order"> | string | null
@@ -766,11 +947,18 @@ export type OrderScalarWhereInput = {
 
 export type OrderCreateWithoutItemsInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -786,11 +974,18 @@ export type OrderCreateWithoutItemsInput = {
 export type OrderUncheckedCreateWithoutItemsInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -820,11 +1015,18 @@ export type OrderUpdateToOneWithWhereWithoutItemsInput = {
 
 export type OrderUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -840,11 +1042,18 @@ export type OrderUpdateWithoutItemsInput = {
 export type OrderUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -858,11 +1067,18 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
 
 export type OrderCreateWithoutPaymentInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -878,11 +1094,18 @@ export type OrderCreateWithoutPaymentInput = {
 export type OrderUncheckedCreateWithoutPaymentInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -912,11 +1135,18 @@ export type OrderUpdateToOneWithWhereWithoutPaymentInput = {
 
 export type OrderUpdateWithoutPaymentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -932,11 +1162,18 @@ export type OrderUpdateWithoutPaymentInput = {
 export type OrderUncheckedUpdateWithoutPaymentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -950,11 +1187,18 @@ export type OrderUncheckedUpdateWithoutPaymentInput = {
 
 export type OrderCreateWithoutDeliveryInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -970,11 +1214,18 @@ export type OrderCreateWithoutDeliveryInput = {
 export type OrderUncheckedCreateWithoutDeliveryInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -1004,11 +1255,18 @@ export type OrderUpdateToOneWithWhereWithoutDeliveryInput = {
 
 export type OrderUpdateWithoutDeliveryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1024,11 +1282,18 @@ export type OrderUpdateWithoutDeliveryInput = {
 export type OrderUncheckedUpdateWithoutDeliveryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1042,11 +1307,18 @@ export type OrderUncheckedUpdateWithoutDeliveryInput = {
 
 export type OrderCreateWithoutReferralsInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -1062,11 +1334,18 @@ export type OrderCreateWithoutReferralsInput = {
 export type OrderUncheckedCreateWithoutReferralsInput = {
   id?: string
   customer_id?: string | null
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -1096,11 +1375,18 @@ export type OrderUpdateToOneWithWhereWithoutReferralsInput = {
 
 export type OrderUpdateWithoutReferralsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1116,11 +1402,18 @@ export type OrderUpdateWithoutReferralsInput = {
 export type OrderUncheckedUpdateWithoutReferralsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   customer_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1134,11 +1427,18 @@ export type OrderUncheckedUpdateWithoutReferralsInput = {
 
 export type OrderCreateManyCustomerInput = {
   id?: string
+  guest_access_token_hash?: string | null
   order_number: string
   source: string
   status: string
   total_amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: boolean
+  delivery_method?: string
+  delivery_fee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: string | null
+  delivery_city?: string | null
+  delivery_postal_code?: string | null
   guest_name?: string | null
   guest_email?: string | null
   guest_phone?: string | null
@@ -1149,11 +1449,18 @@ export type OrderCreateManyCustomerInput = {
 
 export type OrderUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1168,11 +1475,18 @@ export type OrderUpdateWithoutCustomerInput = {
 
 export type OrderUncheckedUpdateWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1187,11 +1501,18 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
 
 export type OrderUncheckedUpdateManyWithoutCustomerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  guest_access_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order_number?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   influencer_discount_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  inventory_deducted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  delivery_method?: Prisma.StringFieldUpdateOperationsInput | string
+  delivery_fee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  delivery_address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  delivery_postal_code?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   guest_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1243,11 +1564,18 @@ export type OrderCountOutputTypeCountReferralsArgs<ExtArgs extends runtime.Types
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   customer_id?: boolean
+  guest_access_token_hash?: boolean
   order_number?: boolean
   source?: boolean
   status?: boolean
   total_amount?: boolean
   influencer_discount_amount?: boolean
+  inventory_deducted?: boolean
+  delivery_method?: boolean
+  delivery_fee?: boolean
+  delivery_address?: boolean
+  delivery_city?: boolean
+  delivery_postal_code?: boolean
   guest_name?: boolean
   guest_email?: boolean
   guest_phone?: boolean
@@ -1265,11 +1593,18 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   customer_id?: boolean
+  guest_access_token_hash?: boolean
   order_number?: boolean
   source?: boolean
   status?: boolean
   total_amount?: boolean
   influencer_discount_amount?: boolean
+  inventory_deducted?: boolean
+  delivery_method?: boolean
+  delivery_fee?: boolean
+  delivery_address?: boolean
+  delivery_city?: boolean
+  delivery_postal_code?: boolean
   guest_name?: boolean
   guest_email?: boolean
   guest_phone?: boolean
@@ -1282,11 +1617,18 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   customer_id?: boolean
+  guest_access_token_hash?: boolean
   order_number?: boolean
   source?: boolean
   status?: boolean
   total_amount?: boolean
   influencer_discount_amount?: boolean
+  inventory_deducted?: boolean
+  delivery_method?: boolean
+  delivery_fee?: boolean
+  delivery_address?: boolean
+  delivery_city?: boolean
+  delivery_postal_code?: boolean
   guest_name?: boolean
   guest_email?: boolean
   guest_phone?: boolean
@@ -1299,11 +1641,18 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type OrderSelectScalar = {
   id?: boolean
   customer_id?: boolean
+  guest_access_token_hash?: boolean
   order_number?: boolean
   source?: boolean
   status?: boolean
   total_amount?: boolean
   influencer_discount_amount?: boolean
+  inventory_deducted?: boolean
+  delivery_method?: boolean
+  delivery_fee?: boolean
+  delivery_address?: boolean
+  delivery_city?: boolean
+  delivery_postal_code?: boolean
   guest_name?: boolean
   guest_email?: boolean
   guest_phone?: boolean
@@ -1312,7 +1661,7 @@ export type OrderSelectScalar = {
   deleted_at?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customer_id" | "order_number" | "source" | "status" | "total_amount" | "influencer_discount_amount" | "guest_name" | "guest_email" | "guest_phone" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "customer_id" | "guest_access_token_hash" | "order_number" | "source" | "status" | "total_amount" | "influencer_discount_amount" | "inventory_deducted" | "delivery_method" | "delivery_fee" | "delivery_address" | "delivery_city" | "delivery_postal_code" | "guest_name" | "guest_email" | "guest_phone" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
@@ -1340,11 +1689,18 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     customer_id: string | null
+    guest_access_token_hash: string | null
     order_number: string
     source: string
     status: string
     total_amount: runtime.Decimal
     influencer_discount_amount: runtime.Decimal
+    inventory_deducted: boolean
+    delivery_method: string
+    delivery_fee: runtime.Decimal
+    delivery_address: string | null
+    delivery_city: string | null
+    delivery_postal_code: string | null
     guest_name: string | null
     guest_email: string | null
     guest_phone: string | null
@@ -1781,11 +2137,18 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface OrderFieldRefs {
   readonly id: Prisma.FieldRef<"Order", 'String'>
   readonly customer_id: Prisma.FieldRef<"Order", 'String'>
+  readonly guest_access_token_hash: Prisma.FieldRef<"Order", 'String'>
   readonly order_number: Prisma.FieldRef<"Order", 'String'>
   readonly source: Prisma.FieldRef<"Order", 'String'>
   readonly status: Prisma.FieldRef<"Order", 'String'>
   readonly total_amount: Prisma.FieldRef<"Order", 'Decimal'>
   readonly influencer_discount_amount: Prisma.FieldRef<"Order", 'Decimal'>
+  readonly inventory_deducted: Prisma.FieldRef<"Order", 'Boolean'>
+  readonly delivery_method: Prisma.FieldRef<"Order", 'String'>
+  readonly delivery_fee: Prisma.FieldRef<"Order", 'Decimal'>
+  readonly delivery_address: Prisma.FieldRef<"Order", 'String'>
+  readonly delivery_city: Prisma.FieldRef<"Order", 'String'>
+  readonly delivery_postal_code: Prisma.FieldRef<"Order", 'String'>
   readonly guest_name: Prisma.FieldRef<"Order", 'String'>
   readonly guest_email: Prisma.FieldRef<"Order", 'String'>
   readonly guest_phone: Prisma.FieldRef<"Order", 'String'>

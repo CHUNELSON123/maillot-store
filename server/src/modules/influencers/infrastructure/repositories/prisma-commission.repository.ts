@@ -66,6 +66,7 @@ export class PrismaCommissionRepository implements CommissionRepository {
         referral_id: data.referralId,
         amount: data.amount,
         status: data.status,
+        commission_rate_snapshot: data.commissionRateSnapshot,
       },
     });
 
@@ -151,6 +152,7 @@ export class PrismaCommissionRepository implements CommissionRepository {
     status: string;
     created_at: Date;
     updated_at: Date;
+    commission_rate_snapshot: unknown;
   }): CommissionEntity {
     return new CommissionEntity(
       commission.id,
@@ -160,6 +162,9 @@ export class PrismaCommissionRepository implements CommissionRepository {
       commission.status,
       commission.created_at,
       commission.updated_at,
+      commission.commission_rate_snapshot === null
+        ? null
+        : Number(commission.commission_rate_snapshot),
     );
   }
 }

@@ -78,11 +78,14 @@ export const ModelName = {
   Banner: 'Banner',
   Promotion: 'Promotion',
   Notification: 'Notification',
+  ContactMessage: 'ContactMessage',
+  NewsletterSubscription: 'NewsletterSubscription',
   AuditLog: 'AuditLog',
   SystemSetting: 'SystemSetting',
   CustomerRewardRule: 'CustomerRewardRule',
   CustomerReward: 'CustomerReward',
-  WishlistItem: 'WishlistItem'
+  WishlistItem: 'WishlistItem',
+  CartItem: 'CartItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -356,11 +359,18 @@ export type PurchaseItemScalarFieldEnum = (typeof PurchaseItemScalarFieldEnum)[k
 export const OrderScalarFieldEnum = {
   id: 'id',
   customer_id: 'customer_id',
+  guest_access_token_hash: 'guest_access_token_hash',
   order_number: 'order_number',
   source: 'source',
   status: 'status',
   total_amount: 'total_amount',
   influencer_discount_amount: 'influencer_discount_amount',
+  inventory_deducted: 'inventory_deducted',
+  delivery_method: 'delivery_method',
+  delivery_fee: 'delivery_fee',
+  delivery_address: 'delivery_address',
+  delivery_city: 'delivery_city',
+  delivery_postal_code: 'delivery_postal_code',
   guest_name: 'guest_name',
   guest_email: 'guest_email',
   guest_phone: 'guest_phone',
@@ -449,6 +459,23 @@ export const InfluencerScalarFieldEnum = {
   referral_code: 'referral_code',
   status: 'status',
   commission_rate: 'commission_rate',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  phone: 'phone',
+  country: 'country',
+  date_of_birth: 'date_of_birth',
+  gender: 'gender',
+  city: 'city',
+  occupation: 'occupation',
+  bio: 'bio',
+  application_note: 'application_note',
+  instagram_url: 'instagram_url',
+  tiktok_url: 'tiktok_url',
+  youtube_url: 'youtube_url',
+  facebook_url: 'facebook_url',
+  x_url: 'x_url',
+  profile_picture_url: 'profile_picture_url',
+  terms_accepted_at: 'terms_accepted_at',
   created_at: 'created_at',
   updated_at: 'updated_at',
   deleted_at: 'deleted_at',
@@ -467,6 +494,7 @@ export const ReferralScalarFieldEnum = {
   order_id: 'order_id',
   referral_code: 'referral_code',
   status: 'status',
+  attribution_token_hash: 'attribution_token_hash',
   created_at: 'created_at',
   updated_at: 'updated_at',
   deleted_at: 'deleted_at',
@@ -483,6 +511,7 @@ export const CommissionScalarFieldEnum = {
   influencer_id: 'influencer_id',
   referral_id: 'referral_id',
   amount: 'amount',
+  commission_rate_snapshot: 'commission_rate_snapshot',
   status: 'status',
   created_at: 'created_at',
   updated_at: 'updated_at',
@@ -566,6 +595,35 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const ContactMessageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  subject: 'subject',
+  message: 'message',
+  status: 'status',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type ContactMessageScalarFieldEnum = (typeof ContactMessageScalarFieldEnum)[keyof typeof ContactMessageScalarFieldEnum]
+
+
+export const NewsletterSubscriptionScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  is_active: 'is_active',
+  subscribed_at: 'subscribed_at',
+  unsubscribed_at: 'unsubscribed_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type NewsletterSubscriptionScalarFieldEnum = (typeof NewsletterSubscriptionScalarFieldEnum)[keyof typeof NewsletterSubscriptionScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {
@@ -653,6 +711,20 @@ export const WishlistItemScalarFieldEnum = {
 } as const
 
 export type WishlistItemScalarFieldEnum = (typeof WishlistItemScalarFieldEnum)[keyof typeof WishlistItemScalarFieldEnum]
+
+
+export const CartItemScalarFieldEnum = {
+  id: 'id',
+  customer_id: 'customer_id',
+  product_id: 'product_id',
+  variant_id: 'variant_id',
+  quantity: 'quantity',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at'
+} as const
+
+export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typeof CartItemScalarFieldEnum]
 
 
 export const SortOrder = {

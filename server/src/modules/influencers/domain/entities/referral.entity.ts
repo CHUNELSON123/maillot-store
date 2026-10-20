@@ -7,5 +7,10 @@ export class ReferralEntity {
     public readonly status: string,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly orderNumber: string | null = null,
+    public readonly orderStatus: string | null = null,
+    public readonly saleAmount: number | null = null,
+    public readonly customerLabel: string | null = null,
+    public readonly productNames: string[] = [],
   ) {}
 }

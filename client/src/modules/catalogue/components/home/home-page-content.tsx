@@ -75,10 +75,12 @@ export function HomePageContent() {
         images={images}
       />
 
-      <HomePromotion
-        promotion={promotion}
-        banner={banners[1]}
-      />
+      {(promotion || banners[1]) && (
+        <HomePromotion
+          promotion={promotion}
+          banner={banners[1]}
+        />
+      )}
 
       <ShopBenefits />
 
@@ -89,7 +91,7 @@ export function HomePageContent() {
         </div>
       </div>
 
-      <NewsletterSection />
+      <NewsletterSection flush />
     </main>
   );
 }

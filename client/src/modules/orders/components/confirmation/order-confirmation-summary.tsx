@@ -20,6 +20,7 @@ type ConfirmationItem = {
 type Props = {
   items: ConfirmationItem[];
   subtotal: number;
+  discount?: number;
   deliveryFee: number;
   total: number;
 };
@@ -33,20 +34,30 @@ function resolveImageUrl(imageUrl: string | null) {
     return imageUrl;
   }
 
+  if (imageUrl.startsWith("/uploads")) {
+    try {
+      const apiOrigin = new URL(
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/v1",
+      ).origin;
+      return `${apiOrigin}${imageUrl}`;
+    } catch {
+      return imageUrl;
+    }
+  }
+
   return imageUrl;
 }
 
 export function OrderConfirmationSummary({
   items,
   subtotal,
+  discount = 0,
   deliveryFee,
   total,
 }: Props) {
   return (
     <section className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-6">
-      <h2 className="text-lg font-semibold">
-        Order Summary
-      </h2>
+      <h2 className="text-lg font-semibold">Order Summary</h2>
 
       <div className="mt-5 space-y-5">
         {items.map((item) => {
@@ -81,10 +92,8 @@ export function OrderConfirmationSummary({
                 {item.variant && (
                   <p className="mt-1 text-xs text-neutral-500">
                     {[
-                      item.variant.size &&
-                        `Size: ${item.variant.size}`,
-                      item.variant.color &&
-                        `Color: ${item.variant.color}`,
+                      item.variant.size && `Size: ${item.variant.size}`,
+                      item.variant.color && `Color: ${item.variant.color}`,
                     ]
                       .filter(Boolean)
                       .join(" • ")}
@@ -108,30 +117,31 @@ export function OrderConfirmationSummary({
 
       <div className="mt-5 space-y-3 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-neutral-500">
-            Subtotal
-          </span>
+          <span className="text-neutral-500">Subtotal</span>
 
-          <span className="font-medium">
-            {subtotal.toLocaleString()} FCFA
-          </span>
+          <span className="font-medium">{subtotal.toLocaleString()} FCFA</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-neutral-500">
-            Delivery
-          </span>
+          <span className="text-neutral-500">Delivery</span>
 
           <span className="font-medium">
             {deliveryFee.toLocaleString()} FCFA
           </span>
         </div>
 
+        {discount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-neutral-500">Discount</span>
+            <span className="font-medium">
+              -{discount.toLocaleString()} FCFA
+            </span>
+          </div>
+        )}
+
         <div className="border-t border-neutral-200 pt-3">
           <div className="flex items-center justify-between">
-            <span className="font-semibold">
-              Total
-            </span>
+            <span className="font-semibold">Total</span>
 
             <span className="text-lg font-semibold">
               {total.toLocaleString()} FCFA

@@ -10,10 +10,12 @@ import {
   ChevronDown,
   X,
   Heart,
+  LayoutDashboard,
 } from "lucide-react";
 
 import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
 import { useCart } from "@/modules/cart/hooks/use-cart";
+import { useInfluencerAccess } from "@/modules/influencers/hooks/use-influencer-access";
 
 const navItems = [
   { name: "HOME", href: "/" },
@@ -28,6 +30,7 @@ export function CustomerHeader() {
   const pathname = usePathname();
   const { itemCount: wishlistCount, isReady: wishlistReady } = useWishlist();
   const { itemCount: cartCount } = useCart();
+  const canOpenInfluencerPortal = useInfluencerAccess();
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -124,6 +127,21 @@ export function CustomerHeader() {
 
           {/* Right actions */}
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-4 lg:ml-5">
+            {canOpenInfluencerPortal && (
+              <Link
+                href="/influencer/portal/dashboard"
+                aria-label="Influencer dashboard"
+                className={`flex shrink-0 items-center gap-1.5 transition ${
+                  isActive("/influencer/portal")
+                    ? "text-[#D4AF37]"
+                    : "text-white hover:text-[#D4AF37]"
+                }`}
+              >
+                <LayoutDashboard size={18} strokeWidth={1.7} />
+                <span className="hidden text-[10px] font-semibold sm:inline">Dashboard</span>
+              </Link>
+            )}
+
             {/* Search */}
             <div className="flex h-[27px] w-[105px] min-w-0 items-center border border-neutral-700 bg-[#151515] px-2 sm:h-[29px] sm:w-[166px] sm:px-2.5">
               <input

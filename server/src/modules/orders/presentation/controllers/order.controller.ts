@@ -20,6 +20,7 @@ import { UpdateOrderStatusUseCase } from '../../application/use-cases/update-ord
 
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderStatusDto } from '../dto/update-order-status.dto';
+import { GuestOrderConfirmationDto } from '../dto/guest-order-confirmation.dto';
 
 import { OptionalJwtAuthGuard } from '../../../../common/guards/optional-jwt-auth.guard';
 
@@ -51,10 +52,17 @@ export class OrderController {
         variantId: item.variantId,
         quantity: item.quantity,
       })),
-      influencerDiscountAmount: dto.influencerDiscountAmount,
+      referralCode: dto.referralCode,
+      referralAttributionToken: dto.referralAttributionToken,
+      paymentMethod: dto.paymentMethod,
       guestName: dto.guestName,
       guestEmail: dto.guestEmail,
       guestPhone: dto.guestPhone,
+      guestAccessToken: dto.guestAccessToken,
+      deliveryMethod: dto.deliveryMethod,
+      deliveryAddress: dto.deliveryAddress,
+      deliveryCity: dto.deliveryCity,
+      deliveryPostalCode: dto.deliveryPostalCode,
     });
   }
 
@@ -63,6 +71,27 @@ export class OrderController {
   @Roles('Customer')
   getMyOrders(@Req() request: AuthenticatedRequest) {
     return this.getOrdersUseCase.execute(request.user!.id);
+  }
+
+  @Get('number/:orderNumber')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Customer')
+  getMyOrderByNumber(
+    @Req() request: AuthenticatedRequest,
+    @Param('orderNumber') orderNumber: string,
+  ) {
+    return this.getOrderUseCase.executeByOrderNumber(
+      request.user!.id,
+      orderNumber,
+    );
+  }
+
+  @Post('guest/:id/confirmation')
+  getGuestOrderConfirmation(
+    @Param('id') orderId: string,
+    @Body() dto: GuestOrderConfirmationDto,
+  ) {
+    return this.getOrderUseCase.executeGuest(orderId, dto.guestAccessToken);
   }
 
   @Get(':id')

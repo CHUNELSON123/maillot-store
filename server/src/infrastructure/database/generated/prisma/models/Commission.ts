@@ -28,10 +28,12 @@ export type AggregateCommission = {
 
 export type CommissionAvgAggregateOutputType = {
   amount: runtime.Decimal | null
+  commission_rate_snapshot: runtime.Decimal | null
 }
 
 export type CommissionSumAggregateOutputType = {
   amount: runtime.Decimal | null
+  commission_rate_snapshot: runtime.Decimal | null
 }
 
 export type CommissionMinAggregateOutputType = {
@@ -39,6 +41,7 @@ export type CommissionMinAggregateOutputType = {
   influencer_id: string | null
   referral_id: string | null
   amount: runtime.Decimal | null
+  commission_rate_snapshot: runtime.Decimal | null
   status: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -53,6 +56,7 @@ export type CommissionMaxAggregateOutputType = {
   influencer_id: string | null
   referral_id: string | null
   amount: runtime.Decimal | null
+  commission_rate_snapshot: runtime.Decimal | null
   status: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -67,6 +71,7 @@ export type CommissionCountAggregateOutputType = {
   influencer_id: number
   referral_id: number
   amount: number
+  commission_rate_snapshot: number
   status: number
   created_at: number
   updated_at: number
@@ -80,10 +85,12 @@ export type CommissionCountAggregateOutputType = {
 
 export type CommissionAvgAggregateInputType = {
   amount?: true
+  commission_rate_snapshot?: true
 }
 
 export type CommissionSumAggregateInputType = {
   amount?: true
+  commission_rate_snapshot?: true
 }
 
 export type CommissionMinAggregateInputType = {
@@ -91,6 +98,7 @@ export type CommissionMinAggregateInputType = {
   influencer_id?: true
   referral_id?: true
   amount?: true
+  commission_rate_snapshot?: true
   status?: true
   created_at?: true
   updated_at?: true
@@ -105,6 +113,7 @@ export type CommissionMaxAggregateInputType = {
   influencer_id?: true
   referral_id?: true
   amount?: true
+  commission_rate_snapshot?: true
   status?: true
   created_at?: true
   updated_at?: true
@@ -119,6 +128,7 @@ export type CommissionCountAggregateInputType = {
   influencer_id?: true
   referral_id?: true
   amount?: true
+  commission_rate_snapshot?: true
   status?: true
   created_at?: true
   updated_at?: true
@@ -220,6 +230,7 @@ export type CommissionGroupByOutputType = {
   influencer_id: string
   referral_id: string | null
   amount: runtime.Decimal
+  commission_rate_snapshot: runtime.Decimal | null
   status: string
   created_at: Date
   updated_at: Date
@@ -257,6 +268,7 @@ export type CommissionWhereInput = {
   influencer_id?: Prisma.UuidFilter<"Commission"> | string
   referral_id?: Prisma.UuidNullableFilter<"Commission"> | string | null
   amount?: Prisma.DecimalFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.DecimalNullableFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Commission"> | string
   created_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
@@ -273,6 +285,7 @@ export type CommissionOrderByWithRelationInput = {
   influencer_id?: Prisma.SortOrder
   referral_id?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -292,6 +305,7 @@ export type CommissionWhereUniqueInput = Prisma.AtLeast<{
   influencer_id?: Prisma.UuidFilter<"Commission"> | string
   referral_id?: Prisma.UuidNullableFilter<"Commission"> | string | null
   amount?: Prisma.DecimalFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.DecimalNullableFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Commission"> | string
   created_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
@@ -308,6 +322,7 @@ export type CommissionOrderByWithAggregationInput = {
   influencer_id?: Prisma.SortOrder
   referral_id?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -330,6 +345,7 @@ export type CommissionScalarWhereWithAggregatesInput = {
   influencer_id?: Prisma.UuidWithAggregatesFilter<"Commission"> | string
   referral_id?: Prisma.UuidNullableWithAggregatesFilter<"Commission"> | string | null
   amount?: Prisma.DecimalWithAggregatesFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.DecimalNullableWithAggregatesFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringWithAggregatesFilter<"Commission"> | string
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Commission"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Commission"> | Date | string
@@ -342,6 +358,7 @@ export type CommissionScalarWhereWithAggregatesInput = {
 export type CommissionCreateInput = {
   id?: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -358,6 +375,7 @@ export type CommissionUncheckedCreateInput = {
   influencer_id: string
   referral_id?: string | null
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -370,6 +388,7 @@ export type CommissionUncheckedCreateInput = {
 export type CommissionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -386,6 +405,7 @@ export type CommissionUncheckedUpdateInput = {
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -400,6 +420,7 @@ export type CommissionCreateManyInput = {
   influencer_id: string
   referral_id?: string | null
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -412,6 +433,7 @@ export type CommissionCreateManyInput = {
 export type CommissionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -426,6 +448,7 @@ export type CommissionUncheckedUpdateManyInput = {
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -450,6 +473,7 @@ export type CommissionCountOrderByAggregateInput = {
   influencer_id?: Prisma.SortOrder
   referral_id?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -461,6 +485,7 @@ export type CommissionCountOrderByAggregateInput = {
 
 export type CommissionAvgOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrder
 }
 
 export type CommissionMaxOrderByAggregateInput = {
@@ -468,6 +493,7 @@ export type CommissionMaxOrderByAggregateInput = {
   influencer_id?: Prisma.SortOrder
   referral_id?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -482,6 +508,7 @@ export type CommissionMinOrderByAggregateInput = {
   influencer_id?: Prisma.SortOrder
   referral_id?: Prisma.SortOrder
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -493,6 +520,7 @@ export type CommissionMinOrderByAggregateInput = {
 
 export type CommissionSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  commission_rate_snapshot?: Prisma.SortOrder
 }
 
 export type CommissionCreateNestedManyWithoutInfluencerInput = {
@@ -582,6 +610,7 @@ export type CommissionUncheckedUpdateManyWithoutReferralNestedInput = {
 export type CommissionCreateWithoutInfluencerInput = {
   id?: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -596,6 +625,7 @@ export type CommissionUncheckedCreateWithoutInfluencerInput = {
   id?: string
   referral_id?: string | null
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -639,6 +669,7 @@ export type CommissionScalarWhereInput = {
   influencer_id?: Prisma.UuidFilter<"Commission"> | string
   referral_id?: Prisma.UuidNullableFilter<"Commission"> | string | null
   amount?: Prisma.DecimalFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.DecimalNullableFilter<"Commission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFilter<"Commission"> | string
   created_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Commission"> | Date | string
@@ -651,6 +682,7 @@ export type CommissionScalarWhereInput = {
 export type CommissionCreateWithoutReferralInput = {
   id?: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -665,6 +697,7 @@ export type CommissionUncheckedCreateWithoutReferralInput = {
   id?: string
   influencer_id: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -704,6 +737,7 @@ export type CommissionCreateManyInfluencerInput = {
   id?: string
   referral_id?: string | null
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -716,6 +750,7 @@ export type CommissionCreateManyInfluencerInput = {
 export type CommissionUpdateWithoutInfluencerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -730,6 +765,7 @@ export type CommissionUncheckedUpdateWithoutInfluencerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -743,6 +779,7 @@ export type CommissionUncheckedUpdateManyWithoutInfluencerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -756,6 +793,7 @@ export type CommissionCreateManyReferralInput = {
   id?: string
   influencer_id: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status: string
   created_at?: Date | string
   updated_at?: Date | string
@@ -768,6 +806,7 @@ export type CommissionCreateManyReferralInput = {
 export type CommissionUpdateWithoutReferralInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -782,6 +821,7 @@ export type CommissionUncheckedUpdateWithoutReferralInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -795,6 +835,7 @@ export type CommissionUncheckedUpdateManyWithoutReferralInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  commission_rate_snapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -811,6 +852,7 @@ export type CommissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   influencer_id?: boolean
   referral_id?: boolean
   amount?: boolean
+  commission_rate_snapshot?: boolean
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -827,6 +869,7 @@ export type CommissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   influencer_id?: boolean
   referral_id?: boolean
   amount?: boolean
+  commission_rate_snapshot?: boolean
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -843,6 +886,7 @@ export type CommissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   influencer_id?: boolean
   referral_id?: boolean
   amount?: boolean
+  commission_rate_snapshot?: boolean
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -859,6 +903,7 @@ export type CommissionSelectScalar = {
   influencer_id?: boolean
   referral_id?: boolean
   amount?: boolean
+  commission_rate_snapshot?: boolean
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -868,7 +913,7 @@ export type CommissionSelectScalar = {
   deleted_by?: boolean
 }
 
-export type CommissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "referral_id" | "amount" | "status" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["commission"]>
+export type CommissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "referral_id" | "amount" | "commission_rate_snapshot" | "status" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["commission"]>
 export type CommissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   influencer?: boolean | Prisma.InfluencerDefaultArgs<ExtArgs>
   referral?: boolean | Prisma.Commission$referralArgs<ExtArgs>
@@ -893,6 +938,7 @@ export type $CommissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     influencer_id: string
     referral_id: string | null
     amount: runtime.Decimal
+    commission_rate_snapshot: runtime.Decimal | null
     status: string
     created_at: Date
     updated_at: Date
@@ -1329,6 +1375,7 @@ export interface CommissionFieldRefs {
   readonly influencer_id: Prisma.FieldRef<"Commission", 'String'>
   readonly referral_id: Prisma.FieldRef<"Commission", 'String'>
   readonly amount: Prisma.FieldRef<"Commission", 'Decimal'>
+  readonly commission_rate_snapshot: Prisma.FieldRef<"Commission", 'Decimal'>
   readonly status: Prisma.FieldRef<"Commission", 'String'>
   readonly created_at: Prisma.FieldRef<"Commission", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Commission", 'DateTime'>

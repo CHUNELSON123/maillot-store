@@ -33,7 +33,6 @@ import { UpdatePromotionDto } from '../dto/update-promotion.dto';
   path: 'cms',
   version: '1',
 })
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class CmsController {
   constructor(
     private readonly createBannerUseCase: CreateBannerUseCase,
@@ -46,7 +45,18 @@ export class CmsController {
     private readonly deletePromotionUseCase: DeletePromotionUseCase,
   ) {}
 
+  @Get('public/banners')
+  getPublicBanners() {
+    return this.getBannersUseCase.execute(true);
+  }
+
+  @Get('public/promotions')
+  getPublicPromotions() {
+    return this.getPromotionsUseCase.execute(true);
+  }
+
   @Post('banners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   createBanner(@Body() dto: CreateBannerDto) {
     return this.createBannerUseCase.execute({
@@ -58,24 +68,28 @@ export class CmsController {
   }
 
   @Get('banners')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff', 'Customer')
   getBanners(@Query('activeOnly') activeOnly?: string) {
     return this.getBannersUseCase.execute(activeOnly === 'true');
   }
 
   @Patch('banners/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   updateBanner(@Param('id') bannerId: string, @Body() dto: UpdateBannerDto) {
     return this.updateBannerUseCase.execute(bannerId, dto);
   }
 
   @Delete('banners/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   deleteBanner(@Param('id') bannerId: string) {
     return this.deleteBannerUseCase.execute(bannerId);
   }
 
   @Post('promotions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   createPromotion(@Body() dto: CreatePromotionDto) {
     return this.createPromotionUseCase.execute({
@@ -90,12 +104,14 @@ export class CmsController {
   }
 
   @Get('promotions')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff', 'Customer')
   getPromotions(@Query('activeOnly') activeOnly?: string) {
     return this.getPromotionsUseCase.execute(activeOnly === 'true');
   }
 
   @Patch('promotions/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   updatePromotion(
     @Param('id') promotionId: string,
@@ -109,6 +125,7 @@ export class CmsController {
   }
 
   @Delete('promotions/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   deletePromotion(@Param('id') promotionId: string) {
     return this.deletePromotionUseCase.execute(promotionId);

@@ -12,7 +12,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { getUploadsDirectory } from '../../../../infrastructure/storage/uploads-directory';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
@@ -38,9 +41,19 @@ export class ProductImageController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads/products',
+        destination: (_req, _file, callback) => {
+          const destination = join(getUploadsDirectory(), 'products');
+          mkdirSync(destination, { recursive: true });
+          callback(null, destination);
+        },
         filename: (_req, file, callback) => {
-          const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
+          const extensions: Record<string, string> = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/webp': '.webp',
+            'image/gif': '.gif',
+          };
+          const uniqueName = `${randomUUID()}${extensions[file.mimetype] ?? '.img'}`;
           callback(null, uniqueName);
         },
       }),
@@ -48,7 +61,7 @@ export class ProductImageController {
         fileSize: 5 * 1024 * 1024,
       },
       fileFilter: (_req, file, callback) => {
-        if (!file.mimetype.startsWith('image/')) {
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) {
           callback(
             new BadRequestException('Only image files are allowed'),
             false,

@@ -2,16 +2,34 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { Mail, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import { communicationsService } from "@/modules/communications/services/communications.service";
 
 export function ContactForm() {
-  const [isReady, setIsReady] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"success" | "error" | "">("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    setIsSubmitting(true);
+    setStatus("");
 
-    // The contact API will be connected when the backend is implemented.
-    setIsReady(true);
+    try {
+      await communicationsService.submitContactMessage({
+        name: String(data.get("name") ?? ""),
+        email: String(data.get("email") ?? ""),
+        subject: String(data.get("subject") ?? ""),
+        message: String(data.get("message") ?? ""),
+      });
+      form.reset();
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -98,22 +116,28 @@ export function ContactForm() {
           />
         </div>
 
-        {isReady && (
+        {status === "success" && (
           <p
             role="status"
-            className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900"
+            className="rounded-md border border-green-200 bg-green-50 p-3 text-xs leading-5 text-green-900"
           >
-            The contact form is ready, but message delivery has not
-            been connected yet. Your message has not been sent.
+            Your message has been saved. It has not been emailed; email delivery is not configured.
+          </p>
+        )}
+
+        {status === "error" && (
+          <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+            We could not save your message. Please try again.
           </p>
         )}
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#D4AF37] px-5 text-xs font-extrabold uppercase text-black transition hover:bg-[#c49f25]"
         >
           <Send size={14} />
-          Send Message
+          {isSubmitting ? "Saving..." : "Send Message"}
         </button>
       </form>
     </section>

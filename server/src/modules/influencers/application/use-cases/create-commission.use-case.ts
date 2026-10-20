@@ -50,6 +50,10 @@ export class CreateCommissionUseCase {
       throw new NotFoundException('Order not found');
     }
 
+    if (order.status !== 'DELIVERED') {
+      throw new BadRequestException('Commission is recorded only after delivery is completed');
+    }
+
     const productSubtotal = order.items.reduce(
       (total, item) => total + item.quantity * item.unitPrice,
       0,
@@ -80,6 +84,7 @@ export class CreateCommissionUseCase {
       referralId: referral.id,
       amount: commissionAmount,
       status: 'PENDING',
+      commissionRateSnapshot: influencer.commissionRate,
     });
   }
 }

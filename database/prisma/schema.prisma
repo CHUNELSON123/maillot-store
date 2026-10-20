@@ -82,11 +82,12 @@ model Customer {
   updated_by String?   @db.Uuid
   deleted_by String?   @db.Uuid
 
-  user      User              @relation(fields: [user_id], references: [id])
-  addresses CustomerAddress[]
-  orders    Order[]
-  rewards   CustomerReward[]
+  user           User              @relation(fields: [user_id], references: [id])
+  addresses      CustomerAddress[]
+  orders         Order[]
+  rewards        CustomerReward[]
   wishlist_items WishlistItem[]
+  cart_items     CartItem[]
 
   @@map("customers")
 }
@@ -159,11 +160,12 @@ model Product {
   updated_by  String?   @db.Uuid
   deleted_by  String?   @db.Uuid
 
-  category Category         @relation(fields: [category_id], references: [id])
-  brand    Brand            @relation(fields: [brand_id], references: [id])
-  variants ProductVariant[]
-  images   ProductImage[]
+  category       Category         @relation(fields: [category_id], references: [id])
+  brand          Brand            @relation(fields: [brand_id], references: [id])
+  variants       ProductVariant[]
+  images         ProductImage[]
   wishlist_items WishlistItem[]
+  cart_items     CartItem[]
 
   @@index([category_id])
   @@index([brand_id])
@@ -194,6 +196,7 @@ model ProductVariant {
   inventory   Inventory?
   movements   InventoryMovement[]
   order_items OrderItem[]
+  cart_items  CartItem[]
 
   @@index([product_id])
   @@map("product_variants")
@@ -320,11 +323,18 @@ model PurchaseItem {
 model Order {
   id                         String  @id @default(uuid()) @db.Uuid
   customer_id                String? @db.Uuid
+  guest_access_token_hash    String? @unique
   order_number               String  @unique
   source                     String
   status                     String
   total_amount               Decimal @db.Decimal(12, 2)
   influencer_discount_amount Decimal @default(0) @db.Decimal(12, 2)
+  inventory_deducted         Boolean @default(false)
+  delivery_method            String  @default("DELIVERY")
+  delivery_fee               Decimal @default(0) @db.Decimal(12, 2)
+  delivery_address           String?
+  delivery_city              String?
+  delivery_postal_code       String?
 
   // Guest checkout information
   guest_name  String?
@@ -431,17 +441,34 @@ model Delivery {
 }
 
 model Influencer {
-  id              String    @id @default(uuid()) @db.Uuid
-  user_id         String    @unique @db.Uuid
-  referral_code   String    @unique
-  status          String
-  commission_rate Decimal   @db.Decimal(5, 2)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  deleted_at      DateTime?
-  created_by      String?   @db.Uuid
-  updated_by      String?   @db.Uuid
-  deleted_by      String?   @db.Uuid
+  id                  String    @id @default(uuid()) @db.Uuid
+  user_id             String    @unique @db.Uuid
+  referral_code       String    @unique
+  status              String
+  commission_rate     Decimal   @db.Decimal(5, 2)
+  first_name          String?
+  last_name           String?
+  phone               String?
+  country             String?
+  date_of_birth       DateTime? @db.Date
+  gender              String?
+  city                String?
+  occupation          String?
+  bio                 String?
+  application_note    String?
+  instagram_url       String?
+  tiktok_url          String?
+  youtube_url         String?
+  facebook_url        String?
+  x_url               String?
+  profile_picture_url String?
+  terms_accepted_at   DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
+  created_by          String?   @db.Uuid
+  updated_by          String?   @db.Uuid
+  deleted_by          String?   @db.Uuid
 
   user        User                @relation(fields: [user_id], references: [id])
   referrals   Referral[]
@@ -454,17 +481,18 @@ model Influencer {
 }
 
 model Referral {
-  id            String    @id @default(uuid()) @db.Uuid
-  influencer_id String    @db.Uuid
-  order_id      String?   @db.Uuid
-  referral_code String
-  status        String
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  deleted_at    DateTime?
-  created_by    String?   @db.Uuid
-  updated_by    String?   @db.Uuid
-  deleted_by    String?   @db.Uuid
+  id                     String    @id @default(uuid()) @db.Uuid
+  influencer_id          String    @db.Uuid
+  order_id               String?   @db.Uuid
+  referral_code          String
+  status                 String
+  attribution_token_hash String?   @unique
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  deleted_at             DateTime?
+  created_by             String?   @db.Uuid
+  updated_by             String?   @db.Uuid
+  deleted_by             String?   @db.Uuid
 
   influencer Influencer @relation(fields: [influencer_id], references: [id])
   order      Order?     @relation(fields: [order_id], references: [id])
@@ -478,17 +506,18 @@ model Referral {
 }
 
 model Commission {
-  id            String    @id @default(uuid()) @db.Uuid
-  influencer_id String    @db.Uuid
-  referral_id   String?   @db.Uuid
-  amount        Decimal   @db.Decimal(12, 2)
-  status        String
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  deleted_at    DateTime?
-  created_by    String?   @db.Uuid
-  updated_by    String?   @db.Uuid
-  deleted_by    String?   @db.Uuid
+  id                       String    @id @default(uuid()) @db.Uuid
+  influencer_id            String    @db.Uuid
+  referral_id              String?   @db.Uuid
+  amount                   Decimal   @db.Decimal(12, 2)
+  commission_rate_snapshot Decimal?  @db.Decimal(5, 2)
+  status                   String
+  created_at               DateTime  @default(now())
+  updated_at               DateTime  @updatedAt
+  deleted_at               DateTime?
+  created_by               String?   @db.Uuid
+  updated_by               String?   @db.Uuid
+  deleted_by               String?   @db.Uuid
 
   influencer Influencer @relation(fields: [influencer_id], references: [id])
   referral   Referral?  @relation(fields: [referral_id], references: [id])
@@ -576,6 +605,34 @@ model Notification {
   @@map("notifications")
 }
 
+model ContactMessage {
+  id         String    @id @default(uuid()) @db.Uuid
+  name       String
+  email      String
+  subject    String
+  message    String
+  status     String    @default("NEW")
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([status, created_at])
+  @@map("contact_messages")
+}
+
+model NewsletterSubscription {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  is_active       Boolean   @default(true)
+  subscribed_at   DateTime  @default(now())
+  unsubscribed_at DateTime?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  @@map("newsletter_subscriptions")
+}
+
 model AuditLog {
   id         String    @id @default(uuid()) @db.Uuid
   user_id    String?   @db.Uuid
@@ -660,11 +717,11 @@ model CustomerReward {
 }
 
 model WishlistItem {
-  id          String   @id @default(uuid()) @db.Uuid
-  customer_id String   @db.Uuid
-  product_id  String   @db.Uuid
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id          String    @id @default(uuid()) @db.Uuid
+  customer_id String    @db.Uuid
+  product_id  String    @db.Uuid
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
 
   customer Customer @relation(fields: [customer_id], references: [id])
@@ -674,4 +731,24 @@ model WishlistItem {
   @@index([product_id])
   @@index([customer_id])
   @@map("wishlist_items")
+}
+
+model CartItem {
+  id          String    @id @default(uuid()) @db.Uuid
+  customer_id String    @db.Uuid
+  product_id  String    @db.Uuid
+  variant_id  String?   @db.Uuid
+  quantity    Int       @default(1)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  customer Customer        @relation(fields: [customer_id], references: [id])
+  product  Product         @relation(fields: [product_id], references: [id])
+  variant  ProductVariant? @relation(fields: [variant_id], references: [id])
+
+  @@index([customer_id])
+  @@index([product_id])
+  @@index([variant_id])
+  @@map("cart_items")
 }

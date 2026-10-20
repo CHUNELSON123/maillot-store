@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Home, Lock } from "lucide-react";
 
 import { CustomerLayout } from "@/modules/customer/components/customer-layout";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
 import { authStorage } from "@/lib/auth/auth-storage";
+import { authService } from "@/modules/auth/services/auth.service";
+import { customerService } from "@/modules/customer/services/customer.service";
 import { apiClient } from "@/services/api/api-client";
 import { useCart } from "../../hooks/use-cart";
 import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
@@ -17,27 +19,47 @@ import { CheckoutDeliveryForm } from "./checkout-delivery-form";
 import { CheckoutPaymentMethods } from "./checkout-payment-methods";
 import { CheckoutOrderSummary } from "./checkout-order-summary";
 import { orderConfirmationStorage } from "@/modules/orders/services/order-confirmation-storage";
+import { referralAttributionStorage } from "@/modules/influencers/services/influencer.service";
 
-export type DeliveryMethod =
-  | "delivery"
-  | "pickup";
+export type DeliveryMethod = "delivery" | "pickup";
 
-export type PaymentMethod =
-  | "mtn"
-  | "orange"
-  | "card"
-  | "cash";
+export type PaymentMethod = "mtn" | "orange" | "card" | "cash";
+
+type CreatedOrder = {
+  id: string;
+  orderNumber: string;
+  createdAt: string;
+  status: string;
+  totalAmount: number;
+  influencerDiscountAmount: number;
+  deliveryMethod: "DELIVERY" | "PICKUP";
+  deliveryFee: number;
+  deliveryAddress: string | null;
+  deliveryCity: string | null;
+  deliveryPostalCode: string | null;
+  payment: {
+    id: string;
+    amount: number;
+    status: string;
+    paymentMethod: string;
+    paidAt: string | null;
+  } | null;
+  items: Array<{
+    id: string;
+    variantId: string;
+    quantity: number;
+    unitPrice: number;
+  }>;
+};
+
+function createGuestAccessToken(): string {
+  const bytes = window.crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
 export function CheckoutPageContent() {
-  const {
-    items,
-    itemCount,
-    subtotal,
-    deliveryFee,
-    total,
-    clearCart,
-    updateVariant,
-  } = useCart();
+  const { items, itemCount, subtotal, deliveryFee, clearCart, updateVariant } =
+    useCart();
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -50,20 +72,38 @@ export function CheckoutPageContent() {
   const [deliveryMethod, setDeliveryMethod] =
     useState<DeliveryMethod>("delivery");
 
-  const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethod>("mtn");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mtn");
 
-  const [termsAccepted, setTermsAccepted] =
-    useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAccountPrompt, setShowAccountPrompt] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isRegisteredCustomer, setIsRegisteredCustomer] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  useEffect(() => {
+    const token = authStorage.getToken();
+    if (!token) return;
 
-  const [showAccountPrompt, setShowAccountPrompt] =
-    useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
+    setIsRegisteredCustomer(true);
+    void Promise.all([
+      customerService.getProfile(),
+      authService.getMe(),
+      customerService.getAddresses().catch(() => []),
+    ])
+      .then(([profile, user, addresses]) => {
+        setFullName(`${profile.firstName} ${profile.lastName}`.trim());
+        setPhone(profile.phone ?? "");
+        setEmail(user.email);
+        const defaultAddress = addresses.find((savedAddress) => savedAddress.isDefault);
+        if (defaultAddress) {
+          setAddress(defaultAddress.address);
+          setCity(defaultAddress.city);
+        }
+      })
+      .catch((error) => {
+        console.error("Unable to load account details for checkout:", error);
+      });
+  }, []);
 
   const handleVariantChange = useCallback(
     (itemId: string, variant: ProductVariant) => {
@@ -73,73 +113,49 @@ export function CheckoutPageContent() {
     [updateVariant],
   );
 
-  const actualDeliveryFee =
-    deliveryMethod === "delivery"
-      ? deliveryFee
-      : 0;
-
-  const actualTotal =
-    subtotal + actualDeliveryFee;
+  const actualDeliveryFee = deliveryMethod === "delivery" ? deliveryFee : 0;
+  const actualTotal = subtotal + actualDeliveryFee;
 
   const validateCheckout = () => {
     if (items.length === 0) {
-      setErrorMessage(
-        "Your cart is empty.",
-      );
+      setErrorMessage("Your cart is empty.");
       return false;
     }
 
-    if (!fullName.trim()) {
-      setErrorMessage(
-        "Please enter your full name.",
-      );
+    if (!isRegisteredCustomer && !fullName.trim()) {
+      setErrorMessage("Please enter your full name.");
       return false;
     }
 
-    if (!phone.trim()) {
-      setErrorMessage(
-        "Please enter your phone number.",
-      );
+    if (!isRegisteredCustomer && !phone.trim()) {
+      setErrorMessage("Please enter your phone number.");
       return false;
     }
 
-    if (!email.trim()) {
-      setErrorMessage(
-        "Please enter your email address.",
-      );
+    if (!isRegisteredCustomer && !email.trim()) {
+      setErrorMessage("Please enter your email address.");
       return false;
     }
 
     if (
-      !email.includes("@") ||
-      !email.includes(".")
+      !isRegisteredCustomer &&
+      (!email.includes("@") || !email.includes("."))
     ) {
-      setErrorMessage(
-        "Please enter a valid email address.",
-      );
+      setErrorMessage("Please enter a valid email address.");
       return false;
     }
 
-    if (
-      deliveryMethod === "delivery" &&
-      (!address.trim() || !city.trim())
-    ) {
-      setErrorMessage(
-        "Please provide your delivery address and city.",
-      );
+    if (deliveryMethod === "delivery" && (!address.trim() || !city.trim())) {
+      setErrorMessage("Please provide your delivery address and city.");
       return false;
     }
 
     if (!termsAccepted) {
-      setErrorMessage(
-        "Please accept the Terms & Conditions.",
-      );
+      setErrorMessage("Please accept the Terms & Conditions.");
       return false;
     }
 
-    const itemWithoutVariant = items.find(
-      (item) => !item.variant?.id,
-    );
+    const itemWithoutVariant = items.find((item) => !item.variant?.id);
 
     if (itemWithoutVariant) {
       setErrorMessage(
@@ -152,7 +168,7 @@ export function CheckoutPageContent() {
   };
 
   const submitOrder = async () => {
-    if (!validateCheckout()) {
+    if (isSubmitting || !validateCheckout()) {
       return;
     }
 
@@ -161,87 +177,126 @@ export function CheckoutPageContent() {
 
     try {
       const token = authStorage.getToken();
+      let confirmationName = fullName.trim();
+      let confirmationPhone = phone.trim();
+      let confirmationEmail = email.trim();
 
-      const response = await apiClient<{
-        id: string;
-        orderNumber: string;
-      }>("/orders", {
+      if (token) {
+        const [profile, user] = await Promise.all([
+          customerService.getProfile(),
+          authService.getMe(),
+        ]);
+        confirmationName = `${profile.firstName} ${profile.lastName}`.trim();
+        confirmationPhone = profile.phone ?? "";
+        confirmationEmail = user.email;
+      }
+
+      const guestAccessToken = token ? undefined : createGuestAccessToken();
+      const referralAttribution = referralAttributionStorage.get();
+
+      const response = await apiClient<CreatedOrder>("/orders", {
         method: "POST",
         ...(token ? { token } : {}),
         body: JSON.stringify({
           source: "WEBSITE",
+          paymentMethod,
 
           items: items.map((item) => ({
             variantId: item.variant!.id,
             quantity: item.quantity,
           })),
 
-          guestName: token
-            ? undefined
-            : fullName.trim(),
+          guestName: token ? undefined : fullName.trim(),
+          guestEmail: token ? undefined : email.trim(),
+          guestPhone: token ? undefined : phone.trim(),
+          guestAccessToken,
+          referralAttributionToken: referralAttribution?.attributionToken,
 
-          guestEmail: token
-            ? undefined
-            : email.trim(),
-
-          guestPhone: token
-            ? undefined
-            : phone.trim(),
+          deliveryMethod: deliveryMethod === "delivery" ? "DELIVERY" : "PICKUP",
+          deliveryAddress:
+            deliveryMethod === "delivery" ? address.trim() : undefined,
+          deliveryCity: deliveryMethod === "delivery" ? city.trim() : undefined,
+          deliveryPostalCode:
+            deliveryMethod === "delivery"
+              ? postalCode.trim() || undefined
+              : undefined,
         }),
       });
 
-      orderConfirmationStorage.save({
-  id: response.id,
-  orderNumber: response.orderNumber,
-  orderDate: new Date().toISOString(),
+      const confirmationItems = response.items.map((orderItem) => {
+        const cartItem = items.find(
+          (item) => item.variant?.id === orderItem.variantId,
+        );
 
-  customer: {
-    fullName: fullName.trim(),
-    email: email.trim(),
-    phone: phone.trim(),
-  },
-
-  delivery: {
-    method: deliveryMethod,
-    address: address.trim(),
-    city: city.trim(),
-    postalCode: postalCode.trim(),
-  },
-
-  paymentMethod,
-
-  items: items.map((item) => ({
-    id: item.id,
-    product: {
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price,
-    },
-    variant: item.variant
-      ? {
-          id: item.variant.id,
-          size: item.variant.size,
-          color: item.variant.color,
-          sku: item.variant.sku,
-        }
-      : null,
-    imageUrl: item.imageUrl,
-    quantity: item.quantity,
-  })),
-
-  subtotal,
-  deliveryFee: actualDeliveryFee,
-  total: actualTotal,
-});
-
-clearCart();
-
-window.location.href = "/order-confirmed";
-    } catch (error) {
-      console.error(
-        "Order creation failed:",
-        error,
+        return {
+          id: orderItem.id,
+          product: {
+            id: cartItem?.product.id ?? orderItem.variantId,
+            name: cartItem?.product.name ?? "Order item",
+            price: orderItem.unitPrice,
+          },
+          variant: cartItem?.variant
+            ? {
+                id: cartItem.variant.id,
+                size: cartItem.variant.size,
+                color: cartItem.variant.color,
+                sku: cartItem.variant.sku,
+              }
+            : null,
+          imageUrl: cartItem?.imageUrl ?? null,
+          quantity: orderItem.quantity,
+        };
+      });
+      referralAttributionStorage.clear();
+      const persistedSubtotal = response.items.reduce(
+        (sum, item) => sum + item.unitPrice * item.quantity,
+        0,
       );
+      const persistedPaymentMethod: Record<string, PaymentMethod> = {
+        "MTN Mobile Money": "mtn",
+        "Orange Money": "orange",
+        "Bank Card": "card",
+        "Cash Before Delivery": "cash",
+      };
+
+      orderConfirmationStorage.save({
+        id: response.id,
+        guestAccessToken,
+        orderNumber: response.orderNumber,
+        orderDate: response.createdAt,
+        orderStatus: response.status,
+
+        customer: {
+          fullName: confirmationName,
+          email: confirmationEmail,
+          phone: confirmationPhone,
+        },
+
+        delivery: {
+          method:
+            response.deliveryMethod === "DELIVERY" ? "delivery" : "pickup",
+          address: response.deliveryAddress ?? "",
+          city: response.deliveryCity ?? "",
+          postalCode: response.deliveryPostalCode ?? "",
+        },
+
+        paymentMethod:
+          persistedPaymentMethod[response.payment?.paymentMethod ?? ""] ??
+          "not-recorded",
+        paymentStatus: response.payment?.status ?? "NOT_RECORDED",
+
+        items: confirmationItems,
+
+        subtotal: persistedSubtotal,
+        discount: response.influencerDiscountAmount,
+        deliveryFee: response.deliveryFee,
+        total: response.totalAmount,
+      });
+
+      clearCart();
+      window.location.href = "/order-confirmed";
+    } catch (error) {
+      console.error("Order creation failed:", error);
 
       setErrorMessage(
         error instanceof Error
@@ -286,24 +341,15 @@ window.location.href = "/order-confirmed";
               Home
             </Link>
 
-            <span className="text-neutral-400">
-              ›
-            </span>
+            <span className="text-neutral-400">›</span>
 
-            <Link
-              href="/cart"
-              className="transition hover:text-[#D4AF37]"
-            >
+            <Link href="/cart" className="transition hover:text-[#D4AF37]">
               Cart
             </Link>
 
-            <span className="text-neutral-400">
-              ›
-            </span>
+            <span className="text-neutral-400">›</span>
 
-            <span className="font-semibold">
-              Checkout
-            </span>
+            <span className="font-semibold">Checkout</span>
           </div>
 
           <div className="mt-4">
@@ -336,35 +382,44 @@ window.location.href = "/order-confirmed";
           ) : (
             <div className="mt-3 grid gap-6 lg:grid-cols-[1fr_390px]">
               <div className="min-w-0 rounded-[8px] border border-neutral-200 px-4 py-3 sm:px-5">
-                <CheckoutContactForm
-                  fullName={fullName}
-                  phone={phone}
-                  email={email}
-                  onFullNameChange={setFullName}
-                  onPhoneChange={setPhone}
-                  onEmailChange={setEmail}
-                />
+                {isRegisteredCustomer ? (
+                  <section className="rounded-md border border-neutral-200 p-4">
+                    <h2 className="text-sm font-semibold">Account contact</h2>
+                    <p className="mt-1 text-xs text-neutral-600">
+                      Your order will be linked to your customer account. Guest
+                      contact details are not required.
+                    </p>
+                    {(fullName || email || phone) && (
+                      <p className="mt-2 text-xs text-neutral-700">
+                        {[fullName, email, phone].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
+                  </section>
+                ) : (
+                  <CheckoutContactForm
+                    fullName={fullName}
+                    phone={phone}
+                    email={email}
+                    onFullNameChange={setFullName}
+                    onPhoneChange={setPhone}
+                    onEmailChange={setEmail}
+                  />
+                )}
 
                 <CheckoutDeliveryForm
                   deliveryMethod={deliveryMethod}
-                  onDeliveryMethodChange={
-                    setDeliveryMethod
-                  }
+                  onDeliveryMethodChange={setDeliveryMethod}
                   address={address}
                   city={city}
                   postalCode={postalCode}
                   onAddressChange={setAddress}
                   onCityChange={setCity}
-                  onPostalCodeChange={
-                    setPostalCode
-                  }
+                  onPostalCodeChange={setPostalCode}
                 />
 
                 <CheckoutPaymentMethods
                   paymentMethod={paymentMethod}
-                  onPaymentMethodChange={
-                    setPaymentMethod
-                  }
+                  onPaymentMethodChange={setPaymentMethod}
                   termsAccepted={termsAccepted}
                   onTermsChange={setTermsAccepted}
                 />
@@ -377,23 +432,17 @@ window.location.href = "/order-confirmed";
 
                 <button
                   type="button"
-                  disabled={
-                    !termsAccepted ||
-                    isSubmitting
-                  }
+                  disabled={!termsAccepted || isSubmitting}
                   onClick={handlePlaceOrder}
                   className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-[4px] bg-[#D4AF37] text-[10px] font-extrabold uppercase text-black transition hover:bg-[#c49f25] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Lock size={13} />
-
-                  {isSubmitting
-                    ? "PROCESSING..."
-                    : "PLACE ORDER"}
+                  {isSubmitting ? "PROCESSING..." : "PLACE ORDER"}
                 </button>
 
-                <div className="mt-3 flex items-center justify-center gap-1.5 text-[9px] text-neutral-600">
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-center text-[9px] text-neutral-600">
                   <Lock size={11} />
-                  Your payment is secure and encrypted
+                  Payment stays pending until it is verified
                 </div>
               </div>
 
@@ -415,12 +464,8 @@ window.location.href = "/order-confirmed";
 
         {showAccountPrompt && (
           <CheckoutAccountPrompt
-            onContinueAsGuest={
-              handleContinueAsGuest
-            }
-            onClose={() =>
-              setShowAccountPrompt(false)
-            }
+            onContinueAsGuest={handleContinueAsGuest}
+            onClose={() => setShowAccountPrompt(false)}
           />
         )}
       </main>

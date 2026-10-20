@@ -3,6 +3,7 @@ import { PrismaService } from '../../../../infrastructure/database/prisma.servic
 import { ProductEntity } from '../../domain/entities/product.entity';
 import {
   CreateProductData,
+  ProductListQuery,
   ProductRepository,
   UpdateProductData,
 } from '../../domain/repositories/product.repository';
@@ -60,6 +61,62 @@ export class PrismaProductRepository implements ProductRepository {
           product.updated_at,
         ),
     );
+  }
+
+  async findPage(query: ProductListQuery) {
+    const where = {
+      deleted_at: null,
+      ...(query.categoryId ? { category_id: query.categoryId } : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { name: { contains: query.search, mode: 'insensitive' as const } },
+              {
+                description: {
+                  contains: query.search,
+                  mode: 'insensitive' as const,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+    const orderBy =
+      query.sort === 'price-asc'
+        ? { price: 'asc' as const }
+        : query.sort === 'price-desc'
+          ? { price: 'desc' as const }
+          : query.sort === 'name'
+            ? { name: 'asc' as const }
+            : { created_at: 'desc' as const };
+
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        orderBy,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return {
+      items: products.map(
+        (product) =>
+          new ProductEntity(
+            product.id,
+            product.category_id,
+            product.brand_id,
+            product.name,
+            product.description,
+            Number(product.price),
+            product.status,
+            product.created_at,
+            product.updated_at,
+          ),
+      ),
+      total,
+    };
   }
 
   async findById(id: string): Promise<ProductEntity | null> {

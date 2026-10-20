@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import {
+  applyInventoryDelta,
+  setInventoryQuantity,
+} from '../../../../infrastructure/database/inventory-stock';
 import { InventoryMovementEntity } from '../../domain/entities/inventory-movement.entity';
 import {
   CreateInventoryMovementData,
@@ -13,13 +17,31 @@ export class PrismaInventoryMovementRepository implements InventoryMovementRepos
   async create(
     data: CreateInventoryMovementData,
   ): Promise<InventoryMovementEntity> {
-    const movement = await this.prisma.inventoryMovement.create({
-      data: {
-        variant_id: data.variantId,
-        quantity: data.quantity,
-        movement_type: data.movementType,
-        reference: data.reference,
-      },
+    const movement = await this.prisma.$transaction(async (tx) => {
+      if (data.movementType === 'STOCK_IN') {
+        return applyInventoryDelta(
+          tx,
+          data.variantId,
+          data.quantity,
+          'STOCK_IN',
+          data.reference ?? 'Manual stock movement',
+        );
+      } else if (data.movementType === 'STOCK_OUT') {
+        return applyInventoryDelta(
+          tx,
+          data.variantId,
+          -data.quantity,
+          'STOCK_OUT',
+          data.reference ?? 'Manual stock movement',
+        );
+      } else {
+        return setInventoryQuantity(
+          tx,
+          data.variantId,
+          data.quantity,
+          data.reference ?? 'Manual stock adjustment',
+        );
+      }
     });
 
     return new InventoryMovementEntity(

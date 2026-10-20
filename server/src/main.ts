@@ -4,15 +4,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
-import { join } from 'path';
+import { mkdirSync } from 'node:fs';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { getUploadsDirectory } from './infrastructure/storage/uploads-directory';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
 
   app.enableCors();
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+  const uploadsDirectory = getUploadsDirectory();
+  mkdirSync(uploadsDirectory, { recursive: true });
+  app.useStaticAssets(uploadsDirectory, {
     prefix: '/uploads/',
   });
 

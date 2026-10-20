@@ -30,6 +30,11 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
 
-    return requiredRoles.includes(user.roleName ?? '');
+    const userRole = user.roleName ?? '';
+    if (requiredRoles.includes(userRole)) return true;
+
+    // Influencers created from existing customer accounts keep their customer
+    // record and can continue using storefront account, cart, and wishlist APIs.
+    return userRole === 'Influencer' && requiredRoles.includes('Customer');
   }
 }

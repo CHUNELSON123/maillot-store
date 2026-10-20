@@ -5,6 +5,7 @@ export interface CreateCommissionData {
   referralId?: string;
   amount: number;
   status: string;
+  commissionRateSnapshot?: number | null;
 }
 
 export abstract class CommissionRepository {

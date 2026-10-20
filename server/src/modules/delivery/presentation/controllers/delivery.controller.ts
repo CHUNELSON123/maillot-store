@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
@@ -15,6 +16,13 @@ import { GetDeliveryUseCase } from '../../application/use-cases/get-delivery.use
 import { UpdateDeliveryUseCase } from '../../application/use-cases/update-delivery.use-case';
 import { CreateDeliveryDto } from '../dto/create-delivery.dto';
 import { UpdateDeliveryDto } from '../dto/update-delivery.dto';
+
+interface AuthenticatedRequest {
+  user: {
+    id: string;
+    roleName: string;
+  };
+}
 
 @Controller({
   path: 'deliveries',
@@ -40,8 +48,13 @@ export class DeliveryController {
 
   @Get(':orderId')
   @Roles('Administrator', 'Staff', 'Customer')
-  getDelivery(@Param('orderId') orderId: string) {
-    return this.getDeliveryUseCase.execute(orderId);
+  getDelivery(
+    @Req() request: AuthenticatedRequest,
+    @Param('orderId') orderId: string,
+  ) {
+    const customerUserId =
+      request.user.roleName === 'Customer' ? request.user.id : undefined;
+    return this.getDeliveryUseCase.execute(orderId, customerUserId);
   }
 
   @Patch(':id')

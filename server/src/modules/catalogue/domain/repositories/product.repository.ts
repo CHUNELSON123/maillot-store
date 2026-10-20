@@ -18,10 +18,23 @@ export interface UpdateProductData {
   status?: string;
 }
 
+export interface ProductListQuery {
+  page: number;
+  limit: number;
+  categoryId?: string;
+  search?: string;
+  sort?: 'price-asc' | 'price-desc' | 'name';
+}
+
 export abstract class ProductRepository {
   abstract create(data: CreateProductData): Promise<ProductEntity>;
 
   abstract findAll(): Promise<ProductEntity[]>;
+
+  abstract findPage(query: ProductListQuery): Promise<{
+    items: ProductEntity[];
+    total: number;
+  }>;
 
   abstract findById(id: string): Promise<ProductEntity | null>;
 

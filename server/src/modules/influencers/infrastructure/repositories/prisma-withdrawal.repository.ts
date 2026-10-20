@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -16,27 +17,42 @@ export class PrismaWithdrawalRepository implements WithdrawalRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateWithdrawalData): Promise<WithdrawalRequestEntity> {
-    const influencer = await this.prisma.influencer.findFirst({
-      where: {
-        id: data.influencerId,
-        deleted_at: null,
-      },
-    });
-
-    if (!influencer) {
-      throw new NotFoundException('Influencer not found');
+    if (!Number.isFinite(data.amount) || data.amount <= 0) {
+      throw new BadRequestException('Withdrawal amount must be greater than zero');
     }
 
-    if (influencer.status !== 'ACTIVE') {
-      throw new ConflictException('Influencer is not active');
-    }
+    const withdrawal = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "influencers" WHERE "id" = ${data.influencerId}::uuid FOR UPDATE`;
+      const influencer = await tx.influencer.findFirst({
+        where: { id: data.influencerId, deleted_at: null },
+      });
+      if (!influencer) throw new NotFoundException('Influencer not found');
+      if (influencer.status !== 'ACTIVE') {
+        throw new ConflictException('Influencer is not active');
+      }
 
-    const withdrawal = await this.prisma.withdrawalRequest.create({
-      data: {
-        influencer_id: data.influencerId,
-        amount: data.amount,
-        status: data.status,
-      },
+      const [commissionTotals, withdrawalTotals] = await Promise.all([
+        tx.commission.aggregate({
+          where: { influencer_id: data.influencerId, status: 'APPROVED', deleted_at: null },
+          _sum: { amount: true },
+        }),
+        tx.withdrawalRequest.aggregate({
+          where: { influencer_id: data.influencerId, status: { in: ['PENDING', 'APPROVED', 'PAID'] }, deleted_at: null },
+          _sum: { amount: true },
+        }),
+      ]);
+      const available = Number(commissionTotals._sum.amount ?? 0) - Number(withdrawalTotals._sum.amount ?? 0);
+      if (data.amount > available) {
+        throw new BadRequestException(`Insufficient commission balance. Available balance: ${Math.max(0, available)}`);
+      }
+
+      return tx.withdrawalRequest.create({
+        data: {
+          influencer_id: data.influencerId,
+          amount: data.amount,
+          status: data.status,
+        },
+      });
     });
 
     return this.toEntity(withdrawal);

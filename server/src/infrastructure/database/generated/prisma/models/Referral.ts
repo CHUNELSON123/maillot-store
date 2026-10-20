@@ -30,6 +30,7 @@ export type ReferralMinAggregateOutputType = {
   order_id: string | null
   referral_code: string | null
   status: string | null
+  attribution_token_hash: string | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -44,6 +45,7 @@ export type ReferralMaxAggregateOutputType = {
   order_id: string | null
   referral_code: string | null
   status: string | null
+  attribution_token_hash: string | null
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
@@ -58,6 +60,7 @@ export type ReferralCountAggregateOutputType = {
   order_id: number
   referral_code: number
   status: number
+  attribution_token_hash: number
   created_at: number
   updated_at: number
   deleted_at: number
@@ -74,6 +77,7 @@ export type ReferralMinAggregateInputType = {
   order_id?: true
   referral_code?: true
   status?: true
+  attribution_token_hash?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -88,6 +92,7 @@ export type ReferralMaxAggregateInputType = {
   order_id?: true
   referral_code?: true
   status?: true
+  attribution_token_hash?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -102,6 +107,7 @@ export type ReferralCountAggregateInputType = {
   order_id?: true
   referral_code?: true
   status?: true
+  attribution_token_hash?: true
   created_at?: true
   updated_at?: true
   deleted_at?: true
@@ -189,6 +195,7 @@ export type ReferralGroupByOutputType = {
   order_id: string | null
   referral_code: string
   status: string
+  attribution_token_hash: string | null
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
@@ -224,6 +231,7 @@ export type ReferralWhereInput = {
   order_id?: Prisma.UuidNullableFilter<"Referral"> | string | null
   referral_code?: Prisma.StringFilter<"Referral"> | string
   status?: Prisma.StringFilter<"Referral"> | string
+  attribution_token_hash?: Prisma.StringNullableFilter<"Referral"> | string | null
   created_at?: Prisma.DateTimeFilter<"Referral"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Referral"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Referral"> | Date | string | null
@@ -241,6 +249,7 @@ export type ReferralOrderByWithRelationInput = {
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  attribution_token_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -254,6 +263,7 @@ export type ReferralOrderByWithRelationInput = {
 
 export type ReferralWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  attribution_token_hash?: string
   AND?: Prisma.ReferralWhereInput | Prisma.ReferralWhereInput[]
   OR?: Prisma.ReferralWhereInput[]
   NOT?: Prisma.ReferralWhereInput | Prisma.ReferralWhereInput[]
@@ -270,7 +280,7 @@ export type ReferralWhereUniqueInput = Prisma.AtLeast<{
   influencer?: Prisma.XOR<Prisma.InfluencerScalarRelationFilter, Prisma.InfluencerWhereInput>
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
   commissions?: Prisma.CommissionListRelationFilter
-}, "id">
+}, "id" | "attribution_token_hash">
 
 export type ReferralOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -278,6 +288,7 @@ export type ReferralOrderByWithAggregationInput = {
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  attribution_token_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -298,6 +309,7 @@ export type ReferralScalarWhereWithAggregatesInput = {
   order_id?: Prisma.UuidNullableWithAggregatesFilter<"Referral"> | string | null
   referral_code?: Prisma.StringWithAggregatesFilter<"Referral"> | string
   status?: Prisma.StringWithAggregatesFilter<"Referral"> | string
+  attribution_token_hash?: Prisma.StringNullableWithAggregatesFilter<"Referral"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Referral"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Referral"> | Date | string
   deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Referral"> | Date | string | null
@@ -310,6 +322,7 @@ export type ReferralCreateInput = {
   id?: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -327,6 +340,7 @@ export type ReferralUncheckedCreateInput = {
   order_id?: string | null
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -340,6 +354,7 @@ export type ReferralUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -357,6 +372,7 @@ export type ReferralUncheckedUpdateInput = {
   order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -372,6 +388,7 @@ export type ReferralCreateManyInput = {
   order_id?: string | null
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -384,6 +401,7 @@ export type ReferralUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -398,6 +416,7 @@ export type ReferralUncheckedUpdateManyInput = {
   order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -422,6 +441,7 @@ export type ReferralCountOrderByAggregateInput = {
   order_id?: Prisma.SortOrder
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  attribution_token_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -436,6 +456,7 @@ export type ReferralMaxOrderByAggregateInput = {
   order_id?: Prisma.SortOrder
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  attribution_token_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -450,6 +471,7 @@ export type ReferralMinOrderByAggregateInput = {
   order_id?: Prisma.SortOrder
   referral_code?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  attribution_token_hash?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
@@ -567,6 +589,7 @@ export type ReferralCreateWithoutOrderInput = {
   id?: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -582,6 +605,7 @@ export type ReferralUncheckedCreateWithoutOrderInput = {
   influencer_id: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -626,6 +650,7 @@ export type ReferralScalarWhereInput = {
   order_id?: Prisma.UuidNullableFilter<"Referral"> | string | null
   referral_code?: Prisma.StringFilter<"Referral"> | string
   status?: Prisma.StringFilter<"Referral"> | string
+  attribution_token_hash?: Prisma.StringNullableFilter<"Referral"> | string | null
   created_at?: Prisma.DateTimeFilter<"Referral"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Referral"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Referral"> | Date | string | null
@@ -638,6 +663,7 @@ export type ReferralCreateWithoutInfluencerInput = {
   id?: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -653,6 +679,7 @@ export type ReferralUncheckedCreateWithoutInfluencerInput = {
   order_id?: string | null
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -692,6 +719,7 @@ export type ReferralCreateWithoutCommissionsInput = {
   id?: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -708,6 +736,7 @@ export type ReferralUncheckedCreateWithoutCommissionsInput = {
   order_id?: string | null
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -736,6 +765,7 @@ export type ReferralUpdateWithoutCommissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -752,6 +782,7 @@ export type ReferralUncheckedUpdateWithoutCommissionsInput = {
   order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -765,6 +796,7 @@ export type ReferralCreateManyOrderInput = {
   influencer_id: string
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -777,6 +809,7 @@ export type ReferralUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -792,6 +825,7 @@ export type ReferralUncheckedUpdateWithoutOrderInput = {
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -806,6 +840,7 @@ export type ReferralUncheckedUpdateManyWithoutOrderInput = {
   influencer_id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -819,6 +854,7 @@ export type ReferralCreateManyInfluencerInput = {
   order_id?: string | null
   referral_code: string
   status: string
+  attribution_token_hash?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
@@ -831,6 +867,7 @@ export type ReferralUpdateWithoutInfluencerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -846,6 +883,7 @@ export type ReferralUncheckedUpdateWithoutInfluencerInput = {
   order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -860,6 +898,7 @@ export type ReferralUncheckedUpdateManyWithoutInfluencerInput = {
   order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referral_code?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -905,6 +944,7 @@ export type ReferralSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   order_id?: boolean
   referral_code?: boolean
   status?: boolean
+  attribution_token_hash?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -923,6 +963,7 @@ export type ReferralSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   order_id?: boolean
   referral_code?: boolean
   status?: boolean
+  attribution_token_hash?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -939,6 +980,7 @@ export type ReferralSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   order_id?: boolean
   referral_code?: boolean
   status?: boolean
+  attribution_token_hash?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -955,6 +997,7 @@ export type ReferralSelectScalar = {
   order_id?: boolean
   referral_code?: boolean
   status?: boolean
+  attribution_token_hash?: boolean
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
@@ -963,7 +1006,7 @@ export type ReferralSelectScalar = {
   deleted_by?: boolean
 }
 
-export type ReferralOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "order_id" | "referral_code" | "status" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["referral"]>
+export type ReferralOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "order_id" | "referral_code" | "status" | "attribution_token_hash" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["referral"]>
 export type ReferralInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   influencer?: boolean | Prisma.InfluencerDefaultArgs<ExtArgs>
   order?: boolean | Prisma.Referral$orderArgs<ExtArgs>
@@ -992,6 +1035,7 @@ export type $ReferralPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     order_id: string | null
     referral_code: string
     status: string
+    attribution_token_hash: string | null
     created_at: Date
     updated_at: Date
     deleted_at: Date | null
@@ -1429,6 +1473,7 @@ export interface ReferralFieldRefs {
   readonly order_id: Prisma.FieldRef<"Referral", 'String'>
   readonly referral_code: Prisma.FieldRef<"Referral", 'String'>
   readonly status: Prisma.FieldRef<"Referral", 'String'>
+  readonly attribution_token_hash: Prisma.FieldRef<"Referral", 'String'>
   readonly created_at: Prisma.FieldRef<"Referral", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Referral", 'DateTime'>
   readonly deleted_at: Prisma.FieldRef<"Referral", 'DateTime'>

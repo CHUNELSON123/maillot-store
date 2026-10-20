@@ -9,15 +9,9 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-
 async function main() {
   // Roles
-  const roles = [
-    "Administrator",
-    "Staff",
-    "Customer",
-    "Influencer",
-  ];
+  const roles = ["Administrator", "Staff", "Customer", "Influencer"];
 
   for (const name of roles) {
     await prisma.role.upsert({
@@ -27,7 +21,7 @@ async function main() {
     });
   }
 
-    // Development Administrator
+  // Development Administrator
   const administratorRole = await prisma.role.findUnique({
     where: { name: "Administrator" },
   });
@@ -57,6 +51,7 @@ async function main() {
   const paymentMethods = [
     "MTN Mobile Money",
     "Orange Money",
+    "Bank Card",
     "Cash Before Delivery",
   ];
 

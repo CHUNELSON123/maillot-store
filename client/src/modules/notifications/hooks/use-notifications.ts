@@ -36,26 +36,31 @@ export function useNotifications() {
   }, [loadNotifications]);
 
   const markAsRead = async (id: string) => {
-    await notificationService.markAsRead(id);
-
-    setNotifications((current) =>
-      current.map((notification) =>
-        notification.id === id
-          ? { ...notification, isRead: true }
-          : notification,
-      ),
-    );
+    try {
+      await notificationService.markAsRead(id);
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === id
+            ? { ...notification, isRead: true }
+            : notification,
+        ),
+      );
+      setError("");
+    } catch {
+      setError("Unable to mark this notification as read.");
+    }
   };
 
   const markAllAsRead = async () => {
-    await notificationService.markAllAsRead();
-
-    setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        isRead: true,
-      })),
-    );
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications((current) =>
+        current.map((notification) => ({ ...notification, isRead: true })),
+      );
+      setError("");
+    } catch {
+      setError("Unable to mark notifications as read.");
+    }
   };
 
   return {

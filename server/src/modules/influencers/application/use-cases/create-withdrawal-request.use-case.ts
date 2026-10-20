@@ -71,4 +71,10 @@ export class CreateWithdrawalRequestUseCase {
       status: 'PENDING',
     });
   }
+
+  async executeForUser(userId: string, amount: number) {
+    const influencer = await this.influencerRepository.findByUserId(userId);
+    if (!influencer) throw new NotFoundException('Influencer profile not found');
+    return this.execute({ influencerId: influencer.id, amount });
+  }
 }

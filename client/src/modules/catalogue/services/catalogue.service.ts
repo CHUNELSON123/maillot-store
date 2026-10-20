@@ -13,6 +13,24 @@ export const catalogueService = {
     });
   },
 
+  async getProductsPage(query: {
+    page: number;
+    limit: number;
+    categoryId?: string;
+    search?: string;
+    sort?: "price-asc" | "price-desc" | "name";
+  }): Promise<{ items: Product[]; page: number; limit: number; total: number; totalPages: number }> {
+    const params = new URLSearchParams({
+      page: String(query.page),
+      limit: String(query.limit),
+    });
+    if (query.categoryId) params.set("categoryId", query.categoryId);
+    if (query.search) params.set("search", query.search);
+    if (query.sort) params.set("sort", query.sort);
+
+    return apiClient(`/products?${params.toString()}`, { method: "GET" });
+  },
+
   async getProduct(id: string): Promise<Product> {
     return apiClient<Product>(`/products/${id}`, {
       method: "GET",

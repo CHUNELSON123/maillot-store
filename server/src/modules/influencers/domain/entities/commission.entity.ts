@@ -7,5 +7,6 @@ export class CommissionEntity {
     public readonly status: string,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly commissionRateSnapshot: number | null = null,
   ) {}
 }

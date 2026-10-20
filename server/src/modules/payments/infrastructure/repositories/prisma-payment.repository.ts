@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import { applyInventoryDelta } from '../../../../infrastructure/database/inventory-stock';
+import { createReferralCommissionIfComplete } from '../../../../infrastructure/database/referral-commission';
 import { PaymentEntity } from '../../domain/entities/payment.entity';
 import {
   CreatePaymentData,
@@ -156,46 +158,33 @@ export class PrismaPaymentRepository implements PaymentRepository {
          * confirms the order and deducts inventory.
          */
         if (order.status === 'PENDING') {
-          for (const item of order.items) {
-            const updatedInventory = await tx.inventory.updateMany({
-              where: {
-                variant_id: item.variant_id,
-                deleted_at: null,
-                quantity: {
-                  gte: item.quantity,
-                },
-              },
-              data: {
-                quantity: {
-                  decrement: item.quantity,
-                },
-              },
-            });
+          const claim = await tx.order.updateMany({
+            where: { id: order.id, status: 'PENDING' },
+            data: { status: 'CONFIRMED', inventory_deducted: true },
+          });
 
-            if (updatedInventory.count === 0) {
-              throw new ConflictException(
-                `Insufficient stock for variant ${item.variant_id}`,
+          if (claim.count > 0 && !order.inventory_deducted) {
+            for (const item of order.items) {
+              await applyInventoryDelta(
+                tx,
+                item.variant_id,
+                -item.quantity,
+                'STOCK_OUT',
+                `Order ${order.order_number}`,
               );
             }
-
-            await tx.inventoryMovement.create({
-              data: {
-                variant_id: item.variant_id,
-                quantity: item.quantity,
-                movement_type: 'STOCK_OUT',
-                reference: `Order ${order.order_number}`,
-              },
+          } else if (claim.count === 0) {
+            const latestOrder = await tx.order.findFirst({
+              where: { id: order.id, deleted_at: null },
+              select: { status: true },
             });
-          }
 
-          await tx.order.update({
-            where: {
-              id: order.id,
-            },
-            data: {
-              status: 'CONFIRMED',
-            },
-          });
+            if (latestOrder?.status === 'CANCELLED') {
+              throw new ConflictException(
+                'Cannot mark payment as PAID for a cancelled order',
+              );
+            }
+          }
         }
       }
 
@@ -216,6 +205,27 @@ export class PrismaPaymentRepository implements PaymentRepository {
           paid_at: paidAt,
         },
       });
+
+      if (data.status === 'PAID' && order.status === 'DELIVERED') {
+        await createReferralCommissionIfComplete(tx, order.id, data.status);
+      }
+
+      if (existingPayment.status !== data.status && order.customer_id) {
+        const customer = await tx.customer.findUnique({
+          where: { id: order.customer_id },
+          select: { user_id: true },
+        });
+        if (customer) {
+          await tx.notification.create({
+            data: {
+              user_id: customer.user_id,
+              title: 'Payment update',
+              message: `Payment for order ${order.order_number} is now ${data.status.toLowerCase()}.`,
+              type: 'PAYMENT',
+            },
+          });
+        }
+      }
 
       return this.toEntity(payment);
     });

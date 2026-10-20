@@ -5,8 +5,13 @@ import { DeliveryRepository } from '../../domain/repositories/delivery.repositor
 export class GetDeliveryUseCase {
   constructor(private readonly deliveryRepository: DeliveryRepository) {}
 
-  async execute(orderId: string) {
-    const delivery = await this.deliveryRepository.findByOrderId(orderId);
+  async execute(orderId: string, customerUserId?: string) {
+    const delivery = customerUserId
+      ? await this.deliveryRepository.findByOrderIdForCustomer(
+          orderId,
+          customerUserId,
+        )
+      : await this.deliveryRepository.findByOrderId(orderId);
 
     if (!delivery) {
       throw new NotFoundException('Delivery not found');

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { InventoryRepository } from '../../domain/repositories/inventory.repository';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InventoryMovementRepository } from '../../domain/repositories/inventory-movement.repository';
 
 export interface CreateInventoryMovementInput {
@@ -16,42 +11,21 @@ export interface CreateInventoryMovementInput {
 @Injectable()
 export class CreateInventoryMovementUseCase {
   constructor(
-    private readonly inventoryRepository: InventoryRepository,
     private readonly inventoryMovementRepository: InventoryMovementRepository,
   ) {}
 
   async execute(input: CreateInventoryMovementInput) {
-    const inventory = await this.inventoryRepository.findByVariantId(
-      input.variantId,
-    );
-
-    if (!inventory) {
-      throw new NotFoundException('Inventory not found for this variant');
-    }
-
     const movementType = input.movementType.toUpperCase();
 
     if (!['STOCK_IN', 'STOCK_OUT', 'ADJUSTMENT'].includes(movementType)) {
       throw new BadRequestException('Invalid movement type');
     }
 
-    let newQuantity: number;
-
-    if (movementType === 'STOCK_IN') {
-      newQuantity = inventory.quantity + input.quantity;
-    } else if (movementType === 'STOCK_OUT') {
-      newQuantity = inventory.quantity - input.quantity;
-
-      if (newQuantity < 0) {
-        throw new BadRequestException('Insufficient stock');
-      }
-    } else {
-      newQuantity = input.quantity;
+    if (movementType !== 'ADJUSTMENT' && input.quantity <= 0) {
+      throw new BadRequestException(
+        'Stock in/out quantity must be greater than zero',
+      );
     }
-
-    await this.inventoryRepository.update(input.variantId, {
-      quantity: newQuantity,
-    });
 
     return this.inventoryMovementRepository.create({
       variantId: input.variantId,

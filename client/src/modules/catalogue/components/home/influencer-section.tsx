@@ -95,7 +95,7 @@ export function InfluencerSection() {
         {/* CTA */}
         <div className="mt-2 flex justify-center sm:justify-end">
           <Link
-            href="/register"
+            href="/influencer"
             className="inline-flex h-7 items-center justify-center border border-[#D4AF37] px-5 text-[7px] font-extrabold uppercase tracking-wide text-white transition hover:bg-[#D4AF37] hover:text-black sm:h-8 sm:px-7 sm:text-[8px]"
           >
             BECOME AN INFLUENCER

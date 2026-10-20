@@ -113,10 +113,17 @@ export class PrismaCmsRepository implements CmsRepository {
   }
 
   async findPromotions(activeOnly = false): Promise<PromotionEntity[]> {
+    const now = new Date();
     const promotions = await this.prisma.promotion.findMany({
       where: {
         deleted_at: null,
-        ...(activeOnly ? { is_active: true } : {}),
+        ...(activeOnly
+          ? {
+              is_active: true,
+              start_date: { lte: now },
+              end_date: { gte: now },
+            }
+          : {}),
       },
       orderBy: {
         created_at: 'desc',

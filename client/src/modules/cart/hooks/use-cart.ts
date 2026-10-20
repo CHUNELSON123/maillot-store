@@ -17,80 +17,128 @@ import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadCart = useCallback(() => {
-    setItems(cartService.getItems());
-    setIsReady(true);
+  const loadCart = useCallback(async () => {
+    try {
+      const currentItems = await cartService.getItems();
+      setItems(currentItems);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load cart");
+    } finally {
+      setIsReady(true);
+    }
   }, []);
 
   useEffect(() => {
-    loadCart();
+    setItems(cartService.getSyncItems());
+    void loadCart();
 
     const handleCartUpdate = () => {
-      loadCart();
+      void loadCart();
     };
 
-    window.addEventListener(
-      "maillot-cart-updated",
-      handleCartUpdate,
-    );
+    const eventName = cartService.getUpdatedEventName();
 
-    window.addEventListener(
-      "storage",
-      handleCartUpdate,
-    );
+    window.addEventListener(eventName, handleCartUpdate);
+    window.addEventListener("storage", handleCartUpdate);
 
     return () => {
-      window.removeEventListener(
-        "maillot-cart-updated",
-        handleCartUpdate,
-      );
-
-      window.removeEventListener(
-        "storage",
-        handleCartUpdate,
-      );
+      window.removeEventListener(eventName, handleCartUpdate);
+      window.removeEventListener("storage", handleCartUpdate);
     };
   }, [loadCart]);
 
   const addItem = useCallback(
-    (input: AddToCartInput) => {
-      setItems(cartService.addItem(input));
+    async (input: AddToCartInput) => {
+      try {
+        const updated = await cartService.addItem(input);
+        setItems(updated);
+        setError(null);
+        return updated;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to add product to cart",
+        );
+        throw err;
+      }
     },
     [],
   );
 
   const updateVariant = useCallback(
-    (itemId: string, variant: ProductVariant) => {
-      setItems(cartService.updateVariant(itemId, variant));
+    async (itemId: string, variant: ProductVariant) => {
+      try {
+        const updated = await cartService.updateVariant(itemId, variant);
+        setItems(updated);
+        setError(null);
+        return updated;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to update product variant",
+        );
+        throw err;
+      }
     },
     [],
   );
 
   const updateQuantity = useCallback(
-    (itemId: string, quantity: number) => {
-      setItems(
-        cartService.updateQuantity(
-          itemId,
-          quantity,
-        ),
-      );
+    async (itemId: string, quantity: number) => {
+      try {
+        const updated = await cartService.updateQuantity(itemId, quantity);
+        setItems(updated);
+        setError(null);
+        return updated;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to update product quantity",
+        );
+        throw err;
+      }
     },
     [],
   );
 
   const removeItem = useCallback(
-    (itemId: string) => {
-      setItems(
-        cartService.removeItem(itemId),
-      );
+    async (itemId: string) => {
+      try {
+        const updated = await cartService.removeItem(itemId);
+        setItems(updated);
+        setError(null);
+        return updated;
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to remove item from cart",
+        );
+        throw err;
+      }
     },
     [],
   );
 
-  const clearCart = useCallback(() => {
-    cartService.clearCart();
-    setItems([]);
+  const clearCart = useCallback(async () => {
+    try {
+      await cartService.clearCart();
+      setItems([]);
+      setError(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to clear cart",
+      );
+      throw err;
+    }
   }, []);
 
   const itemCount = useMemo(
@@ -108,7 +156,7 @@ export function useCart() {
       items.reduce(
         (total, item) =>
           total +
-          item.product.price *
+          (item.variant?.price ?? item.product.price) *
             item.quantity,
         0,
       ),
@@ -127,10 +175,12 @@ export function useCart() {
     deliveryFee,
     total,
     isReady,
+    error,
     addItem,
     updateVariant,
     updateQuantity,
     removeItem,
     clearCart,
+    refreshCart: loadCart,
   };
 }

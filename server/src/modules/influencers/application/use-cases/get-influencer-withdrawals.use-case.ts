@@ -18,4 +18,10 @@ export class GetInfluencerWithdrawalsUseCase {
 
     return this.withdrawalRepository.findByInfluencer(influencerId);
   }
+
+  async executeForUser(userId: string) {
+    const influencer = await this.influencerRepository.findByUserId(userId);
+    if (!influencer) throw new NotFoundException('Influencer profile not found');
+    return this.withdrawalRepository.findByInfluencer(influencer.id);
+  }
 }

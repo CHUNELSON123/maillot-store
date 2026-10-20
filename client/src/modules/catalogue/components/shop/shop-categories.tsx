@@ -1,23 +1,16 @@
 "use client";
 
+import type { Category } from "@/modules/catalogue/types/catalogue.types";
+
 type ShopCategoriesProps = {
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  categories: Category[];
+  selectedCategoryId: string;
+  onCategoryChange: (categoryId: string) => void;
 };
 
-const categories = [
-  "All",
-  "Football",
-  "Basketball",
-  "NFL",
-  "Training",
-  "Accessories",
-  "Retro",
-  "Kids",
-];
-
 export function ShopCategories({
-  selectedCategory,
+  categories,
+  selectedCategoryId,
   onCategoryChange,
 }: ShopCategoriesProps) {
   return (
@@ -27,16 +20,15 @@ export function ShopCategories({
       </h2>
 
       <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-        {categories.map((category) => {
-          const active =
-            selectedCategory === category;
+        {[{ id: "all", name: "All" }, ...categories].map((category) => {
+          const active = selectedCategoryId === category.id;
 
           return (
             <button
-              key={category}
+              key={category.id}
               type="button"
               onClick={() =>
-                onCategoryChange(category)
+                onCategoryChange(category.id)
               }
               className={`shrink-0 rounded-full border px-6 py-2 text-sm font-medium transition ${
                 active
@@ -44,7 +36,7 @@ export function ShopCategories({
                   : "border-neutral-300 bg-white text-neutral-900 hover:border-black"
               }`}
             >
-              {category}
+              {category.name}
             </button>
           );
         })}

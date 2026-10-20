@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { orderService } from "@/modules/customer/services/order.service";
 
 export default function TrackOrderPage() {
   const router = useRouter();
   const [orderId, setOrderId] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
@@ -18,7 +21,16 @@ export default function TrackOrderPage() {
       return;
     }
 
-    router.push(`/account/track-order/${trimmedId}`);
+    setIsSearching(true);
+    setError("");
+    try {
+      const order = await orderService.getOrderByNumber(trimmedId);
+      router.push(`/account/track-order/${encodeURIComponent(order.id)}`);
+    } catch {
+      setError("We could not find an order with that number in your account.");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -29,7 +41,7 @@ export default function TrackOrderPage() {
         </h1>
 
         <p className="mt-2 text-sm text-neutral-500">
-          Enter your order ID to check its current status.
+          Enter your order number to check its status and delivery tracking.
         </p>
       </div>
 
@@ -43,7 +55,7 @@ export default function TrackOrderPage() {
               htmlFor="orderId"
               className="mb-2 block text-sm font-medium text-neutral-900"
             >
-              Order ID
+              Order Number
             </label>
 
             <input
@@ -53,17 +65,20 @@ export default function TrackOrderPage() {
               onChange={(event) =>
                 setOrderId(event.target.value)
               }
-              placeholder="Enter your order ID"
+              placeholder="e.g. ORD-123456789"
               required
               className="h-12 w-full rounded-md border border-neutral-300 px-4 text-sm outline-none transition focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
             />
           </div>
 
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+
           <button
             type="submit"
+            disabled={isSearching}
             className="h-12 w-full rounded-md bg-[#D4AF37] px-6 text-sm font-semibold text-white transition hover:bg-[#bf9828]"
           >
-            TRACK ORDER
+            {isSearching ? "SEARCHING..." : "TRACK ORDER"}
           </button>
         </form>
       </div>

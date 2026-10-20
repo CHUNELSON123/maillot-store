@@ -12,6 +12,19 @@ export class OrderEntity {
     public readonly status: string,
     public readonly totalAmount: number,
     public readonly influencerDiscountAmount: number,
+    public readonly deliveryMethod: string,
+    public readonly deliveryFee: number,
+    public readonly deliveryAddress: string | null,
+    public readonly deliveryCity: string | null,
+    public readonly deliveryPostalCode: string | null,
+    public readonly payment: {
+      id: string;
+      amount: number;
+      status: string;
+      paymentMethodId: string;
+      paymentMethod: string;
+      paidAt: Date | null;
+    } | null,
     public readonly items: OrderItemEntity[],
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
