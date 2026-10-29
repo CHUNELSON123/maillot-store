@@ -65,6 +65,22 @@ export class ProductController {
       page: query.page ?? 1,
       limit: query.limit ?? 12,
       categoryId: query.categoryId,
+      status: 'ACTIVE',
+      search: query.search?.trim() || undefined,
+      sort: query.sort,
+    });
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Administrator', 'Staff')
+  findAllForAdmin(@Query() query: ListProductsDto) {
+    return this.getProductsUseCase.executePage({
+      page: query.page ?? 1,
+      limit: query.limit ?? 5,
+      categoryId: query.categoryId,
+      brandId: query.brandId,
+      status: query.status,
       search: query.search?.trim() || undefined,
       sort: query.sort,
     });

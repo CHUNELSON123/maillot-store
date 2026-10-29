@@ -28,8 +28,9 @@ export class ReportsController {
   ) {}
 
   @Get('dashboard')
-  getDashboardSummary() {
-    return this.getDashboardSummaryUseCase.execute();
+  getDashboardSummary(@Query() dto: ReportFilterDto) {
+    const parseDate = (value?: string) => value ? new Date(`${value.slice(0, 10)}T00:00:00.000Z`) : undefined;
+    return this.getDashboardSummaryUseCase.execute({ startDate: parseDate(dto.startDate), endDate: parseDate(dto.endDate) });
   }
 
   @Get('sales')

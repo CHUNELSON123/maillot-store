@@ -29,6 +29,15 @@ export class ListProductsDto {
   categoryId?: string;
 
   @IsOptional()
+  @IsUUID()
+  brandId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  status?: string;
+
+  @IsOptional()
   @IsString()
   @MaxLength(100)
   search?: string;

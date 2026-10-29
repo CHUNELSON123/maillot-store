@@ -20,5 +20,5 @@ export abstract class ReportsRepository {
 
   abstract getCustomerReport(): Promise<CustomerReportEntity>;
 
-  abstract getDashboardSummary(): Promise<DashboardSummaryEntity>;
+  abstract getDashboardSummary(filter?: ReportFilter): Promise<DashboardSummaryEntity>;
 }

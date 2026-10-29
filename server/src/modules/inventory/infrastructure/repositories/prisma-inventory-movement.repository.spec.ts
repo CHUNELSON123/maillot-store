@@ -57,4 +57,58 @@ describe('PrismaInventoryMovementRepository.create', () => {
     });
     expect(result.quantity).toBe(3);
   });
+
+  it.each(['DAMAGE', 'LOST'] as const)(
+    'deducts %s stock and stores the matching movement in one transaction',
+    async (movementType) => {
+      const now = new Date('2026-10-19T10:00:00.000Z');
+      const movementCreate = jest.fn().mockResolvedValue({
+        id: 'movement-id',
+        variant_id: 'variant-id',
+        quantity: 2,
+        movement_type: movementType,
+        reference: 'Counted during stock check',
+        created_at: now,
+        updated_at: now,
+      });
+      const transaction = {
+        inventory: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findFirst: jest.fn(),
+        },
+        inventoryMovement: { create: movementCreate },
+      };
+      const prisma = {
+        $transaction: jest.fn(
+          (callback: (tx: typeof transaction) => Promise<unknown>) =>
+            callback(transaction),
+        ),
+      } as unknown as PrismaService;
+
+      const repository = new PrismaInventoryMovementRepository(prisma);
+      await repository.create({
+        variantId: 'variant-id',
+        quantity: 2,
+        movementType,
+        reference: 'Counted during stock check',
+      });
+
+      expect(transaction.inventory.updateMany).toHaveBeenCalledWith({
+        where: {
+          variant_id: 'variant-id',
+          deleted_at: null,
+          quantity: { gte: 2 },
+        },
+        data: { quantity: { decrement: 2 } },
+      });
+      expect(movementCreate).toHaveBeenCalledWith({
+        data: {
+          variant_id: 'variant-id',
+          quantity: 2,
+          movement_type: movementType,
+          reference: 'Counted during stock check',
+        },
+      });
+    },
+  );
 });

@@ -11,7 +11,7 @@ export async function applyInventoryDelta(
   tx: InventoryTransaction,
   variantId: string,
   delta: number,
-  movementType: 'STOCK_IN' | 'STOCK_OUT',
+  movementType: 'STOCK_IN' | 'STOCK_OUT' | 'DAMAGE' | 'LOST',
   reference: string,
 ): Promise<
   Awaited<ReturnType<InventoryTransaction['inventoryMovement']['create']>>

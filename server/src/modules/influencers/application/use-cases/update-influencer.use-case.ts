@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import {
   InfluencerRepository,
   UpdateInfluencerData,
@@ -9,6 +9,13 @@ export class UpdateInfluencerUseCase {
   constructor(private readonly influencerRepository: InfluencerRepository) {}
 
   async execute(influencerId: string, data: UpdateInfluencerData) {
+    if (data.status === 'REJECTED') {
+      const influencer = await this.influencerRepository.findById(influencerId);
+      if (!influencer) throw new ConflictException('Influencer not found');
+      if (influencer.status !== 'PENDING') {
+        throw new ConflictException('Only pending applications can be rejected');
+      }
+    }
     if (
       data.commissionRate !== undefined &&
       (data.commissionRate < 0 || data.commissionRate > 100)

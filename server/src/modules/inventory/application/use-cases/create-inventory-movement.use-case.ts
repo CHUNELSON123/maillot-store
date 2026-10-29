@@ -17,7 +17,7 @@ export class CreateInventoryMovementUseCase {
   async execute(input: CreateInventoryMovementInput) {
     const movementType = input.movementType.toUpperCase();
 
-    if (!['STOCK_IN', 'STOCK_OUT', 'ADJUSTMENT'].includes(movementType)) {
+    if (!['STOCK_IN', 'STOCK_OUT', 'ADJUSTMENT', 'DAMAGE', 'LOST'].includes(movementType)) {
       throw new BadRequestException('Invalid movement type');
     }
 

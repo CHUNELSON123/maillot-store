@@ -1,6 +1,10 @@
-import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class UpdateInfluencerDto {
+  @IsOptional()
+  @IsIn(['REJECTED'])
+  status?: 'REJECTED';
+
   @IsOptional()
   @IsString()
   referralCode?: string;

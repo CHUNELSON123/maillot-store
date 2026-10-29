@@ -187,9 +187,23 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
       orderBy: {
         created_at: 'desc',
       },
+      include: { user: { select: { email: true } } },
     });
 
-    return influencers.map((influencer) => this.toInfluencerEntity(influencer));
+    return influencers.map((influencer) => this.toInfluencerEntity(influencer, {
+      email: influencer.user.email,
+      firstName: influencer.first_name,
+      lastName: influencer.last_name,
+      phone: influencer.phone,
+      country: influencer.country,
+      city: influencer.city,
+      occupation: influencer.occupation,
+      instagramUrl: influencer.instagram_url,
+      tiktokUrl: influencer.tiktok_url,
+      youtubeUrl: influencer.youtube_url,
+      facebookUrl: influencer.facebook_url,
+      xUrl: influencer.x_url,
+    }));
   }
 
   async update(
@@ -227,6 +241,7 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
         id: influencerId,
       },
       data: {
+        ...(data.status !== undefined && { status: data.status }),
         ...(data.commissionRate !== undefined && {
           commission_rate: data.commissionRate,
         }),

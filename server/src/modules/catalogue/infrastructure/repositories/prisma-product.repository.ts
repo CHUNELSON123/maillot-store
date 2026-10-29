@@ -41,6 +41,7 @@ export class PrismaProductRepository implements ProductRepository {
     const products = await this.prisma.product.findMany({
       where: {
         deleted_at: null,
+        status: 'ACTIVE',
       },
       orderBy: {
         name: 'asc',
@@ -67,6 +68,8 @@ export class PrismaProductRepository implements ProductRepository {
     const where = {
       deleted_at: null,
       ...(query.categoryId ? { category_id: query.categoryId } : {}),
+      ...(query.brandId ? { brand_id: query.brandId } : {}),
+      ...(query.status ? { status: query.status } : {}),
       ...(query.search
         ? {
             OR: [
@@ -124,6 +127,7 @@ export class PrismaProductRepository implements ProductRepository {
       where: {
         id,
         deleted_at: null,
+        status: 'ACTIVE',
       },
     });
 

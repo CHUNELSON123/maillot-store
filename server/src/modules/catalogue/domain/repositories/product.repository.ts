@@ -22,6 +22,8 @@ export interface ProductListQuery {
   page: number;
   limit: number;
   categoryId?: string;
+  brandId?: string;
+  status?: string;
   search?: string;
   sort?: 'price-asc' | 'price-desc' | 'name';
 }

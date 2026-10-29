@@ -71,22 +71,42 @@ export function useInfluencerApplication() {
   };
 
   const submit = async () => {
-    setIsSubmitting(true);
-    setError('');
-    try {
-      await influencerService.register(values);
-      if (!isAuthenticated) {
-        await authService.login({ email: values.email, password: values.password ?? '' });
+  setIsSubmitting(true);
+  setError('');
+
+  try {
+    await influencerService.register(values);
+
+    // Allow the confirmation page to verify this successful submission.
+    window.sessionStorage.setItem(
+      'maillot_influencer_application_submitted',
+      'true',
+    );
+
+    if (!isAuthenticated) {
+      try {
+        await authService.login({
+          email: values.email,
+          password: values.password ?? '',
+        });
+        window.dispatchEvent(new Event('maillot-auth-updated'));
+      } catch {
+        // Registration succeeded; login failure must not hide confirmation.
       }
-      window.dispatchEvent(new Event('maillot-auth-updated'));
-      return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'We could not submit your application. Please try again.');
-      return false;
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    return true;
+  } catch (cause) {
+    setError(
+      cause instanceof Error
+        ? cause.message
+        : 'We could not submit your application. Please try again.',
+    );
+    return false;
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return {
     values,

@@ -103,3 +103,8 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# First administrator setup
+
+## Administrator registration and sign-in
+
+Send the shop owner the administration link (`/admin`). It offers dedicated Administrator sign-in and registration pages. New administrators register at `/admin/register`, then sign in at `/admin/login` to reach the dashboard. Registration allows up to three Administrator accounts and is serialized in PostgreSQL. The regular customer registration endpoint continues to create Customer accounts only. Administrator sign-in uses the same email/password credentials and JWT authentication as the rest of the system, with the configured longer Administrator session. Administrators can use the dashboard's storefront link to return to the public store.

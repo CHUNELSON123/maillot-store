@@ -12,16 +12,24 @@ export class PrismaProductVariantRepository implements ProductVariantRepository 
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateProductVariantData): Promise<ProductVariantEntity> {
-    const variant = await this.prisma.productVariant.create({
-      data: {
-        product_id: data.productId,
-        sku: data.sku,
-        size: data.size,
-        color: data.color,
-        edition: data.edition,
-        price: data.price,
-        status: data.status,
-      },
+    const variant = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.productVariant.create({
+        data: {
+          product_id: data.productId,
+          sku: data.sku,
+          size: data.size,
+          color: data.color,
+          edition: data.edition,
+          price: data.price,
+          status: data.status,
+        },
+      });
+
+      await tx.inventory.create({
+        data: { variant_id: created.id, quantity: 0, min_stock: 0 },
+      });
+
+      return created;
     });
 
     return new ProductVariantEntity(

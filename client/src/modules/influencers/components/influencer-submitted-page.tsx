@@ -10,14 +10,17 @@ import { NewsletterSection } from '@/components/shared/newsletter-section';
 export function InfluencerSubmittedPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
-  useEffect(() => {
-    if (sessionStorage.getItem('maillot_influencer_application_submitted') !== 'true') {
-      router.replace('/influencer');
-      return;
-    }
-    sessionStorage.removeItem('maillot_influencer_application_submitted');
-    setReady(true);
-  }, [router]);
+ useEffect(() => {
+  const submitted =
+    sessionStorage.getItem('maillot_influencer_application_submitted') === 'true';
+
+  if (!submitted) {
+    router.replace('/influencer');
+    return;
+  }
+
+  setReady(true);
+}, [router]);
   if (!ready) return null;
   return <CustomerLayout><main className="mx-auto max-w-[1200px] px-4 pb-8 sm:px-8">
     <div className="mb-4 pt-3 text-xs text-neutral-500"><Link href="/">Home</Link><span className="mx-2">›</span><Link href="/influencer">Become an Influencer</Link><span className="mx-2">›</span>Application Submitted</div>

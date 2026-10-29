@@ -34,6 +34,14 @@ export class PrismaInventoryMovementRepository implements InventoryMovementRepos
           'STOCK_OUT',
           data.reference ?? 'Manual stock movement',
         );
+      } else if (data.movementType === 'DAMAGE' || data.movementType === 'LOST') {
+        return applyInventoryDelta(
+          tx,
+          data.variantId,
+          -data.quantity,
+          data.movementType,
+          data.reference ?? `Inventory ${data.movementType.toLowerCase()}`,
+        );
       } else {
         return setInventoryQuantity(
           tx,

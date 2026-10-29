@@ -16,6 +16,7 @@ import {
 import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
 import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useInfluencerAccess } from "@/modules/influencers/hooks/use-influencer-access";
+import { useAuth } from "@/modules/auth/hooks/use-auth";
 
 const navItems = [
   { name: "HOME", href: "/" },
@@ -31,6 +32,8 @@ export function CustomerHeader() {
   const { itemCount: wishlistCount, isReady: wishlistReady } = useWishlist();
   const { itemCount: cartCount } = useCart();
   const canOpenInfluencerPortal = useInfluencerAccess();
+  const { user, isAuthenticated } = useAuth();
+  const canOpenAdminPortal = isAuthenticated && (user?.roleName === "Administrator" || user?.roleName === "Staff");
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -139,6 +142,17 @@ export function CustomerHeader() {
               >
                 <LayoutDashboard size={18} strokeWidth={1.7} />
                 <span className="hidden text-[10px] font-semibold sm:inline">Dashboard</span>
+              </Link>
+            )}
+
+            {canOpenAdminPortal && (
+              <Link
+                href="/admin/dashboard"
+                aria-label="Administrator dashboard"
+                className={`flex shrink-0 items-center gap-1.5 transition ${isActive("/admin") ? "text-[#D4AF37]" : "text-white hover:text-[#D4AF37]"}`}
+              >
+                <LayoutDashboard size={18} strokeWidth={1.7} />
+                <span className="hidden text-[10px] font-semibold sm:inline">Admin</span>
               </Link>
             )}
 

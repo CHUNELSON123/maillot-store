@@ -18,6 +18,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CartModule } from './modules/cart/cart.module';
 import { CommunicationsModule } from './modules/communications/communications.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CommunicationsModule } from './modules/communications/communications.mo
     WishlistModule,
     CartModule,
     CommunicationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -78,13 +78,13 @@ export class ProductImageController {
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: AddProductImageDto,
   ) {
-    if (!file) {
-      throw new BadRequestException('Image file is required');
+    if (!file && !dto.imageUrl) {
+      throw new BadRequestException('Upload an image file or provide an image URL');
     }
 
     return this.addProductImageUseCase.execute({
       productId,
-      imageUrl: `/uploads/products/${file.filename}`,
+      imageUrl: file ? `/uploads/products/${file.filename}` : dto.imageUrl!,
       altText: dto.altText,
       isPrimary: dto.isPrimary === 'true',
     });

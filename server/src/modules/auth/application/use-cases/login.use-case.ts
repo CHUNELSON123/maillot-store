@@ -36,6 +36,9 @@ export class LoginUseCase {
       email: user.email,
       roleId: user.roleId,
       roleName: user.roleName,
+    }, {
+      // Owner/admin access is intentionally longer-lived; all other roles retain the standard one-day session.
+      expiresIn: user.roleName === 'Administrator' ? '7d' : '1d',
     });
 
     return {

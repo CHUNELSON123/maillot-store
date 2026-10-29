@@ -1,0 +1,20 @@
+﻿import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals.js";
+import nextTs from "eslint-config-next/typescript.js";
+
+const eslintConfig = defineConfig([
+  ...nextVitals.extends,
+  ...nextTs.extends,
+  {
+    rules: {
+      ...nextTs.rules,
+    },
+  },
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;

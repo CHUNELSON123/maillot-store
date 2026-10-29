@@ -14,6 +14,7 @@ export interface UpdateInfluencerData {
   commissionRate?: number;
   customerDiscountRate?: number;
   referralCode?: string;
+  status?: 'REJECTED';
 }
 
 export interface CreateReferralData {

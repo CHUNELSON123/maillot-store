@@ -11,13 +11,21 @@ export class PrismaProductImageRepository implements ProductImageRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: AddProductImageData): Promise<ProductImageEntity> {
-    const image = await this.prisma.productImage.create({
-      data: {
-        product_id: data.productId,
-        image_url: data.imageUrl,
-        alt_text: data.altText,
-        is_primary: data.isPrimary ?? false,
-      },
+    const image = await this.prisma.$transaction(async (tx) => {
+      if (data.isPrimary) {
+        await tx.productImage.updateMany({
+          where: { product_id: data.productId, deleted_at: null, is_primary: true },
+          data: { is_primary: false },
+        });
+      }
+      return tx.productImage.create({
+        data: {
+          product_id: data.productId,
+          image_url: data.imageUrl,
+          alt_text: data.altText,
+          is_primary: data.isPrimary ?? false,
+        },
+      });
     });
 
     return new ProductImageEntity(
