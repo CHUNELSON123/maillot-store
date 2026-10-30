@@ -1,4 +1,4 @@
-export type Product = {
+﻿export type Product = {
   id: string;
   categoryId: string;
   brandId: string;
@@ -21,6 +21,7 @@ export type ProductVariant = {
   status: string;
   createdAt: string;
   updatedAt: string;
+  stockQuantity: number;
 };
 
 export type ProductImage = {
@@ -45,3 +46,4 @@ export type Category = {
   createdAt: string;
   updatedAt: string;
 };
+

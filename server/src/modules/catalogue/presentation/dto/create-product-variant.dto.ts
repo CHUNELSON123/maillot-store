@@ -1,9 +1,10 @@
 import { IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 export class CreateProductVariantDto {
+  @IsOptional()
   @IsString()
   @Length(2, 100)
-  sku!: string;
+  sku?: string;
 
   @IsOptional()
   @IsString()

@@ -59,7 +59,63 @@ function mapToEntity(item: any): CartItemEntity {
 export class PrismaCartRepository implements CartRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByCustomerId(customerId: string): Promise<CartItemEntity[]> {
+  private async assertAvailableStock(
+    variantId: string | null,
+    requestedQuantity: number,
+  ): Promise<void> {
+    if (
+      !Number.isSafeInteger(requestedQuantity) ||
+      requestedQuantity < 1
+    ) {
+      throw new BadRequestException(
+        'Quantity must be a positive integer',
+      );
+    }
+
+    if (!variantId) {
+      throw new BadRequestException(
+        'A product variant must be selected before adding to cart',
+      );
+    }
+
+    const variant = await this.prisma.productVariant.findFirst({
+      where: {
+        id: variantId,
+        deleted_at: null,
+        status: 'ACTIVE',
+      },
+      select: {
+        inventory: {
+          select: {
+            quantity: true,
+            deleted_at: true,
+          },
+        },
+      },
+    });
+
+    if (!variant) {
+      throw new NotFoundException('Product variant not found');
+    }
+
+    const inventory = variant.inventory;
+
+    if (!inventory || inventory.deleted_at !== null) {
+      throw new BadRequestException(
+        'This variant is currently out of stock',
+      );
+    }
+
+    if (requestedQuantity > inventory.quantity) {
+      throw new BadRequestException(
+        `Only ${inventory.quantity} unit(s) are currently available`,
+      );
+    }
+  }
+
+  async findByCustomerId(
+    customerId: string,
+  ): Promise<CartItemEntity[]> {
     const items = await this.prisma.cartItem.findMany({
       where: {
         customer_id: customerId,
@@ -85,6 +141,7 @@ export class PrismaCartRepository implements CartRepository {
       where: {
         id: productId,
         deleted_at: null,
+        status: 'ACTIVE',
       },
     });
 
@@ -98,11 +155,14 @@ export class PrismaCartRepository implements CartRepository {
           id: variantId,
           product_id: productId,
           deleted_at: null,
+          status: 'ACTIVE',
         },
       });
 
       if (!variant) {
-        throw new NotFoundException('Product variant not found');
+        throw new NotFoundException(
+          'Product variant not found or inactive',
+        );
       }
     }
 
@@ -115,11 +175,16 @@ export class PrismaCartRepository implements CartRepository {
       },
     });
 
+    const requestedTotal =
+      quantity + (existingItem?.quantity ?? 0);
+
+    await this.assertAvailableStock(variantId, requestedTotal);
+
     if (existingItem) {
       const updated = await this.prisma.cartItem.update({
         where: { id: existingItem.id },
         data: {
-          quantity: existingItem.quantity + quantity,
+          quantity: requestedTotal,
         },
         include: cartItemInclude,
       });
@@ -141,7 +206,7 @@ export class PrismaCartRepository implements CartRepository {
           where: { id: deletedItem.id },
           data: {
             deleted_at: null,
-            quantity: quantity,
+            quantity,
           },
           include: cartItemInclude,
         })
@@ -150,7 +215,7 @@ export class PrismaCartRepository implements CartRepository {
             customer_id: customerId,
             product_id: productId,
             variant_id: variantId,
-            quantity: quantity,
+            quantity,
           },
           include: cartItemInclude,
         });
@@ -181,60 +246,72 @@ export class PrismaCartRepository implements CartRepository {
         where: { id: cartItemId },
         data: { deleted_at: new Date() },
       });
+
       return mapToEntity(item);
     }
 
-    let targetVariantId = item.variant_id;
-    if (variantId !== undefined) {
-      if (variantId !== null) {
-        const variant = await this.prisma.productVariant.findFirst({
-          where: {
-            id: variantId,
-            product_id: item.product_id,
-            deleted_at: null,
-          },
-        });
+    const targetVariantId =
+      variantId !== undefined ? variantId : item.variant_id;
 
-        if (!variant) {
-          throw new NotFoundException('Variant not found for this product');
-        }
+    if (targetVariantId !== null) {
+      const variant = await this.prisma.productVariant.findFirst({
+        where: {
+          id: targetVariantId,
+          product_id: item.product_id,
+          deleted_at: null,
+          status: 'ACTIVE',
+        },
+      });
+
+      if (!variant) {
+        throw new NotFoundException(
+          'Variant not found or inactive for this product',
+        );
       }
-      targetVariantId = variantId;
+    }
 
-      // Check if another active cart item already has this target variant
-      if (targetVariantId !== item.variant_id) {
-        const matchingItem = await this.prisma.cartItem.findFirst({
-          where: {
-            customer_id: customerId,
-            product_id: item.product_id,
-            variant_id: targetVariantId,
-            deleted_at: null,
-            id: { not: cartItemId },
-          },
-        });
+    const requestedQuantity = quantity ?? item.quantity;
 
-        if (matchingItem) {
-          const newQuantity = (quantity ?? item.quantity) + matchingItem.quantity;
-          await this.prisma.cartItem.update({
-            where: { id: cartItemId },
-            data: { deleted_at: new Date() },
-          });
+    const matchingItem =
+      targetVariantId !== item.variant_id
+        ? await this.prisma.cartItem.findFirst({
+            where: {
+              customer_id: customerId,
+              product_id: item.product_id,
+              variant_id: targetVariantId,
+              deleted_at: null,
+              id: { not: cartItemId },
+            },
+          })
+        : null;
 
-          const merged = await this.prisma.cartItem.update({
-            where: { id: matchingItem.id },
-            data: { quantity: newQuantity },
-            include: cartItemInclude,
-          });
+    const finalQuantity =
+      requestedQuantity + (matchingItem?.quantity ?? 0);
 
-          return mapToEntity(merged);
-        }
-      }
+    await this.assertAvailableStock(
+      targetVariantId,
+      finalQuantity,
+    );
+
+    if (matchingItem) {
+      await this.prisma.cartItem.update({
+        where: { id: cartItemId },
+        data: { deleted_at: new Date() },
+      });
+
+      const merged = await this.prisma.cartItem.update({
+        where: { id: matchingItem.id },
+        data: { quantity: finalQuantity },
+        include: cartItemInclude,
+      });
+
+      return mapToEntity(merged);
     }
 
     const updated = await this.prisma.cartItem.update({
       where: { id: cartItemId },
       data: {
-        quantity: quantity !== undefined ? quantity : item.quantity,
+        quantity: requestedQuantity,
         variant_id: targetVariantId,
       },
       include: cartItemInclude,
@@ -243,7 +320,10 @@ export class PrismaCartRepository implements CartRepository {
     return mapToEntity(updated);
   }
 
-  async removeItem(customerId: string, cartItemId: string): Promise<void> {
+  async removeItem(
+    customerId: string,
+    cartItemId: string,
+  ): Promise<void> {
     const item = await this.prisma.cartItem.findFirst({
       where: {
         id: cartItemId,
@@ -289,7 +369,7 @@ export class PrismaCartRepository implements CartRepository {
           item.quantity > 0 ? item.quantity : 1,
         );
       } catch {
-        // Skip unresolvable products or variants during sync
+        // Skip unresolvable or unavailable items during cart sync.
       }
     }
 

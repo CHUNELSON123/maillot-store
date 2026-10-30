@@ -85,7 +85,8 @@ export const ModelName = {
   CustomerRewardRule: 'CustomerRewardRule',
   CustomerReward: 'CustomerReward',
   WishlistItem: 'WishlistItem',
-  CartItem: 'CartItem'
+  CartItem: 'CartItem',
+  ProductOption: 'ProductOption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -725,6 +726,21 @@ export const CartItemScalarFieldEnum = {
 } as const
 
 export type CartItemScalarFieldEnum = (typeof CartItemScalarFieldEnum)[keyof typeof CartItemScalarFieldEnum]
+
+
+export const ProductOptionScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  name: 'name',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at',
+  created_by: 'created_by',
+  updated_by: 'updated_by',
+  deleted_by: 'deleted_by'
+} as const
+
+export type ProductOptionScalarFieldEnum = (typeof ProductOptionScalarFieldEnum)[keyof typeof ProductOptionScalarFieldEnum]
 
 
 export const SortOrder = {

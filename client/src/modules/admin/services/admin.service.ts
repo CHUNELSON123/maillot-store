@@ -55,7 +55,7 @@ export const adminService = {
       case 'products': return page('/products', pageNumber, search);
       case 'categories-brands': {
         const [categories, brands] = await Promise.all([
-          apiClient<AdminRecord[]>('/categories'), apiClient<AdminRecord[]>('/brands'),
+          apiClient<AdminRecord[]>('/categories', { token: token() }), apiClient<AdminRecord[]>('/brands', { token: token() }),
         ]);
         const records: AdminRecord[] = [...categories.map((record) => ({ ...record, _recordType: 'Category' })), ...brands.map((record) => ({ ...record, _recordType: 'Brand' }))];
         const matches = search ? records.filter((record) => String(record.name ?? '').toLowerCase().includes(search.toLowerCase())) : records;
@@ -103,6 +103,10 @@ export const adminService = {
   approveInfluencer(id: string) { return apiClient(`/influencers/${id}/approve`, { method: 'PATCH', token: token() }); },
   updateProduct(id: string, data: AdminRecord) { return apiClient(`/products/${id}`, { method: 'PATCH', token: token(), body: JSON.stringify(data) }); },
   createProduct(data: AdminRecord) { return apiClient<AdminRecord>('/products', { method: 'POST', token: token(), body: JSON.stringify(data) }); },
+  getProductOptions(type: 'COLOR' | 'EDITION') { return apiClient<AdminRecord[]>(`/product-options?type=${type}`, { token: token() }); },
+  createProductOption(type: 'COLOR' | 'EDITION', name: string) { return apiClient('/product-options', { method: 'POST', token: token(), body: JSON.stringify({ type, name }) }); },
+  updateProductOption(id: string, name: string) { return apiClient(`/product-options/${id}`, { method: 'PATCH', token: token(), body: JSON.stringify({ name }) }); },
+  deleteProductOption(id: string) { return apiClient(`/product-options/${id}`, { method: 'DELETE', token: token() }); },
   createCategory(data: AdminRecord) { return apiClient('/categories', { method: 'POST', token: token(), body: JSON.stringify(data) }); },
   createBrand(data: AdminRecord) { return apiClient('/brands', { method: 'POST', token: token(), body: JSON.stringify(data) }); },
   updateCategory(id: string, data: AdminRecord) { return apiClient(`/categories/${id}`, { method: 'PATCH', token: token(), body: JSON.stringify(data) }); },

@@ -1,4 +1,11 @@
 import { Module } from '@nestjs/common';
+import { PrismaProductOptionRepository } from './infrastructure/repositories/prisma-product-option.repository';
+import { ProductOptionRepository } from './domain/repositories/product-option.repository';
+import { CreateProductOptionUseCase } from './application/use-cases/create-product-option.use-case';
+import { DeleteProductOptionUseCase } from './application/use-cases/delete-product-option.use-case';
+import { GetProductOptionsUseCase } from './application/use-cases/get-product-options.use-case';
+import { UpdateProductOptionUseCase } from './application/use-cases/update-product-option.use-case';
+import { ProductOptionController } from './presentation/controllers/product-option.controller';
 import { PrismaCategoryRepository } from './infrastructure/repositories/prisma-category.repository';
 import { CategoryRepository } from './domain/repositories/category.repository';
 import { CreateCategoryUseCase } from './application/use-cases/create-category.use-case';
@@ -49,6 +56,7 @@ import { ProductImageController } from './presentation/controllers/product-image
     ProductController,
     ProductVariantController,
     ProductImageController,
+    ProductOptionController,
   ],
   providers: [
     PrismaCategoryRepository,
@@ -79,6 +87,11 @@ import { ProductImageController } from './presentation/controllers/product-image
     GetProductVariantUseCase,
     UpdateProductVariantUseCase,
 
+    PrismaProductOptionRepository,
+    CreateProductOptionUseCase,
+    DeleteProductOptionUseCase,
+    GetProductOptionsUseCase,
+    UpdateProductOptionUseCase,
     PrismaProductImageRepository,
     AddProductImageUseCase,
     GetProductImagesUseCase,
@@ -101,6 +114,10 @@ import { ProductImageController } from './presentation/controllers/product-image
       useExisting: PrismaProductVariantRepository,
     },
     {
+      provide: ProductOptionRepository,
+      useExisting: PrismaProductOptionRepository,
+    },
+    {
       provide: ProductImageRepository,
       useExisting: PrismaProductImageRepository,
     },
@@ -111,6 +128,7 @@ import { ProductImageController } from './presentation/controllers/product-image
     ProductRepository,
     ProductVariantRepository,
     ProductImageRepository,
+    ProductOptionRepository,
   ],
 })
 export class CatalogueModule {}

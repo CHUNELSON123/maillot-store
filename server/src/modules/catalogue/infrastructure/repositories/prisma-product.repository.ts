@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { ProductEntity } from '../../domain/entities/product.entity';
@@ -41,7 +42,10 @@ export class PrismaProductRepository implements ProductRepository {
     const products = await this.prisma.product.findMany({
       where: {
         deleted_at: null,
-        status: 'ACTIVE',
+        status: {
+          equals: 'ACTIVE',
+          mode: 'insensitive',
+        },
       },
       orderBy: {
         name: 'asc',
@@ -69,11 +73,23 @@ export class PrismaProductRepository implements ProductRepository {
       deleted_at: null,
       ...(query.categoryId ? { category_id: query.categoryId } : {}),
       ...(query.brandId ? { brand_id: query.brandId } : {}),
-      ...(query.status ? { status: query.status } : {}),
+      ...(query.status
+        ? {
+            status: {
+              equals: query.status,
+              mode: 'insensitive' as const,
+            },
+          }
+        : {}),
       ...(query.search
         ? {
             OR: [
-              { name: { contains: query.search, mode: 'insensitive' as const } },
+              {
+                name: {
+                  contains: query.search,
+                  mode: 'insensitive' as const,
+                },
+              },
               {
                 description: {
                   contains: query.search,
@@ -84,6 +100,7 @@ export class PrismaProductRepository implements ProductRepository {
           }
         : {}),
     };
+
     const orderBy =
       query.sort === 'price-asc'
         ? { price: 'asc' as const }
@@ -127,7 +144,6 @@ export class PrismaProductRepository implements ProductRepository {
       where: {
         id,
         deleted_at: null,
-        status: 'ACTIVE',
       },
     });
 

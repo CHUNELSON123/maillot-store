@@ -1,4 +1,4 @@
-export class ProductVariantEntity {
+﻿export class ProductVariantEntity {
   constructor(
     public readonly id: string,
     public readonly productId: string,
@@ -10,5 +10,6 @@ export class ProductVariantEntity {
     public readonly status: string,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly stockQuantity: number = 0,
   ) {}
 }

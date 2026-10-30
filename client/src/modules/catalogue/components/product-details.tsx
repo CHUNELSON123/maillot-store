@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   Heart,
@@ -37,9 +36,9 @@ export function ProductDetails({ product }: Props) {
   const { addItem } = useCart();
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    null,
-  );
+  const [selectedEdition, setSelectedEdition] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
   const { toggleItem, isInWishlist } = useWishlist();
@@ -51,14 +50,71 @@ export function ProductDetails({ product }: Props) {
 
   const purchasableVariants = variants.filter(
     (variant): variant is ProductVariant & { price: number } =>
+      variant.status === "ACTIVE" &&
       typeof variant.price === "number" &&
       Number.isFinite(variant.price) &&
-      variant.price >= 0,
+      variant.price >= 0 &&
+      Number.isFinite(variant.stockQuantity) &&
+      variant.stockQuantity > 0,
   );
 
+  const editions = [...new Set(
+    variants
+      .map((variant) => variant.edition)
+      .filter((value): value is string => Boolean(value)),
+  )];
+
+  const colors = [...new Set(
+    variants
+      .map((variant) => variant.color)
+      .filter((value): value is string => Boolean(value)),
+  )];
+
+  const sizes = [...new Set(
+    variants
+      .map((variant) => variant.size)
+      .filter((value): value is string => Boolean(value)),
+  )];
+
+  const hasAvailableCombination = (
+    field: "edition" | "color" | "size",
+    value: string,
+  ) =>
+    purchasableVariants.some((variant) => {
+      if (variant[field] !== value) return false;
+
+      // Changing edition resets color and size.
+      if (field !== "edition" && selectedEdition && variant.edition !== selectedEdition) {
+        return false;
+      }
+
+      // Changing color resets size.
+      if (field === "size" && selectedColor && variant.color !== selectedColor) {
+        return false;
+      }
+
+      return true;
+    });
+
   const selectedVariant = purchasableVariants.find(
-    (variant) => variant.id === selectedVariantId,
-  ) ?? (purchasableVariants.length === 1 ? purchasableVariants[0] : null);
+    (variant) =>
+      (!editions.length || variant.edition === selectedEdition) &&
+      (!colors.length || variant.color === selectedColor) &&
+      (!sizes.length || variant.size === selectedSize),
+  ) ?? (
+    !editions.length &&
+    !colors.length &&
+    !sizes.length &&
+    purchasableVariants.length === 1
+      ? purchasableVariants[0]
+      : null
+  );
+
+  const availableStock = selectedVariant?.stockQuantity ?? 0;
+  const canPurchase =
+    selectedVariant !== null &&
+    quantity >= 1 &&
+    quantity <= availableStock;
 
   const activeImage = images[selectedImage];
 
@@ -96,7 +152,7 @@ export function ProductDetails({ product }: Props) {
   ).format(selectedVariant?.price ?? product.price);
 
   const handleAddToCart = (buyNow = false) => {
-    if (!selectedVariant) {
+    if (!selectedVariant || !canPurchase) {
       return;
     }
 
@@ -343,102 +399,155 @@ export function ProductDetails({ product }: Props) {
             </div>
 
             {/* Stock */}
-            <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-green-600">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-green-600 text-white">
-                <Check
-                  size={11}
-                  strokeWidth={3}
-                />
-              </span>
-
-              In Stock
+            <div
+              className={`mt-2 text-sm font-semibold ${
+                !selectedVariant
+                  ? "text-neutral-500"
+                  : availableStock > 0
+                    ? "text-green-700"
+                    : "text-red-600"
+              }`}
+            >
+              {!selectedVariant
+                ? "Select your product options"
+                : `${availableStock} unit(s) available`}
             </div>
 
             <div className="my-6 h-px bg-neutral-200" />
 
-            {/* Variant */}
-            {variants.length > 0 && (
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-bold">
-                    Variant:
-                  </p>
-
-                  <button
-                    type="button"
-                    className="text-xs text-neutral-500 underline"
+            {/* Product options */}
+            <div className="space-y-5">
+              {editions.length > 0 && (
+                <div>
+                  <label
+                    htmlFor="product-edition"
+                    className="mb-2 block text-sm font-bold"
                   >
-                    Size Guide
-                  </button>
+                    Edition
+                  </label>
+                  <select
+                    id="product-edition"
+                    value={selectedEdition}
+                    onChange={(event) => {
+                      setSelectedEdition(event.target.value);
+                      setSelectedColor("");
+                      setSelectedSize("");
+                      setQuantity(1);
+                    }}
+                    className="h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
+                  >
+                    <option value="">Choose an edition</option>
+                    {editions.map((edition) => {
+                      const available = hasAvailableCombination("edition", edition);
+                      return (
+                        <option key={edition} value={edition} disabled={!available}>
+                          {edition}{!available ? " — Unavailable" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
+              )}
 
-                <div className="flex flex-wrap gap-3">
-                  {variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      type="button"
-                      disabled={!purchasableVariants.some(
-                        (item) => item.id === variant.id,
-                      )}
-                      aria-pressed={selectedVariant?.id === variant.id}
-                      onClick={() =>
-                        setSelectedVariantId(variant.id)
-                      }
-                      className={`flex min-h-10 min-w-[48px] items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${
-                        selectedVariant?.id === variant.id
-                          ? "border-black bg-black text-white"
-                          : "border-neutral-300 bg-white hover:border-black"
-                      }`}
-                    >
-                      {[variant.size, variant.color, variant.edition, variant.sku]
-                        .filter(Boolean)
-                        .join(" / ")}
-                    </button>
-                  ))}
+              {colors.length > 0 && (
+                <div>
+                  <label
+                    htmlFor="product-color"
+                    className="mb-2 block text-sm font-bold"
+                  >
+                    Color
+                  </label>
+                  <select
+                    id="product-color"
+                    value={selectedColor}
+                    onChange={(event) => {
+                      setSelectedColor(event.target.value);
+                      setSelectedSize("");
+                      setQuantity(1);
+                    }}
+                    className="h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
+                  >
+                    <option value="">Choose a color</option>
+                    {colors.map((color) => {
+                      const available = hasAvailableCombination("color", color);
+                      return (
+                        <option key={color} value={color} disabled={!available}>
+                          {color}{!available ? " — Unavailable" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
-              </div>
-            )}
+              )}
+
+              {sizes.length > 0 && (
+                <div>
+                  <label
+                    htmlFor="product-size"
+                    className="mb-2 block text-sm font-bold"
+                  >
+                    Size
+                  </label>
+                  <select
+                    id="product-size"
+                    value={selectedSize}
+                    onChange={(event) => {
+                      setSelectedSize(event.target.value);
+                      setQuantity(1);
+                    }}
+                    className="h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
+                  >
+                    <option value="">Choose a size</option>
+                    {sizes.map((size) => {
+                      const available = hasAvailableCombination("size", size);
+                      return (
+                        <option key={size} value={size} disabled={!available}>
+                          {size}{!available ? " — Unavailable" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
+            </div>
 
             {!selectedVariant && (
               <p className="mt-3 text-sm text-neutral-600">
                 {purchasableVariants.length === 0
                   ? "This product is currently unavailable."
-                  : "Please select a variant before adding to cart."}
+                  : "Select the available options to continue."}
               </p>
             )}
 
             {/* Quantity */}
             <div className="mt-7 flex items-center gap-4">
-              <span className="text-sm font-bold">
-                Quantity:
-              </span>
+              <span className="text-sm font-bold">Quantity:</span>
 
               <div className="flex h-10 items-center rounded-md border border-neutral-300">
                 <button
                   type="button"
+                  disabled={quantity <= 1}
                   onClick={() =>
-                    setQuantity(
-                      Math.max(
-                        1,
-                        quantity - 1,
-                      ),
-                    )
+                    setQuantity((current) => Math.max(1, current - 1))
                   }
-                  className="flex h-full w-10 items-center justify-center text-lg"
+                  className="flex h-full w-10 items-center justify-center text-lg disabled:opacity-40"
+                  aria-label="Decrease quantity"
                 >
                   −
                 </button>
 
-                <span className="w-10 text-center text-sm">
-                  {quantity}
-                </span>
+                <span className="w-10 text-center text-sm">{quantity}</span>
 
                 <button
                   type="button"
+                  disabled={!selectedVariant || quantity >= availableStock}
                   onClick={() =>
-                    setQuantity(quantity + 1)
+                    setQuantity((current) =>
+                      Math.min(availableStock, current + 1),
+                    )
                   }
-                  className="flex h-full w-10 items-center justify-center text-lg"
+                  className="flex h-full w-10 items-center justify-center text-lg disabled:opacity-40"
+                  aria-label="Increase quantity"
                 >
                   +
                 </button>
@@ -450,7 +559,7 @@ export function ProductDetails({ product }: Props) {
               <button
                 type="button"
                 onClick={() => handleAddToCart()}
-                disabled={!selectedVariant}
+                disabled={!canPurchase}
                 className="flex h-12 items-center justify-center gap-2 rounded-lg bg-[#D4AF37] text-sm font-bold text-black hover:bg-[#c49d2e] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingCart size={18} />
@@ -460,7 +569,7 @@ export function ProductDetails({ product }: Props) {
               <button
                 type="button"
                 onClick={() => handleAddToCart(true)}
-                disabled={!selectedVariant}
+                disabled={!canPurchase}
                 className="flex h-12 items-center justify-center gap-2 rounded-lg bg-black text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Zap

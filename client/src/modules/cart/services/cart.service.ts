@@ -1,4 +1,4 @@
-import { AddToCartInput, CartItem } from "../types/cart.types";
+﻿import { AddToCartInput, CartItem } from "../types/cart.types";
 import {
   Product,
   ProductVariant,
@@ -92,6 +92,7 @@ function mapApiItem(item: CartApiItem): CartItem {
         status: "ACTIVE",
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        stockQuantity: 0,
       }
     : null;
 
@@ -398,3 +399,4 @@ export const cartService = {
     return UPDATED_EVENT;
   },
 };
+
