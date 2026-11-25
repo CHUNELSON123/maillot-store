@@ -15,7 +15,7 @@ function storefrontEdition(variants: Array<{ edition: string | null }>, productE
     return !/^(active|inactive|pending|draft|\d+)$/i.test(value.trim());
   };
   const variantEdition = variants.find((variant) => isEditionLabel(variant.edition))?.edition;
-  return variantEdition ?? (isEditionLabel(productEdition) ? productEdition : null);
+  return isEditionLabel(productEdition) ? productEdition : variantEdition ?? null;
 }
 
 @Injectable()

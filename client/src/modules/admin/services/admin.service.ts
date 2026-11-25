@@ -172,6 +172,7 @@ export const adminService = {
   createDelivery(data: AdminRecord) { return apiClient('/deliveries', { method: 'POST', token: token(), body: JSON.stringify(data) }); },
   updateInfluencer(id: string, data: AdminRecord) { return apiClient(`/influencers/${id}`, { method: 'PATCH', token: token(), body: JSON.stringify(data) }); },
   approveInfluencer(id: string) { return apiClient(`/influencers/${id}/approve`, { method: 'PATCH', token: token() }); },
+  deleteProduct(id: string) { return apiClient(`/products/${id}`, { method: 'DELETE', token: token() }); },
   updateProduct(id: string, data: AdminRecord) { return apiClient(`/products/${id}`, { method: 'PATCH', token: token(), body: JSON.stringify(data) }); },
   createProduct(data: AdminRecord) { return apiClient<AdminRecord>('/products', { method: 'POST', token: token(), body: JSON.stringify(data) }); },
   getProductOptions(type: 'COLOR' | 'EDITION') { return apiClient<AdminRecord[]>(`/product-options?type=${type}`, { token: token() }); },

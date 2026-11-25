@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { adminService } from '../services/admin.service';
+import { ApiError } from '@/services/api/api-error';
 import { AdminRecord, AdminSection } from '../types/admin.types';
 
 type RecordKind = 'Category' | 'Brand' | 'Banner' | 'Promotion';
@@ -29,6 +30,7 @@ export function AdminCreateRecordDialog({ section, onClose, onCreated, initialKi
   const [existingImages, setExistingImages] = useState<AdminRecord[]>([]);
   const [variantStock, setVariantStock] = useState<Record<string, string>>({});
   const [originalStock, setOriginalStock] = useState<Record<string, string>>({});
+  const [missingInventory, setMissingInventory] = useState<string[]>([]);
   const [saveIncomplete, setSaveIncomplete] = useState(false);
 
   useEffect(() => {
@@ -37,14 +39,18 @@ export function AdminCreateRecordDialog({ section, onClose, onCreated, initialKi
     setForm(Object.fromEntries(['name', 'description', 'price', 'season', 'edition', 'categoryId', 'brandId', 'status'].map((key) => [key, String(product[key] ?? '')])));
     void Promise.all([adminService.getProductVariants(String(product.id)), adminService.getProductImages(String(product.id))])
       .then(async ([variants, images]) => {
-        const stocks = await Promise.all(variants.map((variant) => adminService.getInventory(String(variant.id))));
+        const stocks = await Promise.all(variants.map(async (variant) => {
+          try { return await adminService.getInventory(String(variant.id)); }
+          catch (cause) { if (cause instanceof ApiError && cause.statusCode === 404) return null; throw cause; }
+        }));
         if (!active) return;
         setExistingVariants(variants);
         setExistingImages(images);
         setSelectedSizes([...new Set(variants.map((variant) => String(variant.size || 'One Size')))]);
-        const quantities = Object.fromEntries(variants.map((variant, index) => [String(variant.id), String(stocks[index].quantity ?? 0)]));
+        const quantities = Object.fromEntries(variants.map((variant, index) => [String(variant.id), String(stocks[index]?.quantity ?? 0)]));
         setVariantStock(quantities);
         setOriginalStock(quantities);
+        setMissingInventory(variants.filter((_, index) => stocks[index] === null).map((variant) => String(variant.id)));
         setLoadingProduct(false);
       })
       .catch((cause) => { if (active) setError(cause instanceof Error ? cause.message : 'Could not load product details.'); });
@@ -94,8 +100,11 @@ export function AdminCreateRecordDialog({ section, onClose, onCreated, initialKi
         for (const variant of existingVariants) {
           const id = String(variant.id);
           if (Number(variantStock[id]) === Number(originalStock[id])) continue;
-          const current = await adminService.getInventory(id);
-          if (Number(current.quantity) !== Number(originalStock[id])) throw new Error('Stock changed since this form was opened. Close and reopen the product to review the latest quantity.');
+          let current: AdminRecord | null;
+          try { current = await adminService.getInventory(id); }
+          catch (cause) { if (cause instanceof ApiError && cause.statusCode === 404 && missingInventory.includes(id)) current = null; else throw cause; }
+          if (current === null && !missingInventory.includes(id)) throw new Error('Stock changed since this form was opened. Close and reopen the product.');
+          if (Number(current?.quantity ?? 0) !== Number(originalStock[id]) || (current !== null && missingInventory.includes(id))) throw new Error('Stock changed since this form was opened. Close and reopen the product to review the latest quantity.');
         }
         const payload = { name: form.name.trim(), description: form.description?.trim() || generatedDescription(), categoryId: form.categoryId, brandId: form.brandId || null, price: Number(form.price), season: form.season?.trim() || null, edition: form.edition?.trim() || null, status: form.status || 'ACTIVE' };
         changesStarted = true;
@@ -104,7 +113,10 @@ export function AdminCreateRecordDialog({ section, onClose, onCreated, initialKi
         for (const variant of existingVariants) {
           const id = String(variant.id);
           const desired = Number(variantStock[id]);
-          if (desired !== Number(originalStock[id])) await adminService.createInventoryMovement({ variantId: id, quantity: desired, movementType: 'ADJUSTMENT', reference: 'Product edit stock adjustment' });
+          if (desired !== Number(originalStock[id])) {
+            if (missingInventory.includes(id)) await adminService.createInventory({ variantId: id, quantity: desired });
+            else await adminService.createInventoryMovement({ variantId: id, quantity: desired, movementType: 'ADJUSTMENT', reference: 'Product edit stock adjustment' });
+          }
         }
         for (const [size, quantity] of stockEntries) {
           const variant = await adminService.createProductVariant(productId, { size, edition: form.edition?.trim() || undefined, price: Number(form.price), status: 'ACTIVE' });

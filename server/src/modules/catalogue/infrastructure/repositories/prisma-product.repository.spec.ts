@@ -50,9 +50,19 @@ describe('PrismaProductRepository.findPage', () => {
       orderBy: { price: 'asc' },
       skip: 12,
       take: 12,
+      include: { variants: { where: { deleted_at: null }, select: { edition: true }, orderBy: { created_at: 'asc' } } },
     });
     expect(count).toHaveBeenCalledWith({ where });
     expect(result.total).toBe(31);
     expect(result.items).toEqual([]);
+  });
+});
+
+
+describe('product edition after editing', () => {
+  it('returns the product edition even when a variant retains an older edition', async () => {
+    const product = { id: 'p', category_id: 'c', brand_id: null, name: 'Jersey', description: null, season: null, edition: 'Away Edition', price: 120, status: 'ACTIVE', created_at: new Date(), updated_at: new Date(), variants: [{ edition: 'Home Edition' }] };
+    const repository = new PrismaProductRepository({ product: { findFirst: jest.fn().mockResolvedValue(product) } } as never);
+    expect((await repository.findById('p'))?.edition).toBe('Away Edition');
   });
 });
