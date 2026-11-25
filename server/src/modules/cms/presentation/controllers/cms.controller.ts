@@ -13,12 +13,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join } from 'node:path';
-import { mkdirSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
-import { getUploadsDirectory } from '../../../../infrastructure/storage/uploads-directory';
-
+import { storeImage } from '../../../../infrastructure/storage/cloudinary';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
@@ -75,17 +70,6 @@ export class CmsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
   @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: (_request, _file, callback) => {
-        const directory = join(getUploadsDirectory(), 'cms');
-        mkdirSync(directory, { recursive: true });
-        callback(null, directory);
-      },
-      filename: (_request, file, callback) => {
-        const extensions: Record<string, string> = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
-        callback(null, `${randomUUID()}${extensions[file.mimetype] ?? '.img'}`);
-      },
-    }),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (_request, file, callback) => {
       if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) {
@@ -95,18 +79,18 @@ export class CmsController {
       callback(null, true);
     },
   }))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Choose an image file to upload');
-    return { imageUrl: `/uploads/cms/${file.filename}` };
+    return { imageUrl: await storeImage(file, 'cms') };
   }
 
   @Post('banners')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  createBanner(@Body() dto: CreateBannerDto) {
+  async createBanner(@Body() dto: CreateBannerDto) {
     return this.createBannerUseCase.execute({
       title: dto.title,
-      imageUrl: dto.imageUrl,
+      imageUrl: await storeImage(dto.imageUrl, 'cms'),
       linkUrl: dto.linkUrl,
       isActive: dto.isActive,
     });
@@ -122,8 +106,8 @@ export class CmsController {
   @Patch('banners/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  updateBanner(@Param('id') bannerId: string, @Body() dto: UpdateBannerDto) {
-    return this.updateBannerUseCase.execute(bannerId, dto);
+  async updateBanner(@Param('id') bannerId: string, @Body() dto: UpdateBannerDto) {
+    return this.updateBannerUseCase.execute(bannerId, { ...dto, imageUrl: dto.imageUrl ? await storeImage(dto.imageUrl, 'cms') : dto.imageUrl });
   }
 
   @Delete('banners/:id')
@@ -136,11 +120,11 @@ export class CmsController {
   @Post('promotions')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  createPromotion(@Body() dto: CreatePromotionDto) {
+  async createPromotion(@Body() dto: CreatePromotionDto) {
     return this.createPromotionUseCase.execute({
       title: dto.title,
       description: dto.description,
-      imageUrl: dto.imageUrl,
+      imageUrl: dto.imageUrl ? await storeImage(dto.imageUrl, 'cms') : dto.imageUrl,
       discountType: dto.discountType,
       discountValue: dto.discountValue,
       targetType: dto.targetType ?? 'ALL',
@@ -161,12 +145,13 @@ export class CmsController {
   @Patch('promotions/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  updatePromotion(
+  async updatePromotion(
     @Param('id') promotionId: string,
     @Body() dto: UpdatePromotionDto,
   ) {
     return this.updatePromotionUseCase.execute(promotionId, {
       ...dto,
+      imageUrl: dto.imageUrl ? await storeImage(dto.imageUrl, 'cms') : dto.imageUrl,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
     });

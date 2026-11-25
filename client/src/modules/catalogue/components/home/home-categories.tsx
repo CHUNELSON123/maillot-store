@@ -17,51 +17,6 @@ const categoryThemes: Record<string, string> = {
   Lifestyle: "from-[#1c2026] via-[#20242a] to-[#070707]",
 };
 
-const fallbackCategories: Category[] = [
-  {
-    id: "nfl",
-    name: "NFL",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-  {
-    id: "nba",
-    name: "NBA",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-  {
-    id: "football",
-    name: "Football",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-  {
-    id: "nhl",
-    name: "NHL",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-  {
-    id: "accessories",
-    name: "Accessories",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-  {
-    id: "lifestyle",
-    name: "Lifestyle",
-    description: null,
-    createdAt: "",
-    updatedAt: "",
-  },
-];
-
 function getCategoryTheme(name: string) {
   const normalizedName =
     name.charAt(0).toUpperCase() +
@@ -77,10 +32,8 @@ function getCategoryTheme(name: string) {
 export function HomeCategories({
   categories,
 }: HomeCategoriesProps) {
-  const visibleCategories =
-    categories.length > 0
-      ? categories.slice(0, 6)
-      : fallbackCategories;
+  const visibleCategories = categories;
+  if (!visibleCategories.length) return null;
 
   return (
     <section className="bg-[#090909] px-3 py-4 text-white min-[380px]:px-4 sm:px-8 lg:px-10">
@@ -113,7 +66,7 @@ export function HomeCategories({
 
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.22),transparent_23%)] opacity-80 transition duration-500 group-hover:scale-105" />
 
-                <div className="absolute left-1/2 top-3 h-9 w-16 -translate-x-1/2 rounded-full border border-white/25 bg-white/10 min-[380px]:h-10 min-[380px]:w-20 sm:h-12 sm:w-24" />
+                <>{category.imageUrl && <img src={category.imageUrl.startsWith('/uploads/') ? (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/v1').replace(/\/v1\/?$/, '') + category.imageUrl : category.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />}</>
 
                 <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/85" />
 

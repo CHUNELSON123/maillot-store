@@ -8,6 +8,7 @@ const apiUrl = new URL(
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       {
         protocol: apiUrl.protocol.slice(0, -1) as "http" | "https",
         hostname: apiUrl.hostname,

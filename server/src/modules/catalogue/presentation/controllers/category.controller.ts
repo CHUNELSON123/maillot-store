@@ -1,3 +1,4 @@
+import { storeImage } from '../../../../infrastructure/storage/cloudinary';
 import {
   Body,
   Controller,
@@ -35,11 +36,11 @@ export class CategoryController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  create(@Body() dto: CreateCategoryDto) {
+  async create(@Body() dto: CreateCategoryDto) {
     return this.createCategoryUseCase.execute({
       name: dto.name,
       description: dto.description,
-      imageUrl: dto.imageUrl,
+      imageUrl: dto.imageUrl ? await storeImage(dto.imageUrl, 'categories') : dto.imageUrl,
     });
   }
 
@@ -56,11 +57,11 @@ export class CategoryController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Administrator', 'Staff')
-  update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
     return this.updateCategoryUseCase.execute(id, {
       name: dto.name,
       description: dto.description,
-      imageUrl: dto.imageUrl,
+      imageUrl: dto.imageUrl ? await storeImage(dto.imageUrl, 'categories') : dto.imageUrl,
     });
   }
 

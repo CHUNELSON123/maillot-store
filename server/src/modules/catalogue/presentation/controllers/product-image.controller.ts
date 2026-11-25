@@ -11,11 +11,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join } from 'node:path';
-import { mkdirSync } from 'node:fs';
-import { randomUUID } from 'node:crypto';
-import { getUploadsDirectory } from '../../../../infrastructure/storage/uploads-directory';
+import { storeImage } from '../../../../infrastructure/storage/cloudinary';
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
@@ -40,23 +36,6 @@ export class ProductImageController {
   @Roles('Administrator', 'Staff')
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: (_req, _file, callback) => {
-          const destination = join(getUploadsDirectory(), 'products');
-          mkdirSync(destination, { recursive: true });
-          callback(null, destination);
-        },
-        filename: (_req, file, callback) => {
-          const extensions: Record<string, string> = {
-            'image/jpeg': '.jpg',
-            'image/png': '.png',
-            'image/webp': '.webp',
-            'image/gif': '.gif',
-          };
-          const uniqueName = `${randomUUID()}${extensions[file.mimetype] ?? '.img'}`;
-          callback(null, uniqueName);
-        },
-      }),
       limits: {
         fileSize: 5 * 1024 * 1024,
       },
@@ -84,7 +63,7 @@ export class ProductImageController {
 
     return this.addProductImageUseCase.execute({
       productId,
-      imageUrl: file ? `/uploads/products/${file.filename}` : dto.imageUrl!,
+      imageUrl: await storeImage(file || dto.imageUrl!, 'products'),
       altText: dto.altText,
       isPrimary: dto.isPrimary === 'true',
     });
