@@ -16,7 +16,7 @@ function formatDiscount(promotion: Promotion): string | null {
     case "percent":
       return `${promotion.discountValue}% OFF`;
     default:
-      return null;
+      return `${promotion.discountValue.toLocaleString()} XAF OFF`;
   }
 }
 
@@ -27,12 +27,22 @@ function formatDate(date: string): string {
     : parsedDate.toLocaleDateString();
 }
 
+function resolveImageUrl(imageUrl: string) {
+  if (!imageUrl.startsWith('/uploads')) return imageUrl;
+  try { return `${new URL(process.env.NEXT_PUBLIC_API_URL ?? '').origin}${imageUrl}`; }
+  catch { return imageUrl; }
+}
+
 export function PromotionBanner({ promotion }: PromotionBannerProps) {
   const discount = formatDiscount(promotion);
 
+  const targetLabel = promotion.targetType === 'ALL' ? 'ON SELECTED PRODUCTS' : promotion.targetType === 'BRAND' ? 'ON SELECTED BRANDS' : promotion.targetType === 'CATEGORY' ? 'ON SELECTED CATEGORIES' : 'ON SELECTED PRODUCTS';
   return (
-    <article className="relative overflow-hidden rounded-[4px] bg-[#090909] p-5 text-white sm:p-7">
+    <article className="relative min-h-[180px] overflow-hidden rounded-[4px] bg-[#090909] p-5 text-white sm:p-7">
+      {promotion.imageUrl && <img src={resolveImageUrl(promotion.imageUrl)} alt="" className="absolute inset-0 h-full w-full object-cover"/>}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/20"/>
       <div className="absolute inset-y-0 right-0 w-1 bg-[#D4AF37]" />
+      <div className="relative z-10">
       <p className="text-[8px] font-bold uppercase tracking-wide text-[#D4AF37] sm:text-[10px]">
         ACTIVE PROMOTION
       </p>
@@ -50,7 +60,7 @@ export function PromotionBanner({ promotion }: PromotionBannerProps) {
         </p>
       )}
       <p className="mt-4 text-xs text-white/60">
-        Valid {formatDate(promotion.startDate)} – {formatDate(promotion.endDate)}
+        {targetLabel} · Valid {formatDate(promotion.startDate)} – {formatDate(promotion.endDate)}
       </p>
       <Link
         href="/shop"
@@ -58,6 +68,7 @@ export function PromotionBanner({ promotion }: PromotionBannerProps) {
       >
         SHOP NOW
       </Link>
+      </div>
     </article>
   );
 }

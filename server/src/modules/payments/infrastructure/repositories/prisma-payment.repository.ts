@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { applyInventoryDelta } from '../../../../infrastructure/database/inventory-stock';
-import { createReferralCommissionIfComplete } from '../../../../infrastructure/database/referral-commission';
+import { createReferralCommissionIfPaid } from '../../../../infrastructure/database/referral-commission';
 import { PaymentEntity } from '../../domain/entities/payment.entity';
 import {
   CreatePaymentData,
@@ -114,6 +114,8 @@ export class PrismaPaymentRepository implements PaymentRepository {
     data: UpdatePaymentStatusData,
   ): Promise<PaymentEntity> {
     return this.prisma.$transaction(async (tx) => {
+      // Serialize repeated provider callbacks and manual updates for the same payment.
+      await tx.$queryRaw`SELECT id FROM payments WHERE id = ${paymentId}::uuid FOR UPDATE`;
       const existingPayment = await tx.payment.findFirst({
         where: {
           id: paymentId,
@@ -206,11 +208,16 @@ export class PrismaPaymentRepository implements PaymentRepository {
         },
       });
 
-      if (data.status === 'PAID' && order.status === 'DELIVERED') {
-        await createReferralCommissionIfComplete(tx, order.id, data.status);
+      if (data.status === 'PAID') {
+        await createReferralCommissionIfPaid(tx, order.id, data.status);
       }
 
       if (existingPayment.status !== data.status && order.customer_id) {
+        const notificationSetting = await tx.systemSetting.findFirst({
+          where: { key: 'customer_order_notifications', deleted_at: null },
+          select: { value: true },
+        });
+        if (notificationSetting?.value !== 'false') {
         const customer = await tx.customer.findUnique({
           where: { id: order.customer_id },
           select: { user_id: true },
@@ -224,6 +231,7 @@ export class PrismaPaymentRepository implements PaymentRepository {
               type: 'PAYMENT',
             },
           });
+        }
         }
       }
 

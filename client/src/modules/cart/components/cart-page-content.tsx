@@ -16,10 +16,10 @@ export function CartPageContent() {
     items,
     itemCount,
     subtotal,
-    deliveryFee,
-    total,
+    customerDiscountAmount,
     isReady,
     updateQuantity,
+    updateVariant,
     removeItem,
   } = useCart();
 
@@ -112,6 +112,7 @@ export function CartPageContent() {
                     <CartItem
                       key={item.id}
                       item={item}
+                      onVariantChange={(variant) => updateVariant(item.id, variant)}
                       onQuantityChange={(quantity) =>
                         updateQuantity(item.id, quantity)
                       }
@@ -127,8 +128,8 @@ export function CartPageContent() {
                   <CartOrderSummary
                     itemCount={itemCount}
                     subtotal={subtotal}
-                    deliveryFee={deliveryFee}
-                    total={total}
+                    customerDiscountAmount={customerDiscountAmount}
+                    total={subtotal - customerDiscountAmount}
                   />
 
                   <CartSupport />

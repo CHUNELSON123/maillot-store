@@ -5,6 +5,17 @@ export class UpdateAdminUserDto {
   @IsOptional() @IsBoolean() active?: boolean;
 }
 
+export class UpdateAdminCustomerDto {
+  @IsEmail() email!: string;
+  @IsString() @Length(1, 80) firstName!: string;
+  @IsString() @Length(1, 80) lastName!: string;
+  @IsOptional() @IsString() @Length(5, 30) phone?: string;
+}
+
+export class UpdateAdminCustomerStatusDto {
+  @IsBoolean() active!: boolean;
+}
+
 export class CreateAdminUserDto {
   @IsEmail() email!: string;
   @IsString() @Length(8, 200) password!: string;

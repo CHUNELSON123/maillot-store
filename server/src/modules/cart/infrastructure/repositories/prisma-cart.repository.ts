@@ -60,6 +60,7 @@ export class PrismaCartRepository implements CartRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private async assertAvailableStock(
+    productId: string,
     variantId: string | null,
     requestedQuantity: number,
   ): Promise<void> {
@@ -73,9 +74,18 @@ export class PrismaCartRepository implements CartRepository {
     }
 
     if (!variantId) {
-      throw new BadRequestException(
-        'A product variant must be selected before adding to cart',
-      );
+      const availableVariant = await this.prisma.productVariant.findFirst({
+        where: {
+          product_id: productId,
+          deleted_at: null,
+          status: 'ACTIVE',
+          price: { not: null },
+          inventory: { is: { deleted_at: null, quantity: { gte: requestedQuantity } } },
+        },
+        select: { id: true },
+      });
+      if (!availableVariant) throw new BadRequestException('No product option has enough stock for this quantity');
+      return;
     }
 
     const variant = await this.prisma.productVariant.findFirst({
@@ -178,7 +188,7 @@ export class PrismaCartRepository implements CartRepository {
     const requestedTotal =
       quantity + (existingItem?.quantity ?? 0);
 
-    await this.assertAvailableStock(variantId, requestedTotal);
+    await this.assertAvailableStock(productId, variantId, requestedTotal);
 
     if (existingItem) {
       const updated = await this.prisma.cartItem.update({
@@ -289,6 +299,7 @@ export class PrismaCartRepository implements CartRepository {
       requestedQuantity + (matchingItem?.quantity ?? 0);
 
     await this.assertAvailableStock(
+      item.product_id,
       targetVariantId,
       finalQuantity,
     );

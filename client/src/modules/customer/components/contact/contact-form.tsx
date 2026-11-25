@@ -4,8 +4,11 @@
 import { FormEvent, useState } from "react";
 import { Send } from "lucide-react";
 import { communicationsService } from "@/modules/communications/services/communications.service";
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { pageContentValue } from "@/modules/cms/utils/page-content-defaults";
 
 export function ContactForm() {
+  const { content } = useCms();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"success" | "error" | "">("");
 
@@ -38,11 +41,11 @@ export function ContactForm() {
         id="contact-form-title"
         className="text-sm font-extrabold uppercase tracking-wide"
       >
-        SEND US A MESSAGE
+        {pageContentValue(content, 'cms.contact.form_title')}
       </h2>
 
       <p className="mt-2 text-xs leading-5 text-neutral-600">
-        Have a question? We would love to hear from you.
+        {pageContentValue(content, 'cms.contact.form_intro')}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">

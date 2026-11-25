@@ -72,6 +72,7 @@ export type InfluencerPortalData = {
     availableBalance: number;
     totalWithdrawn: number;
   };
+  minimumWithdrawalAmount: number;
   activity: { date: string; clicks: number; orders: number; sales: number }[];
 };
 

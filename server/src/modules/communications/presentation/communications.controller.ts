@@ -18,6 +18,6 @@ export class CommunicationsController {
 
   @Post('newsletter/subscriptions')
   subscribe(@Body() dto: SubscribeNewsletterDto) {
-    return this.subscribeNewsletter.execute(dto.email);
+    return this.subscribeNewsletter.execute(dto.contact, dto.whatsappOptIn ?? false);
   }
 }

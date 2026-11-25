@@ -6,11 +6,13 @@ import { UserRound, X } from "lucide-react";
 type CheckoutAccountPromptProps = {
   onContinueAsGuest: () => void;
   onClose: () => void;
+  returnUrl?: string;
 };
 
 export function CheckoutAccountPrompt({
   onContinueAsGuest,
   onClose,
+  returnUrl = "/checkout",
 }: CheckoutAccountPromptProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
@@ -48,14 +50,14 @@ export function CheckoutAccountPrompt({
             </button>
 
             <Link
-              href="/register?returnUrl=%2Fcheckout"
+              href={`/register?returnUrl=${encodeURIComponent(returnUrl)}`}
               className="flex h-10 w-full items-center justify-center rounded-[4px] border border-neutral-800 text-[10px] font-extrabold uppercase text-neutral-950 transition hover:bg-neutral-50"
             >
               CREATE AN ACCOUNT
             </Link>
 
             <Link
-              href="/login?returnUrl=%2Fcheckout"
+              href={`/login?returnUrl=${encodeURIComponent(returnUrl)}`}
               className="mt-1 text-[10px] font-semibold text-neutral-600 underline underline-offset-2 transition hover:text-[#D4AF37]"
             >
               Already have an account? Log in

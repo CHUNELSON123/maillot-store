@@ -5,12 +5,14 @@ import { CreateInventoryUseCase } from './application/use-cases/create-inventory
 import { GetInventoryUseCase } from './application/use-cases/get-inventory.use-case';
 import { UpdateInventoryUseCase } from './application/use-cases/update-inventory.use-case';
 import { GetLowStockUseCase } from './application/use-cases/get-low-stock.use-case';
+import { GetInventorySummaryUseCase } from './application/use-cases/get-inventory-summary.use-case';
 import { InventoryController } from './presentation/controllers/inventory.controller';
 
 import { PrismaInventoryMovementRepository } from './infrastructure/repositories/prisma-inventory-movement.repository';
 import { InventoryMovementRepository } from './domain/repositories/inventory-movement.repository';
 import { CreateInventoryMovementUseCase } from './application/use-cases/create-inventory-movement.use-case';
 import { GetInventoryMovementsUseCase } from './application/use-cases/get-inventory-movements.use-case';
+import { ImportInventoryUseCase } from './application/use-cases/import-inventory.use-case';
 import { InventoryMovementController } from './presentation/controllers/inventory-movement.controller';
 
 @Module({
@@ -21,10 +23,12 @@ import { InventoryMovementController } from './presentation/controllers/inventor
     GetInventoryUseCase,
     UpdateInventoryUseCase,
     GetLowStockUseCase,
+    GetInventorySummaryUseCase,
 
     PrismaInventoryMovementRepository,
     CreateInventoryMovementUseCase,
     GetInventoryMovementsUseCase,
+    ImportInventoryUseCase,
 
     {
       provide: InventoryRepository,

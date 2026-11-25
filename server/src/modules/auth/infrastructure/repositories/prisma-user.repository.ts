@@ -10,6 +10,27 @@ import {
 export class PrismaUserRepository implements UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async recordSuccessfulLogin(userId: string): Promise<Date> {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { last_login_at: new Date() },
+      select: { last_login_at: true },
+    });
+    return user.last_login_at!;
+  }
+
+  async updatePassword(userId: string, passwordHash: string): Promise<void> {
+    await this.prisma.user.update({ where: { id: userId }, data: { password: passwordHash } });
+  }
+
+  async isRegistrationAllowed(): Promise<boolean> {
+    const setting = await this.prisma.systemSetting.findFirst({
+      where: { key: 'allow_registration', deleted_at: null },
+      select: { value: true },
+    });
+    return setting?.value !== 'false';
+  }
+
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -84,6 +105,7 @@ export class PrismaUserRepository implements UserRepository {
             first_name: data.firstName,
             last_name: data.lastName,
             phone: data.phone,
+            registration_source: data.registrationSource,
           },
         },
       },

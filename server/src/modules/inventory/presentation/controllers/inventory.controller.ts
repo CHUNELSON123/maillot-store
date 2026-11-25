@@ -14,6 +14,7 @@ import { CreateInventoryUseCase } from '../../application/use-cases/create-inven
 import { GetInventoryUseCase } from '../../application/use-cases/get-inventory.use-case';
 import { UpdateInventoryUseCase } from '../../application/use-cases/update-inventory.use-case';
 import { GetLowStockUseCase } from '../../application/use-cases/get-low-stock.use-case';
+import { GetInventorySummaryUseCase } from '../../application/use-cases/get-inventory-summary.use-case';
 import { CreateInventoryDto } from '../dto/create-inventory.dto';
 import { UpdateInventoryDto } from '../dto/update-inventory.dto';
 
@@ -28,6 +29,7 @@ export class InventoryController {
     private readonly getInventoryUseCase: GetInventoryUseCase,
     private readonly updateInventoryUseCase: UpdateInventoryUseCase,
     private readonly getLowStockUseCase: GetLowStockUseCase,
+    private readonly getInventorySummaryUseCase: GetInventorySummaryUseCase,
   ) {}
 
   @Post()
@@ -44,6 +46,12 @@ export class InventoryController {
   @Roles('Administrator', 'Staff')
   getLowStock() {
     return this.getLowStockUseCase.execute();
+  }
+
+  @Get('summary')
+  @Roles('Administrator', 'Staff')
+  getSummary() {
+    return this.getInventorySummaryUseCase.execute();
   }
 
   @Get(':variantId')

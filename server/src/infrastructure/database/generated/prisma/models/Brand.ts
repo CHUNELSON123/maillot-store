@@ -400,9 +400,9 @@ export type BrandMinOrderByAggregateInput = {
   deleted_by?: Prisma.SortOrder
 }
 
-export type BrandScalarRelationFilter = {
-  is?: Prisma.BrandWhereInput
-  isNot?: Prisma.BrandWhereInput
+export type BrandNullableScalarRelationFilter = {
+  is?: Prisma.BrandWhereInput | null
+  isNot?: Prisma.BrandWhereInput | null
 }
 
 export type BrandCreateNestedOneWithoutProductsInput = {
@@ -411,10 +411,12 @@ export type BrandCreateNestedOneWithoutProductsInput = {
   connect?: Prisma.BrandWhereUniqueInput
 }
 
-export type BrandUpdateOneRequiredWithoutProductsNestedInput = {
+export type BrandUpdateOneWithoutProductsNestedInput = {
   create?: Prisma.XOR<Prisma.BrandCreateWithoutProductsInput, Prisma.BrandUncheckedCreateWithoutProductsInput>
   connectOrCreate?: Prisma.BrandCreateOrConnectWithoutProductsInput
   upsert?: Prisma.BrandUpsertWithoutProductsInput
+  disconnect?: Prisma.BrandWhereInput | boolean
+  delete?: Prisma.BrandWhereInput | boolean
   connect?: Prisma.BrandWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.BrandUpdateToOneWithWhereWithoutProductsInput, Prisma.BrandUpdateWithoutProductsInput>, Prisma.BrandUncheckedUpdateWithoutProductsInput>
 }

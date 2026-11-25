@@ -31,6 +31,8 @@ export class LoginUseCase {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    await this.userRepository.recordSuccessfulLogin(user.id);
+
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,

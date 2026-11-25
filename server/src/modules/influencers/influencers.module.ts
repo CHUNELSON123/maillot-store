@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module';
+import { CommunicationsModule } from '../communications/communications.module';
 
 import { PrismaInfluencerRepository } from './infrastructure/repositories/prisma-influencer.repository';
 import { InfluencerRepository } from './domain/repositories/influencer.repository';
@@ -43,7 +44,7 @@ import { ReferralClickController } from './presentation/controllers/referral-cli
 import { InfluencerPhotoController } from './presentation/controllers/influencer-photo.controller';
 
 @Module({
-  imports: [AuthModule, OrdersModule],
+  imports: [AuthModule, OrdersModule, CommunicationsModule],
   controllers: [
     InfluencerController,
     InfluencerRegistrationController,

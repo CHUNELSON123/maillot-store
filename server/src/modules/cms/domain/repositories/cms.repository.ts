@@ -18,8 +18,11 @@ export interface UpdateBannerData {
 export interface CreatePromotionData {
   title: string;
   description?: string;
+  imageUrl?: string;
   discountType: string;
   discountValue: number;
+  targetType: string;
+  targetIds: string[];
   startDate: Date;
   endDate: Date;
   isActive?: boolean;
@@ -28,14 +31,18 @@ export interface CreatePromotionData {
 export interface UpdatePromotionData {
   title?: string;
   description?: string;
+  imageUrl?: string;
   discountType?: string;
   discountValue?: number;
+  targetType?: string;
+  targetIds?: string[];
   startDate?: Date;
   endDate?: Date;
   isActive?: boolean;
 }
 
 export abstract class CmsRepository {
+  abstract getPublicContent(): Promise<Record<string, string>>;
   abstract createBanner(data: CreateBannerData): Promise<BannerEntity>;
 
   abstract findBanners(activeOnly?: boolean): Promise<BannerEntity[]>;

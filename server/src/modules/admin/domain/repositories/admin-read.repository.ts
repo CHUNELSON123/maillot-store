@@ -3,6 +3,16 @@ export interface AdminListQuery {
   limit: number;
   search?: string;
   status?: string;
+  categoryId?: string;
+  brandId?: string;
+  roleId?: string;
+  source?: string;
+  paymentStatus?: string;
+  startDate?: string;
+  endDate?: string;
+  registrationSource?: string;
+  paymentMethod?: string;
+  provider?: string;
 }
 
 export abstract class AdminReadRepository {
@@ -11,6 +21,8 @@ export abstract class AdminReadRepository {
   abstract listDeliveries(query: AdminListQuery): Promise<unknown>;
   abstract listCustomers(query: AdminListQuery): Promise<unknown>;
   abstract getCustomer(customerId: string): Promise<unknown>;
+  abstract updateCustomer(customerId: string, input: { firstName: string; lastName: string; phone?: string; email: string }, actorId: string): Promise<unknown>;
+  abstract updateCustomerStatus(customerId: string, active: boolean, actorId: string): Promise<unknown>;
   abstract listUsers(query: AdminListQuery): Promise<unknown>;
   abstract listInventory(query: AdminListQuery): Promise<unknown>;
   abstract listAuditLogs(query: AdminListQuery): Promise<unknown>;

@@ -3,9 +3,11 @@ import { ProductRepository } from '../../domain/repositories/product.repository'
 
 export interface CreateProductInput {
   categoryId: string;
-  brandId: string;
+  brandId?: string;
   name: string;
   description?: string;
+  season?: string;
+  edition?: string;
   price: number;
   status: string;
 }

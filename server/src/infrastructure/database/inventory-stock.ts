@@ -7,6 +7,14 @@ import { Prisma } from './generated/prisma/client';
 
 type InventoryTransaction = Prisma.TransactionClient;
 
+async function notifyStockDrop(tx: InventoryTransaction, before: { quantity: number; min_stock: number; variant: { sku: string; product: { name: string } } }, nextQuantity: number) {
+  if (!((nextQuantity === 0 && before.quantity > 0) || (before.quantity > before.min_stock && nextQuantity > 0 && nextQuantity <= before.min_stock))) return;
+  const setting = await tx.systemSetting.findFirst({ where: { key: 'admin_low_stock_notifications', deleted_at: null }, select: { value: true } });
+  if (setting?.value === 'false') return;
+  const admins = await tx.user.findMany({ where: { deleted_at: null, role: { is: { name: 'Administrator', deleted_at: null } } }, select: { id: true } });
+  if (admins.length) await tx.notification.createMany({ data: admins.map(({ id }) => ({ user_id: id, title: nextQuantity === 0 ? 'Product out of stock' : 'Low stock alert', message: `${before.variant.product.name} (${before.variant.sku}) has ${nextQuantity} remaining.`, type: 'INVENTORY', target_url: `/admin/inventory?search=${encodeURIComponent(before.variant.sku)}` })) });
+}
+
 export async function applyInventoryDelta(
   tx: InventoryTransaction,
   variantId: string,
@@ -21,6 +29,11 @@ export async function applyInventoryDelta(
       'Inventory change must be a non-zero integer',
     );
   }
+
+  const before = await tx.inventory.findFirst({
+    where: { variant_id: variantId, deleted_at: null },
+    select: { quantity: true, min_stock: true, variant: { select: { sku: true, product: { select: { name: true } } } } },
+  });
 
   const result = await tx.inventory.updateMany({
     where: {
@@ -47,6 +60,9 @@ export async function applyInventoryDelta(
 
     throw new ConflictException(`Insufficient stock for variant ${variantId}`);
   }
+
+  const nextQuantity = (before?.quantity ?? 0) + delta;
+  if (before && delta < 0) await notifyStockDrop(tx, before, nextQuantity);
 
   return tx.inventoryMovement.create({
     data: {
@@ -75,7 +91,7 @@ export async function setInventoryQuantity(
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const inventory = await tx.inventory.findFirst({
       where: { variant_id: variantId, deleted_at: null },
-      select: { id: true, quantity: true },
+      select: { id: true, quantity: true, min_stock: true, variant: { select: { sku: true, product: { select: { name: true } } } } },
     });
 
     if (!inventory) {
@@ -97,6 +113,8 @@ export async function setInventoryQuantity(
     if (updated.count === 0) {
       continue;
     }
+
+    if (delta < 0) await notifyStockDrop(tx, inventory, quantity);
 
     return tx.inventoryMovement.create({
       data: {

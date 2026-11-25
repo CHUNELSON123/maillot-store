@@ -7,15 +7,18 @@ import { GetPaymentUseCase } from './application/use-cases/get-payment.use-case'
 import { UpdatePaymentStatusUseCase } from './application/use-cases/update-payment-status.use-case';
 import { PaymentController } from './presentation/controllers/payment.controller';
 import { OrdersModule } from '../orders/orders.module';
+import { NotchPayService } from './infrastructure/notchpay.service';
+import { NotchPayController } from './presentation/controllers/notchpay.controller';
 
 @Module({
   imports: [AuthModule, OrdersModule],
-  controllers: [PaymentController],
+  controllers: [PaymentController, NotchPayController],
   providers: [
     PrismaPaymentRepository,
     CreatePaymentUseCase,
     GetPaymentUseCase,
     UpdatePaymentStatusUseCase,
+    NotchPayService,
     {
       provide: PaymentRepository,
       useExisting: PrismaPaymentRepository,

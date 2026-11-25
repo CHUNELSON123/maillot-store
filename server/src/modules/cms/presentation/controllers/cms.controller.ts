@@ -1,5 +1,6 @@
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -8,7 +9,15 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { getUploadsDirectory } from '../../../../infrastructure/storage/uploads-directory';
 
 import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
@@ -23,6 +32,7 @@ import { CreatePromotionUseCase } from '../../application/use-cases/create-promo
 import { GetPromotionsUseCase } from '../../application/use-cases/get-promotions.use-case';
 import { UpdatePromotionUseCase } from '../../application/use-cases/update-promotion.use-case';
 import { DeletePromotionUseCase } from '../../application/use-cases/delete-promotion.use-case';
+import { GetPublicContentUseCase } from '../../application/use-cases/get-public-content.use-case';
 
 import { CreateBannerDto } from '../dto/create-banner.dto';
 import { UpdateBannerDto } from '../dto/update-banner.dto';
@@ -43,6 +53,7 @@ export class CmsController {
     private readonly getPromotionsUseCase: GetPromotionsUseCase,
     private readonly updatePromotionUseCase: UpdatePromotionUseCase,
     private readonly deletePromotionUseCase: DeletePromotionUseCase,
+    private readonly getPublicContentUseCase: GetPublicContentUseCase,
   ) {}
 
   @Get('public/banners')
@@ -53,6 +64,40 @@ export class CmsController {
   @Get('public/promotions')
   getPublicPromotions() {
     return this.getPromotionsUseCase.execute(true);
+  }
+
+  @Get('public/content')
+  getPublicContent() {
+    return this.getPublicContentUseCase.execute();
+  }
+
+  @Post('uploads')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Administrator', 'Staff')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: (_request, _file, callback) => {
+        const directory = join(getUploadsDirectory(), 'cms');
+        mkdirSync(directory, { recursive: true });
+        callback(null, directory);
+      },
+      filename: (_request, file, callback) => {
+        const extensions: Record<string, string> = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+        callback(null, `${randomUUID()}${extensions[file.mimetype] ?? '.img'}`);
+      },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_request, file, callback) => {
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.mimetype)) {
+        callback(new BadRequestException('Only image files are allowed'), false);
+        return;
+      }
+      callback(null, true);
+    },
+  }))
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Choose an image file to upload');
+    return { imageUrl: `/uploads/cms/${file.filename}` };
   }
 
   @Post('banners')
@@ -95,8 +140,11 @@ export class CmsController {
     return this.createPromotionUseCase.execute({
       title: dto.title,
       description: dto.description,
+      imageUrl: dto.imageUrl,
       discountType: dto.discountType,
       discountValue: dto.discountValue,
+      targetType: dto.targetType ?? 'ALL',
+      targetIds: dto.targetIds ?? [],
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
       isActive: dto.isActive,

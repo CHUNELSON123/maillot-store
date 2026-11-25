@@ -6,7 +6,7 @@ import { LockKeyhole } from "lucide-react";
 type CartOrderSummaryProps = {
   itemCount: number;
   subtotal: number;
-  deliveryFee: number;
+  customerDiscountAmount: number;
   total: number;
 };
 
@@ -17,7 +17,7 @@ function formatPrice(value: number) {
 export function CartOrderSummary({
   itemCount,
   subtotal,
-  deliveryFee,
+  customerDiscountAmount,
   total,
 }: CartOrderSummaryProps) {
   return (
@@ -41,19 +41,7 @@ export function CartOrderSummary({
             </span>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <span>Delivery Fee</span>
-
-              <span>
-                {formatPrice(deliveryFee)}
-              </span>
-            </div>
-
-            <p className="mt-1 text-[9px] text-neutral-500">
-              Calculated at checkout
-            </p>
-          </div>
+          {customerDiscountAmount > 0 && <div className="flex items-center justify-between text-green-700"><span>Influencer customer discount</span><span>−{formatPrice(customerDiscountAmount)}</span></div>}
         </div>
 
         <div className="my-4 border-t border-neutral-200" />

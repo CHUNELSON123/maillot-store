@@ -6,6 +6,8 @@ import { communicationsService } from "@/modules/communications/services/communi
 export function NewsletterSection({ flush = false }: { flush?: boolean }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"success" | "error" | "">("");
+  const [contact, setContact] = useState("");
+  const isPhone = contact.trim().length > 0 && !contact.includes("@");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -16,9 +18,13 @@ export function NewsletterSection({ flush = false }: { flush?: boolean }) {
 
     try {
       await communicationsService.subscribeToNewsletter(
-        String(data.get("email") ?? ""),
+        {
+          contact: String(data.get("contact") ?? ""),
+          whatsappOptIn: data.get("whatsappOptIn") === "on",
+        },
       );
       form.reset();
+      setContact("");
       setStatus("success");
     } catch {
       setStatus("error");
@@ -35,27 +41,14 @@ export function NewsletterSection({ flush = false }: { flush?: boolean }) {
         <div>
           <p className="text-sm font-semibold tracking-wide">STAY IN THE LOOP</p>
           <p className="mt-1 max-w-md text-sm leading-6 text-neutral-300">
-            Save your email for future MaillotStore updates and promotions.
+            Subscribe with your email address or WhatsApp number for Maillot Store updates.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex w-full max-w-xl">
-          <input
-            name="email"
-            type="email"
-            required
-            maxLength={254}
-            autoComplete="email"
-            placeholder="Enter your email address"
-            className="h-12 min-w-0 flex-1 rounded-l-md border border-neutral-300 bg-white px-4 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-[#D4AF37]"
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-12 rounded-r-md bg-[#D4AF37] px-6 text-sm font-semibold text-white transition hover:bg-[#bf9828] disabled:opacity-60"
-          >
-            {isSubmitting ? "SAVING..." : "SUBSCRIBE"}
-          </button>
+        <form onSubmit={handleSubmit} className="grid w-full max-w-xl gap-2 sm:grid-cols-[1fr_auto]">
+          <input name="contact" type="text" required maxLength={254} autoComplete="email tel" value={contact} onChange={(event) => setContact(event.target.value)} placeholder="Email address or WhatsApp number" className="h-11 min-w-0 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-[#D4AF37]" />
+          <button type="submit" disabled={isSubmitting} className="h-11 rounded-md bg-[#D4AF37] px-5 text-sm font-semibold text-white transition hover:bg-[#bf9828] disabled:opacity-60">{isSubmitting ? "SAVING..." : "SUBSCRIBE"}</button>
+          {isPhone && <label className="flex items-start gap-2 text-[11px] leading-relaxed text-neutral-300 sm:col-span-2"><input name="whatsappOptIn" type="checkbox" className="mt-0.5 accent-[#D4AF37]"/>I agree to receive Maillot Store updates on WhatsApp at this number.</label>}
         </form>
       </div>
 
@@ -65,7 +58,7 @@ export function NewsletterSection({ flush = false }: { flush?: boolean }) {
           className={`mt-4 text-sm ${status === "error" ? "text-red-300" : "text-green-300"}`}
         >
           {status === "success"
-            ? "Your email is saved for future updates. Email campaigns are not configured yet."
+            ? "Your subscription is saved. WhatsApp updates will be sent only when you have opted in."
             : "We could not save your email. Please try again."}
         </p>
       )}

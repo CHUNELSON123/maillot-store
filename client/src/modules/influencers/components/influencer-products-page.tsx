@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Check, Copy, ExternalLink, Share2, X } from 'lucide-react';
 import { catalogueService } from '@/modules/catalogue/services/catalogue.service';
 import { cmsService } from '@/modules/cms/services/cms.service';
 import { Product, ProductImage } from '@/modules/catalogue/types/catalogue.types';
@@ -22,6 +23,7 @@ export function InfluencerProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
+  const [sharingProduct, setSharingProduct] = useState<Product | null>(null);
 
   const loadProducts = useCallback(async () => {
     setLoading(true); setError('');
@@ -41,7 +43,27 @@ export function InfluencerProductsPage() {
 
   const referralCode = data?.profile.referralCode ?? '';
   const productLink = (productId: string) => `${window.location.origin}/shop/${productId}?ref=${encodeURIComponent(referralCode)}`;
+  const productDescription = (product: Product) => `${product.name}${product.description ? `\n${product.description}` : ''}\n${productLink(product.id)}`;
   const copyLink = async (key: string, href: string) => { try { await navigator.clipboard.writeText(href); setCopied(key); window.setTimeout(() => setCopied(''), 1800); } catch { setCopied(''); } };
+  const copyShareText = async (product: Product, linkOnly = false) => {
+    try { await navigator.clipboard.writeText(linkOnly ? productLink(product.id) : productDescription(product)); setCopied(product.id); window.setTimeout(() => setCopied(''), 1800); }
+    catch { setCopied(''); }
+  };
+  const openShare = async (network: string, product: Product) => {
+    const href = productLink(product.id);
+    const text = productDescription(product);
+    const encoded = encodeURIComponent(text);
+    const shareUrls: Record<string, string> = {
+      WhatsApp: `https://wa.me/?text=${encoded}`,
+      Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(href)}&quote=${encodeURIComponent(`${product.name} — ${product.description ?? ''}`)}`,
+      X: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — ${product.description ?? ''}`)}&url=${encodeURIComponent(href)}`,
+      Telegram: `https://t.me/share/url?url=${encodeURIComponent(href)}&text=${encodeURIComponent(`${product.name} — ${product.description ?? ''}`)}`,
+    };
+    if (shareUrls[network]) { window.open(shareUrls[network], '_blank', 'noopener,noreferrer'); return; }
+    await copyShareText(product);
+    const profileUrl = network === 'Instagram' ? data?.profile.profile.instagramUrl : data?.profile.profile.tiktokUrl;
+    window.open(profileUrl || (network === 'Instagram' ? 'https://www.instagram.com/' : 'https://www.tiktok.com/'), '_blank', 'noopener,noreferrer');
+  };
   const commission = data?.profile.commissionRate ?? 0;
 
   return <div className="mx-auto max-w-[1250px]"><div className="mb-5"><h1 className="text-2xl font-black">Products &amp; Campaigns</h1><p className="mt-1 text-xs text-neutral-600">Choose products or active store promotions to share with your audience.</p></div>
@@ -49,9 +71,10 @@ export function InfluencerProductsPage() {
     {tab === 'products' ? <><div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><label className="text-xs text-neutral-600">Search products<input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search catalogue…" className="ml-2 h-9 w-[min(340px,65vw)] border border-neutral-300 px-3 text-xs outline-none focus:border-[#D4AF37]" /></label><span className="text-[10px] text-neutral-500">Configured commission rate: <strong className="text-neutral-800">{commission > 0 ? `${commission}%` : 'Not configured'}</strong></span></div>
       {loading ? <p className="py-12 text-center text-xs text-neutral-500">Loading products…</p> : error ? <div role="alert" className="mt-4 border border-red-200 bg-red-50 p-4 text-xs text-red-700">{error}<button onClick={() => void loadProducts()} className="ml-2 underline">Retry</button></div> : products.length === 0 ? <p className="py-12 text-center text-xs text-neutral-500">No catalogue products match this search.</p> : <div className="mt-4 divide-y divide-neutral-200 border border-neutral-200 bg-white">{products.map(product => {
         const imageUrl = images[product.id] ? (/^https?:\/\//.test(images[product.id]) ? images[product.id] : `${apiOrigin}${images[product.id]}`) : '';
-        return <article key={product.id} className="grid items-center gap-4 p-4 sm:grid-cols-[72px_1fr_auto]">{imageUrl ? <img src={imageUrl} alt={product.name} className="h-[72px] w-[72px] object-contain"/> : <div className="flex h-[72px] w-[72px] items-center justify-center bg-neutral-100 text-[9px] text-neutral-400">No image</div>}<div><h2 className="text-xs font-bold">{product.name}</h2><p className="mt-1 text-[10px] text-neutral-500">{product.description || 'Maillot Store catalogue product'}</p><p className="mt-1 text-[10px] text-neutral-700">{Number(product.price).toLocaleString()} XAF · {commission > 0 ? `Commission rate ${commission}%` : 'Commission rate is awaiting store configuration'}</p></div><div className="flex gap-2 sm:flex-col"><button onClick={() => void copyLink(product.id, productLink(product.id))} className="h-8 bg-[#D4AF37] px-4 text-[9px] font-extrabold text-black">{copied === product.id ? 'COPIED' : 'PROMOTE'}</button><Link href={`/shop/${product.id}?ref=${encodeURIComponent(referralCode)}`} className="text-center text-[9px] text-blue-700">View Details</Link></div></article>;
+        return <article key={product.id} className="grid items-center gap-4 p-4 sm:grid-cols-[72px_1fr_auto]">{imageUrl ? <img src={imageUrl} alt={product.name} className="h-[72px] w-[72px] object-contain"/> : <div className="flex h-[72px] w-[72px] items-center justify-center bg-neutral-100 text-[9px] text-neutral-400">No image</div>}<div><h2 className="text-xs font-bold">{product.name}</h2><p className="mt-1 text-[10px] text-neutral-500">{product.description || 'Maillot Store catalogue product'}</p><p className="mt-1 text-[10px] text-neutral-700">{Number(product.price).toLocaleString()} XAF · {commission > 0 ? `Commission rate ${commission}%` : 'Commission rate is awaiting store configuration'}</p></div><div className="flex gap-2 sm:flex-col"><button onClick={() => setSharingProduct(product)} className="inline-flex h-8 items-center justify-center gap-1.5 bg-[#D4AF37] px-4 text-[9px] font-extrabold text-black"><Share2 size={13}/>PROMOTE</button><Link href={`/shop/${product.id}?ref=${encodeURIComponent(referralCode)}`} className="text-center text-[9px] text-blue-700">View Details</Link></div></article>;
       })}</div>}
       <div className="mt-4 flex items-center justify-center gap-3"><button disabled={page <= 1 || loading} onClick={() => setPage(p => Math.max(1,p-1))} className="h-8 border px-3 text-xs disabled:opacity-40">‹</button><span className="text-xs">Page {page}{totalPages ? ` of ${totalPages}` : ''}</span><button disabled={page >= totalPages || loading} onClick={() => setPage(p => p+1)} className="h-8 border px-3 text-xs disabled:opacity-40">›</button></div>
     </> : <section className="mt-4 space-y-3">{promotions.length ? promotions.map(promo => <article key={promo.id} className="grid gap-4 border border-neutral-200 bg-white p-4 sm:grid-cols-[1fr_auto] sm:items-center"><div><h2 className="text-sm font-bold">{promo.title}</h2><p className="mt-1 text-xs text-neutral-600">{promo.description || 'Active store promotion'}</p><p className="mt-2 text-[10px] text-neutral-500">{promo.discountType}: {promo.discountValue} · {new Date(promo.startDate).toLocaleDateString()} – {new Date(promo.endDate).toLocaleDateString()}</p><p className="mt-1 text-[10px] text-neutral-500">Your configured commission rate: {commission > 0 ? `${commission}%` : 'Not configured'}</p></div><button onClick={() => void copyLink(promo.id, `${window.location.origin}/promotions?ref=${encodeURIComponent(referralCode)}`)} className="h-9 bg-[#D4AF37] px-5 text-[10px] font-extrabold">{copied === promo.id ? 'COPIED' : 'COPY REFERRAL LINK'}</button></article>) : <div className="border border-neutral-200 bg-white p-8 text-center text-xs text-neutral-500">There are no active promotions right now.</div>}</section>}
+    {sharingProduct && <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setSharingProduct(null)}><section role="dialog" aria-modal="true" aria-labelledby="share-product-title" className="w-full max-w-lg rounded-lg bg-white shadow-xl"><header className="flex items-center justify-between border-b border-neutral-200 px-5 py-4"><div><h2 id="share-product-title" className="text-sm font-bold">Share {sharingProduct.name}</h2><p className="mt-1 text-xs text-neutral-500">The post includes the product description and your tracked referral link.</p></div><button aria-label="Close sharing options" onClick={() => setSharingProduct(null)} className="rounded p-2 hover:bg-neutral-100"><X size={17}/></button></header><div className="space-y-4 p-5"><p className="max-h-24 overflow-y-auto whitespace-pre-line rounded border border-neutral-200 bg-neutral-50 p-3 text-xs text-neutral-600">{productDescription(sharingProduct)}</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{['WhatsApp', 'Facebook', 'X', 'Telegram', 'Instagram', 'TikTok'].map((network) => <button key={network} onClick={() => void openShare(network, sharingProduct)} className="inline-flex items-center justify-center gap-2 rounded border border-neutral-200 px-3 py-2.5 text-xs font-semibold hover:border-[#D4AF37] hover:bg-amber-50"><ExternalLink size={13}/>{network}</button>)}</div><button onClick={() => void copyShareText(sharingProduct, true)} className="inline-flex w-full items-center justify-center gap-2 rounded bg-[#D4AF37] px-4 py-3 text-xs font-bold text-black">{copied === sharingProduct.id ? <Check size={15}/> : <Copy size={15}/>} {copied === sharingProduct.id ? 'Copied' : 'Copy referral link'}</button><button onClick={() => void copyShareText(sharingProduct)} className="inline-flex w-full items-center justify-center gap-2 rounded border border-neutral-200 px-4 py-2.5 text-xs font-semibold hover:border-[#D4AF37]"><Copy size={14}/>Copy product description and link</button><p className="text-[10px] leading-relaxed text-neutral-500">For Instagram and TikTok, the post text is copied first; paste it into your post on the opened profile.</p></div></section></div>}
   </div>;
 }

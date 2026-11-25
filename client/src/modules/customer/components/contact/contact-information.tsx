@@ -1,58 +1,34 @@
 
+"use client";
+
 import {
   Clock3,
   Mail,
   MapPin,
   Phone,
 } from "lucide-react";
-
-const contactDetails = [
-  {
-    title: "Address",
-    Icon: MapPin,
-    content: (
-      <>
-        Quarter 12, Molyko, Buea
-        <br />
-        Cameroon
-      </>
-    ),
-  },
-  {
-    title: "Phone",
-    Icon: Phone,
-    content: "+237 670 12 34 56",
-  },
-  {
-    title: "Email",
-    Icon: Mail,
-    content: "support@maillotstore.cm",
-  },
-  {
-    title: "Working Hours",
-    Icon: Clock3,
-    content: (
-      <>
-        Mon – Sat: 8:00 AM – 7:00 PM
-        <br />
-        Sunday: 10:00 AM – 4:00 PM
-      </>
-    ),
-  },
-];
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { pageContentValue } from "@/modules/cms/utils/page-content-defaults";
 
 export function ContactInformation() {
+  const { content } = useCms();
+  const contactDetails = [
+    { title: "Address", Icon: MapPin, content: pageContentValue(content, 'cms.contact.address') },
+    { title: "Phone", Icon: Phone, content: pageContentValue(content, 'cms.contact.phone') },
+    { title: "Email", Icon: Mail, content: pageContentValue(content, 'cms.contact.email') },
+    { title: "Working Hours", Icon: Clock3, content: pageContentValue(content, 'cms.contact.hours') },
+  ];
   return (
     <section aria-labelledby="contact-information-title">
       <h2
         id="contact-information-title"
         className="text-sm font-extrabold uppercase tracking-wide"
       >
-        CONTACT INFORMATION
+        {pageContentValue(content, 'cms.contact.information_title')}
       </h2>
 
       <p className="mt-2 text-xs leading-5 text-neutral-600">
-        Reach out to us using any of the details below.
+        {pageContentValue(content, 'cms.contact.information_intro')}
       </p>
 
       <div className="mt-6 space-y-5">
@@ -66,7 +42,7 @@ export function ContactInformation() {
 
             <div className="min-w-0">
               <h3 className="text-xs font-bold">{title}</h3>
-              <div className="mt-1 text-xs leading-5 text-neutral-600">
+              <div className="mt-1 whitespace-pre-line text-xs leading-5 text-neutral-600">
                 {content}
               </div>
             </div>

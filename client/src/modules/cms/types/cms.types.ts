@@ -12,8 +12,11 @@ export type Promotion = {
   id: string;
   title: string;
   description: string | null;
+  imageUrl: string | null;
   discountType: string;
   discountValue: number;
+  targetType: 'ALL' | 'BRAND' | 'CATEGORY' | 'PRODUCT';
+  targetIds: string[];
   startDate: string;
   endDate: string;
   isActive: boolean;

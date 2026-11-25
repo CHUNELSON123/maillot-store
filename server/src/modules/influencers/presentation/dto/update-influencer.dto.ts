@@ -1,9 +1,14 @@
-import { IsIn, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class UpdateInfluencerDto {
   @IsOptional()
   @IsIn(['REJECTED'])
   status?: 'REJECTED';
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  rejectionReason?: string;
 
   @IsOptional()
   @IsString()

@@ -27,6 +27,8 @@ export type AggregateNewsletterSubscription = {
 export type NewsletterSubscriptionMinAggregateOutputType = {
   id: string | null
   email: string | null
+  phone: string | null
+  whatsapp_opt_in: boolean | null
   is_active: boolean | null
   subscribed_at: Date | null
   unsubscribed_at: Date | null
@@ -38,6 +40,8 @@ export type NewsletterSubscriptionMinAggregateOutputType = {
 export type NewsletterSubscriptionMaxAggregateOutputType = {
   id: string | null
   email: string | null
+  phone: string | null
+  whatsapp_opt_in: boolean | null
   is_active: boolean | null
   subscribed_at: Date | null
   unsubscribed_at: Date | null
@@ -49,6 +53,8 @@ export type NewsletterSubscriptionMaxAggregateOutputType = {
 export type NewsletterSubscriptionCountAggregateOutputType = {
   id: number
   email: number
+  phone: number
+  whatsapp_opt_in: number
   is_active: number
   subscribed_at: number
   unsubscribed_at: number
@@ -62,6 +68,8 @@ export type NewsletterSubscriptionCountAggregateOutputType = {
 export type NewsletterSubscriptionMinAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
+  whatsapp_opt_in?: true
   is_active?: true
   subscribed_at?: true
   unsubscribed_at?: true
@@ -73,6 +81,8 @@ export type NewsletterSubscriptionMinAggregateInputType = {
 export type NewsletterSubscriptionMaxAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
+  whatsapp_opt_in?: true
   is_active?: true
   subscribed_at?: true
   unsubscribed_at?: true
@@ -84,6 +94,8 @@ export type NewsletterSubscriptionMaxAggregateInputType = {
 export type NewsletterSubscriptionCountAggregateInputType = {
   id?: true
   email?: true
+  phone?: true
+  whatsapp_opt_in?: true
   is_active?: true
   subscribed_at?: true
   unsubscribed_at?: true
@@ -167,7 +179,9 @@ export type NewsletterSubscriptionGroupByArgs<ExtArgs extends runtime.Types.Exte
 
 export type NewsletterSubscriptionGroupByOutputType = {
   id: string
-  email: string
+  email: string | null
+  phone: string | null
+  whatsapp_opt_in: boolean
   is_active: boolean
   subscribed_at: Date
   unsubscribed_at: Date | null
@@ -199,7 +213,9 @@ export type NewsletterSubscriptionWhereInput = {
   OR?: Prisma.NewsletterSubscriptionWhereInput[]
   NOT?: Prisma.NewsletterSubscriptionWhereInput | Prisma.NewsletterSubscriptionWhereInput[]
   id?: Prisma.UuidFilter<"NewsletterSubscription"> | string
-  email?: Prisma.StringFilter<"NewsletterSubscription"> | string
+  email?: Prisma.StringNullableFilter<"NewsletterSubscription"> | string | null
+  phone?: Prisma.StringNullableFilter<"NewsletterSubscription"> | string | null
+  whatsapp_opt_in?: Prisma.BoolFilter<"NewsletterSubscription"> | boolean
   is_active?: Prisma.BoolFilter<"NewsletterSubscription"> | boolean
   subscribed_at?: Prisma.DateTimeFilter<"NewsletterSubscription"> | Date | string
   unsubscribed_at?: Prisma.DateTimeNullableFilter<"NewsletterSubscription"> | Date | string | null
@@ -210,7 +226,9 @@ export type NewsletterSubscriptionWhereInput = {
 
 export type NewsletterSubscriptionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  email?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsapp_opt_in?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   subscribed_at?: Prisma.SortOrder
   unsubscribed_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -222,20 +240,24 @@ export type NewsletterSubscriptionOrderByWithRelationInput = {
 export type NewsletterSubscriptionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  phone?: string
   AND?: Prisma.NewsletterSubscriptionWhereInput | Prisma.NewsletterSubscriptionWhereInput[]
   OR?: Prisma.NewsletterSubscriptionWhereInput[]
   NOT?: Prisma.NewsletterSubscriptionWhereInput | Prisma.NewsletterSubscriptionWhereInput[]
+  whatsapp_opt_in?: Prisma.BoolFilter<"NewsletterSubscription"> | boolean
   is_active?: Prisma.BoolFilter<"NewsletterSubscription"> | boolean
   subscribed_at?: Prisma.DateTimeFilter<"NewsletterSubscription"> | Date | string
   unsubscribed_at?: Prisma.DateTimeNullableFilter<"NewsletterSubscription"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"NewsletterSubscription"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"NewsletterSubscription"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"NewsletterSubscription"> | Date | string | null
-}, "id" | "email">
+}, "id" | "email" | "phone">
 
 export type NewsletterSubscriptionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  email?: Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsapp_opt_in?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   subscribed_at?: Prisma.SortOrder
   unsubscribed_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -252,7 +274,9 @@ export type NewsletterSubscriptionScalarWhereWithAggregatesInput = {
   OR?: Prisma.NewsletterSubscriptionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.NewsletterSubscriptionScalarWhereWithAggregatesInput | Prisma.NewsletterSubscriptionScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"NewsletterSubscription"> | string
-  email?: Prisma.StringWithAggregatesFilter<"NewsletterSubscription"> | string
+  email?: Prisma.StringNullableWithAggregatesFilter<"NewsletterSubscription"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"NewsletterSubscription"> | string | null
+  whatsapp_opt_in?: Prisma.BoolWithAggregatesFilter<"NewsletterSubscription"> | boolean
   is_active?: Prisma.BoolWithAggregatesFilter<"NewsletterSubscription"> | boolean
   subscribed_at?: Prisma.DateTimeWithAggregatesFilter<"NewsletterSubscription"> | Date | string
   unsubscribed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"NewsletterSubscription"> | Date | string | null
@@ -263,7 +287,9 @@ export type NewsletterSubscriptionScalarWhereWithAggregatesInput = {
 
 export type NewsletterSubscriptionCreateInput = {
   id?: string
-  email: string
+  email?: string | null
+  phone?: string | null
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: Date | string
   unsubscribed_at?: Date | string | null
@@ -274,7 +300,9 @@ export type NewsletterSubscriptionCreateInput = {
 
 export type NewsletterSubscriptionUncheckedCreateInput = {
   id?: string
-  email: string
+  email?: string | null
+  phone?: string | null
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: Date | string
   unsubscribed_at?: Date | string | null
@@ -285,7 +313,9 @@ export type NewsletterSubscriptionUncheckedCreateInput = {
 
 export type NewsletterSubscriptionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp_opt_in?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscribed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   unsubscribed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -296,7 +326,9 @@ export type NewsletterSubscriptionUpdateInput = {
 
 export type NewsletterSubscriptionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp_opt_in?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscribed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   unsubscribed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -307,7 +339,9 @@ export type NewsletterSubscriptionUncheckedUpdateInput = {
 
 export type NewsletterSubscriptionCreateManyInput = {
   id?: string
-  email: string
+  email?: string | null
+  phone?: string | null
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: Date | string
   unsubscribed_at?: Date | string | null
@@ -318,7 +352,9 @@ export type NewsletterSubscriptionCreateManyInput = {
 
 export type NewsletterSubscriptionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp_opt_in?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscribed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   unsubscribed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -329,7 +365,9 @@ export type NewsletterSubscriptionUpdateManyMutationInput = {
 
 export type NewsletterSubscriptionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatsapp_opt_in?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscribed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   unsubscribed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -341,6 +379,8 @@ export type NewsletterSubscriptionUncheckedUpdateManyInput = {
 export type NewsletterSubscriptionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  whatsapp_opt_in?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   subscribed_at?: Prisma.SortOrder
   unsubscribed_at?: Prisma.SortOrder
@@ -352,6 +392,8 @@ export type NewsletterSubscriptionCountOrderByAggregateInput = {
 export type NewsletterSubscriptionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  whatsapp_opt_in?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   subscribed_at?: Prisma.SortOrder
   unsubscribed_at?: Prisma.SortOrder
@@ -363,6 +405,8 @@ export type NewsletterSubscriptionMaxOrderByAggregateInput = {
 export type NewsletterSubscriptionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  whatsapp_opt_in?: Prisma.SortOrder
   is_active?: Prisma.SortOrder
   subscribed_at?: Prisma.SortOrder
   unsubscribed_at?: Prisma.SortOrder
@@ -376,6 +420,8 @@ export type NewsletterSubscriptionMinOrderByAggregateInput = {
 export type NewsletterSubscriptionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: boolean
   unsubscribed_at?: boolean
@@ -387,6 +433,8 @@ export type NewsletterSubscriptionSelect<ExtArgs extends runtime.Types.Extension
 export type NewsletterSubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: boolean
   unsubscribed_at?: boolean
@@ -398,6 +446,8 @@ export type NewsletterSubscriptionSelectCreateManyAndReturn<ExtArgs extends runt
 export type NewsletterSubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
+  phone?: boolean
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: boolean
   unsubscribed_at?: boolean
@@ -409,6 +459,8 @@ export type NewsletterSubscriptionSelectUpdateManyAndReturn<ExtArgs extends runt
 export type NewsletterSubscriptionSelectScalar = {
   id?: boolean
   email?: boolean
+  phone?: boolean
+  whatsapp_opt_in?: boolean
   is_active?: boolean
   subscribed_at?: boolean
   unsubscribed_at?: boolean
@@ -417,14 +469,16 @@ export type NewsletterSubscriptionSelectScalar = {
   deleted_at?: boolean
 }
 
-export type NewsletterSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "is_active" | "subscribed_at" | "unsubscribed_at" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["newsletterSubscription"]>
+export type NewsletterSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "whatsapp_opt_in" | "is_active" | "subscribed_at" | "unsubscribed_at" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["newsletterSubscription"]>
 
 export type $NewsletterSubscriptionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "NewsletterSubscription"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    email: string
+    email: string | null
+    phone: string | null
+    whatsapp_opt_in: boolean
     is_active: boolean
     subscribed_at: Date
     unsubscribed_at: Date | null
@@ -856,6 +910,8 @@ export interface Prisma__NewsletterSubscriptionClient<T, Null = never, ExtArgs e
 export interface NewsletterSubscriptionFieldRefs {
   readonly id: Prisma.FieldRef<"NewsletterSubscription", 'String'>
   readonly email: Prisma.FieldRef<"NewsletterSubscription", 'String'>
+  readonly phone: Prisma.FieldRef<"NewsletterSubscription", 'String'>
+  readonly whatsapp_opt_in: Prisma.FieldRef<"NewsletterSubscription", 'Boolean'>
   readonly is_active: Prisma.FieldRef<"NewsletterSubscription", 'Boolean'>
   readonly subscribed_at: Prisma.FieldRef<"NewsletterSubscription", 'DateTime'>
   readonly unsubscribed_at: Prisma.FieldRef<"NewsletterSubscription", 'DateTime'>

@@ -1,11 +1,15 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, MaxLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class SubscribeNewsletterDto {
   @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+    typeof value === 'string' ? value.trim() : value,
   )
-  @IsEmail()
   @MaxLength(254)
-  email!: string;
+  @IsString()
+  contact!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  whatsappOptIn?: boolean;
 }

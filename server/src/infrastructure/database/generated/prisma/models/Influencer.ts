@@ -52,6 +52,7 @@ export type InfluencerMinAggregateOutputType = {
   occupation: string | null
   bio: string | null
   application_note: string | null
+  rejection_reason: string | null
   instagram_url: string | null
   tiktok_url: string | null
   youtube_url: string | null
@@ -84,6 +85,7 @@ export type InfluencerMaxAggregateOutputType = {
   occupation: string | null
   bio: string | null
   application_note: string | null
+  rejection_reason: string | null
   instagram_url: string | null
   tiktok_url: string | null
   youtube_url: string | null
@@ -116,6 +118,7 @@ export type InfluencerCountAggregateOutputType = {
   occupation: number
   bio: number
   application_note: number
+  rejection_reason: number
   instagram_url: number
   tiktok_url: number
   youtube_url: number
@@ -160,6 +163,7 @@ export type InfluencerMinAggregateInputType = {
   occupation?: true
   bio?: true
   application_note?: true
+  rejection_reason?: true
   instagram_url?: true
   tiktok_url?: true
   youtube_url?: true
@@ -192,6 +196,7 @@ export type InfluencerMaxAggregateInputType = {
   occupation?: true
   bio?: true
   application_note?: true
+  rejection_reason?: true
   instagram_url?: true
   tiktok_url?: true
   youtube_url?: true
@@ -224,6 +229,7 @@ export type InfluencerCountAggregateInputType = {
   occupation?: true
   bio?: true
   application_note?: true
+  rejection_reason?: true
   instagram_url?: true
   tiktok_url?: true
   youtube_url?: true
@@ -343,6 +349,7 @@ export type InfluencerGroupByOutputType = {
   occupation: string | null
   bio: string | null
   application_note: string | null
+  rejection_reason: string | null
   instagram_url: string | null
   tiktok_url: string | null
   youtube_url: string | null
@@ -398,6 +405,7 @@ export type InfluencerWhereInput = {
   occupation?: Prisma.StringNullableFilter<"Influencer"> | string | null
   bio?: Prisma.StringNullableFilter<"Influencer"> | string | null
   application_note?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  rejection_reason?: Prisma.StringNullableFilter<"Influencer"> | string | null
   instagram_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
   tiktok_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
   youtube_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
@@ -434,6 +442,7 @@ export type InfluencerOrderByWithRelationInput = {
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   application_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejection_reason?: Prisma.SortOrderInput | Prisma.SortOrder
   instagram_url?: Prisma.SortOrderInput | Prisma.SortOrder
   tiktok_url?: Prisma.SortOrderInput | Prisma.SortOrder
   youtube_url?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -473,6 +482,7 @@ export type InfluencerWhereUniqueInput = Prisma.AtLeast<{
   occupation?: Prisma.StringNullableFilter<"Influencer"> | string | null
   bio?: Prisma.StringNullableFilter<"Influencer"> | string | null
   application_note?: Prisma.StringNullableFilter<"Influencer"> | string | null
+  rejection_reason?: Prisma.StringNullableFilter<"Influencer"> | string | null
   instagram_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
   tiktok_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
   youtube_url?: Prisma.StringNullableFilter<"Influencer"> | string | null
@@ -509,6 +519,7 @@ export type InfluencerOrderByWithAggregationInput = {
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   application_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  rejection_reason?: Prisma.SortOrderInput | Prisma.SortOrder
   instagram_url?: Prisma.SortOrderInput | Prisma.SortOrder
   tiktok_url?: Prisma.SortOrderInput | Prisma.SortOrder
   youtube_url?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -549,6 +560,7 @@ export type InfluencerScalarWhereWithAggregatesInput = {
   occupation?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
   bio?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
   application_note?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
+  rejection_reason?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
   instagram_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
   tiktok_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
   youtube_url?: Prisma.StringNullableWithAggregatesFilter<"Influencer"> | string | null
@@ -580,6 +592,7 @@ export type InfluencerCreateInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -616,6 +629,7 @@ export type InfluencerUncheckedCreateInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -650,6 +664,7 @@ export type InfluencerUpdateInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -686,6 +701,7 @@ export type InfluencerUncheckedUpdateInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -721,6 +737,7 @@ export type InfluencerCreateManyInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -752,6 +769,7 @@ export type InfluencerUpdateManyMutationInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -784,6 +802,7 @@ export type InfluencerUncheckedUpdateManyInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -821,6 +840,7 @@ export type InfluencerCountOrderByAggregateInput = {
   occupation?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   application_note?: Prisma.SortOrder
+  rejection_reason?: Prisma.SortOrder
   instagram_url?: Prisma.SortOrder
   tiktok_url?: Prisma.SortOrder
   youtube_url?: Prisma.SortOrder
@@ -858,6 +878,7 @@ export type InfluencerMaxOrderByAggregateInput = {
   occupation?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   application_note?: Prisma.SortOrder
+  rejection_reason?: Prisma.SortOrder
   instagram_url?: Prisma.SortOrder
   tiktok_url?: Prisma.SortOrder
   youtube_url?: Prisma.SortOrder
@@ -890,6 +911,7 @@ export type InfluencerMinOrderByAggregateInput = {
   occupation?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   application_note?: Prisma.SortOrder
+  rejection_reason?: Prisma.SortOrder
   instagram_url?: Prisma.SortOrder
   tiktok_url?: Prisma.SortOrder
   youtube_url?: Prisma.SortOrder
@@ -1005,6 +1027,7 @@ export type InfluencerCreateWithoutUserInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1039,6 +1062,7 @@ export type InfluencerUncheckedCreateWithoutUserInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1089,6 +1113,7 @@ export type InfluencerUpdateWithoutUserInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1123,6 +1148,7 @@ export type InfluencerUncheckedUpdateWithoutUserInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1157,6 +1183,7 @@ export type InfluencerCreateWithoutReferralsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1192,6 +1219,7 @@ export type InfluencerUncheckedCreateWithoutReferralsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1241,6 +1269,7 @@ export type InfluencerUpdateWithoutReferralsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1276,6 +1305,7 @@ export type InfluencerUncheckedUpdateWithoutReferralsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1309,6 +1339,7 @@ export type InfluencerCreateWithoutCommissionsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1344,6 +1375,7 @@ export type InfluencerUncheckedCreateWithoutCommissionsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1393,6 +1425,7 @@ export type InfluencerUpdateWithoutCommissionsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1428,6 +1461,7 @@ export type InfluencerUncheckedUpdateWithoutCommissionsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1461,6 +1495,7 @@ export type InfluencerCreateWithoutWithdrawalsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1496,6 +1531,7 @@ export type InfluencerUncheckedCreateWithoutWithdrawalsInput = {
   occupation?: string | null
   bio?: string | null
   application_note?: string | null
+  rejection_reason?: string | null
   instagram_url?: string | null
   tiktok_url?: string | null
   youtube_url?: string | null
@@ -1545,6 +1581,7 @@ export type InfluencerUpdateWithoutWithdrawalsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1580,6 +1617,7 @@ export type InfluencerUncheckedUpdateWithoutWithdrawalsInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   application_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejection_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instagram_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tiktok_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   youtube_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1663,6 +1701,7 @@ export type InfluencerSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   occupation?: boolean
   bio?: boolean
   application_note?: boolean
+  rejection_reason?: boolean
   instagram_url?: boolean
   tiktok_url?: boolean
   youtube_url?: boolean
@@ -1700,6 +1739,7 @@ export type InfluencerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   occupation?: boolean
   bio?: boolean
   application_note?: boolean
+  rejection_reason?: boolean
   instagram_url?: boolean
   tiktok_url?: boolean
   youtube_url?: boolean
@@ -1733,6 +1773,7 @@ export type InfluencerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   occupation?: boolean
   bio?: boolean
   application_note?: boolean
+  rejection_reason?: boolean
   instagram_url?: boolean
   tiktok_url?: boolean
   youtube_url?: boolean
@@ -1766,6 +1807,7 @@ export type InfluencerSelectScalar = {
   occupation?: boolean
   bio?: boolean
   application_note?: boolean
+  rejection_reason?: boolean
   instagram_url?: boolean
   tiktok_url?: boolean
   youtube_url?: boolean
@@ -1782,7 +1824,7 @@ export type InfluencerSelectScalar = {
   customer_discount_rate?: boolean
 }
 
-export type InfluencerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "referral_code" | "status" | "commission_rate" | "first_name" | "last_name" | "phone" | "country" | "date_of_birth" | "gender" | "city" | "occupation" | "bio" | "application_note" | "instagram_url" | "tiktok_url" | "youtube_url" | "facebook_url" | "x_url" | "profile_picture_url" | "terms_accepted_at" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by" | "customer_discount_rate", ExtArgs["result"]["influencer"]>
+export type InfluencerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "referral_code" | "status" | "commission_rate" | "first_name" | "last_name" | "phone" | "country" | "date_of_birth" | "gender" | "city" | "occupation" | "bio" | "application_note" | "rejection_reason" | "instagram_url" | "tiktok_url" | "youtube_url" | "facebook_url" | "x_url" | "profile_picture_url" | "terms_accepted_at" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by" | "customer_discount_rate", ExtArgs["result"]["influencer"]>
 export type InfluencerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referrals?: boolean | Prisma.Influencer$referralsArgs<ExtArgs>
@@ -1821,6 +1863,7 @@ export type $InfluencerPayload<ExtArgs extends runtime.Types.Extensions.Internal
     occupation: string | null
     bio: string | null
     application_note: string | null
+    rejection_reason: string | null
     instagram_url: string | null
     tiktok_url: string | null
     youtube_url: string | null
@@ -2277,6 +2320,7 @@ export interface InfluencerFieldRefs {
   readonly occupation: Prisma.FieldRef<"Influencer", 'String'>
   readonly bio: Prisma.FieldRef<"Influencer", 'String'>
   readonly application_note: Prisma.FieldRef<"Influencer", 'String'>
+  readonly rejection_reason: Prisma.FieldRef<"Influencer", 'String'>
   readonly instagram_url: Prisma.FieldRef<"Influencer", 'String'>
   readonly tiktok_url: Prisma.FieldRef<"Influencer", 'String'>
   readonly youtube_url: Prisma.FieldRef<"Influencer", 'String'>

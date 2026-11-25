@@ -1,10 +1,10 @@
-import { createReferralCommissionIfComplete } from './referral-commission';
+import { createReferralCommissionIfPaid } from './referral-commission';
 
-describe('createReferralCommissionIfComplete', () => {
+describe('createReferralCommissionIfPaid', () => {
   it('does not create commission before payment is PAID', async () => {
     const tx = { order: { findFirst: jest.fn() } };
 
-    await createReferralCommissionIfComplete(tx, 'order-id', 'PENDING');
+    await createReferralCommissionIfPaid(tx, 'order-id', 'PENDING');
 
     expect(tx.order.findFirst).not.toHaveBeenCalled();
   });
@@ -12,6 +12,8 @@ describe('createReferralCommissionIfComplete', () => {
   it('creates the commission once delivery and payment are complete', async () => {
     const commissionCreate = jest.fn();
     const tx = {
+      user: { findMany: jest.fn().mockResolvedValue([{ id: 'admin-id' }]) },
+      notification: { createMany: jest.fn(), create: jest.fn() },
       order: {
         findFirst: jest.fn().mockResolvedValue({
           influencer_discount_amount: 100,
@@ -22,7 +24,7 @@ describe('createReferralCommissionIfComplete', () => {
         findFirst: jest.fn().mockResolvedValue({
           id: 'referral-id',
           influencer_id: 'influencer-id',
-          influencer: { status: 'ACTIVE', commission_rate: 10 },
+          influencer: { status: 'ACTIVE', commission_rate: 10, user_id: 'influencer-user-id' },
         }),
       },
       commission: {
@@ -31,7 +33,17 @@ describe('createReferralCommissionIfComplete', () => {
       },
     };
 
-    await createReferralCommissionIfComplete(tx, 'order-id', 'PAID');
+    await createReferralCommissionIfPaid(tx, 'order-id', 'PAID');
+
+    expect(tx.notification.create).toHaveBeenCalledWith({ data: expect.objectContaining({ user_id: 'influencer-user-id', type: 'COMMISSION', target_url: '/influencer/portal/earnings?tab=commissions' }) });
+
+    expect(tx.notification.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        user_id: 'admin-id',
+        type: 'COMMISSION',
+        target_url: '/admin/influencers?influencer=influencer-id#commission-review',
+      })],
+    });
 
     expect(commissionCreate).toHaveBeenCalledWith({
       data: {

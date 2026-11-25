@@ -20,6 +20,8 @@ describe('PrismaPaymentRepository.updateStatus', () => {
       updated_at: now,
     });
     const transaction = {
+      $queryRaw: jest.fn(),
+      referral: { findFirst: jest.fn().mockResolvedValue(null) },
       payment: {
         findFirst: jest.fn().mockResolvedValue({
           id: 'payment-id',
@@ -67,6 +69,8 @@ describe('PrismaPaymentRepository.updateStatus', () => {
   it('deducts stock when payment confirms a legacy pending order', async () => {
     const now = new Date('2026-10-19T10:00:00.000Z');
     const transaction = {
+      $queryRaw: jest.fn(),
+      referral: { findFirst: jest.fn().mockResolvedValue(null) },
       payment: {
         findFirst: jest.fn().mockResolvedValue({
           id: 'payment-id',
@@ -96,7 +100,7 @@ describe('PrismaPaymentRepository.updateStatus', () => {
         }),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
-      inventory: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+      inventory: { findFirst: jest.fn().mockResolvedValue(null), updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
       inventoryMovement: { create: jest.fn().mockResolvedValue({}) },
     };
     const prisma = {

@@ -4,17 +4,20 @@ import {
 } from "../types/catalogue.types";
 
 import { ProductCard } from "./product-card";
+import { Promotion } from "@/modules/cms/types/cms.types";
 
 type Props = {
   products: Product[];
   images?: ProductImage[];
   limit?: number;
+  promotions?: Promotion[];
 };
 
 export function ProductGrid({
   products,
   images = [],
   limit,
+  promotions = [],
 }: Props) {
   const visibleProducts =
     limit !== undefined
@@ -30,11 +33,12 @@ export function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
       {visibleProducts.map((product) => (
         <ProductCard
           key={product.id}
           product={product}
+          promotions={promotions}
           image={images.find(
             (image) =>
               image.productId === product.id &&

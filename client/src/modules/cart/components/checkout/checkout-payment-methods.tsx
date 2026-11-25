@@ -11,6 +11,8 @@ type Props = {
   ) => void;
   termsAccepted: boolean;
   onTermsChange: (accepted: boolean) => void;
+  enabledMethods: PaymentMethod[];
+  paymentInstructions?: string;
 };
 
 const paymentMethods: {
@@ -45,6 +47,8 @@ export function CheckoutPaymentMethods({
   onPaymentMethodChange,
   termsAccepted,
   onTermsChange,
+  enabledMethods,
+  paymentInstructions,
 }: Props) {
   return (
     <section className="mt-4">
@@ -59,7 +63,7 @@ export function CheckoutPaymentMethods({
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {paymentMethods.map((method) => {
+        {paymentMethods.filter((method) => enabledMethods.includes(method.id)).map((method) => {
           const selected =
             paymentMethod === method.id;
 
@@ -103,6 +107,8 @@ export function CheckoutPaymentMethods({
           );
         })}
       </div>
+      {enabledMethods.length === 0 && <p role="alert" className="mt-2 text-[10px] text-red-700">No payment method is currently enabled. Please contact the store.</p>}
+      {paymentInstructions && <p className="mt-2 border border-amber-200 bg-amber-50 p-2 text-[10px] text-amber-900">{paymentInstructions}</p>}
 
       <label className="mt-3 flex cursor-pointer items-center gap-2 text-[10px]">
         <input

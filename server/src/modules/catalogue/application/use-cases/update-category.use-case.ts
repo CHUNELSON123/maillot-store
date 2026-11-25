@@ -4,6 +4,7 @@ import { CategoryRepository } from '../../domain/repositories/category.repositor
 export interface UpdateCategoryInput {
   name?: string;
   description?: string;
+  imageUrl?: string;
 }
 
 @Injectable()

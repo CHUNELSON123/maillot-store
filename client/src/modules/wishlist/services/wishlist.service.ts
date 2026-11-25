@@ -28,7 +28,7 @@ const UPDATED_EVENT = "maillot-wishlist-updated";
 let cachedItems: WishlistItem[] = [];
 let cachedToken: string | null = null;
 let hasLoaded = false;
-let loadingRequest: Promise<WishlistItem[]> | null = null;
+let loadingRequest: { token: string; promise: Promise<WishlistItem[]> } | null = null;
 
 function notifyUpdated(): void {
   if (typeof window !== "undefined") {
@@ -70,16 +70,6 @@ function saveGuestItems(items: WishlistItem[]): void {
   notifyUpdated();
 }
 
-function requireToken(): string {
-  const token = authStorage.getToken();
-
-  if (!token) {
-    throw new Error("Please sign in to manage your account wishlist.");
-  }
-
-  return token;
-}
-
 function mapApiItem(item: WishlistApiItem): WishlistItem {
   const image: ProductImage | null = item.product.imageUrl
     ? ({
@@ -116,16 +106,18 @@ async function fetchAccountItems(token: string): Promise<WishlistItem[]> {
     token,
   });
 
-  cachedItems = response.map(mapApiItem);
-  cachedToken = token;
-  hasLoaded = true;
-
-  return cachedItems;
+  const items = response.map(mapApiItem);
+  if (authStorage.getStorefrontToken() === token) {
+    cachedItems = items;
+    cachedToken = token;
+    hasLoaded = true;
+  }
+  return items;
 }
 
 export const wishlistService = {
   async getItems(): Promise<WishlistItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestItems();
@@ -139,20 +131,22 @@ export const wishlistService = {
       return cachedItems;
     }
 
-    if (!loadingRequest) {
-      loadingRequest = fetchAccountItems(token).finally(() => {
-        loadingRequest = null;
-      });
+    if (!loadingRequest || loadingRequest.token !== token) {
+      const request = { token, promise: fetchAccountItems(token) };
+      loadingRequest = request;
+      void request.promise.finally(() => {
+        if (loadingRequest === request) loadingRequest = null;
+      }).catch(() => undefined);
     }
 
-    return loadingRequest;
+    return loadingRequest.promise;
   },
 
   async addItem(
     product: Product,
     image: ProductImage | null = null,
   ): Promise<WishlistItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestItems();
@@ -189,7 +183,7 @@ export const wishlistService = {
   },
 
   async removeItem(productId: string): Promise<WishlistItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const updatedItems = readGuestItems().filter(
@@ -227,7 +221,7 @@ export const wishlistService = {
   },
 
   isInWishlist(productId: string): boolean {
-    const items = authStorage.getToken()
+    const items = authStorage.getStorefrontToken()
       ? cachedItems
       : readGuestItems();
 
@@ -235,7 +229,7 @@ export const wishlistService = {
   },
 
   async clear(): Promise<void> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       saveGuestItems([]);
@@ -250,7 +244,8 @@ export const wishlistService = {
   },
 
   async syncGuestItems(): Promise<void> {
-    const token = requireToken();
+    const token = authStorage.getStorefrontToken();
+    if (!token) return;
     const guestItems = readGuestItems();
 
     if (guestItems.length === 0) return;

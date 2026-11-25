@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, Optional } from '@nestjs/common';
+import { WhatsAppNotificationService } from '../../../communications/infrastructure/whatsapp-notification.service';
 import {
   InfluencerRepository,
   UpdateInfluencerData,
@@ -6,10 +7,12 @@ import {
 
 @Injectable()
 export class UpdateInfluencerUseCase {
-  constructor(private readonly influencerRepository: InfluencerRepository) {}
+  private readonly logger = new Logger(UpdateInfluencerUseCase.name);
+  constructor(private readonly influencerRepository: InfluencerRepository, @Optional() private readonly whatsapp?: WhatsAppNotificationService) {}
 
   async execute(influencerId: string, data: UpdateInfluencerData) {
     if (data.status === 'REJECTED') {
+      if (!data.rejectionReason?.trim()) throw new BadRequestException('A reason for rejection is required');
       const influencer = await this.influencerRepository.findById(influencerId);
       if (!influencer) throw new ConflictException('Influencer not found');
       if (influencer.status !== 'PENDING') {
@@ -47,6 +50,14 @@ export class UpdateInfluencerUseCase {
       };
     }
 
-    return this.influencerRepository.update(influencerId, data);
+    const updated = await this.influencerRepository.update(influencerId, { ...data, rejectionReason: data.rejectionReason?.trim() });
+    if (data.status === 'REJECTED') {
+      const profile = await this.influencerRepository.findProfileByUserId(updated.userId);
+      if (profile?.profile.phone) {
+        try { await this.whatsapp?.notifyInfluencerRejected(profile.profile.phone, profile.profile.firstName ?? 'Influencer', data.rejectionReason!.trim()); }
+        catch (error) { this.logger.warn(`Rejection notification failed: ${String(error)}`); }
+      }
+    }
+    return updated;
   }
 }

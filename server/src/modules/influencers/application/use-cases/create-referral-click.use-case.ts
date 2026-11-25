@@ -12,10 +12,10 @@ export class CreateReferralClickUseCase {
       throw new BadRequestException('Invalid referral code');
     }
     const token = randomBytes(32).toString('hex');
-    await this.influencers.createReferralClick(
+    const customerDiscountRate = await this.influencers.createReferralClick(
       referralCode,
       createHash('sha256').update(token).digest('hex'),
     );
-    return { attributionToken: token };
+    return { attributionToken: token, customerDiscountRate };
   }
 }

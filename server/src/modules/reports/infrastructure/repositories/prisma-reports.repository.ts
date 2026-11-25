@@ -51,6 +51,9 @@ export class PrismaReportsRepository implements ReportsRepository {
       confirmedOrders,
       cancelledOrders,
       sales,
+      ordersForPeriod,
+      items,
+      sourceGroups,
     ] = await Promise.all([
       this.prisma.order.count({ where }),
 
@@ -77,7 +80,60 @@ export class PrismaReportsRepository implements ReportsRepository {
           total_amount: true,
         },
       }),
+      this.prisma.order.findMany({
+        where,
+        select: { created_at: true, status: true, total_amount: true },
+      }),
+      this.prisma.orderItem.findMany({
+        where: { deleted_at: null, order: { ...where, status: 'CONFIRMED' } },
+        select: {
+          quantity: true,
+          unit_price: true,
+          variant: { select: { product: { select: { id: true, name: true } } } },
+        },
+      }),
+      this.prisma.order.groupBy({
+        by: ['source'],
+        where: { ...where, status: 'CONFIRMED' },
+        _count: { _all: true },
+        _sum: { total_amount: true },
+      }),
     ]);
+
+    const endExclusive = filter?.endDate
+      ? new Date(startOfUtcDay(filter.endDate).getTime() + DAY_MS)
+      : new Date(startOfUtcDay(new Date()).getTime() + DAY_MS);
+    const startInclusive = filter?.startDate
+      ? startOfUtcDay(filter.startDate)
+      : new Date(endExclusive.getTime() - DAY_MS * 7);
+    const dayCount = Math.max(1, Math.min(366, Math.ceil((endExclusive.getTime() - startInclusive.getTime()) / DAY_MS)));
+    const revenueByDay = new Map<string, number>();
+    const ordersByDay = new Map<string, number>();
+    for (const order of ordersForPeriod) {
+      const key = utcDayKey(order.created_at);
+      ordersByDay.set(key, (ordersByDay.get(key) ?? 0) + 1);
+      if (order.status === 'CONFIRMED') {
+        revenueByDay.set(key, (revenueByDay.get(key) ?? 0) + Number(order.total_amount));
+      }
+    }
+    const revenueOverTime = Array.from({ length: dayCount }, (_, index) => {
+      const day = new Date(startInclusive.getTime() + index * DAY_MS);
+      return { label: day.toLocaleDateString('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }), value: revenueByDay.get(utcDayKey(day)) ?? 0 };
+    });
+    const ordersOverTime = Array.from({ length: dayCount }, (_, index) => {
+      const day = new Date(startInclusive.getTime() + index * DAY_MS);
+      return { label: day.toLocaleDateString('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }), value: ordersByDay.get(utcDayKey(day)) ?? 0 };
+    });
+    const productTotals = new Map<string, { id: string; name: string; quantity: number; revenue: number }>();
+    for (const item of items) {
+      const product = item.variant.product;
+      const current = productTotals.get(product.id) ?? { id: product.id, name: product.name, quantity: 0, revenue: 0 };
+      current.quantity += item.quantity;
+      current.revenue += Number(item.unit_price) * item.quantity;
+      productTotals.set(product.id, current);
+    }
+    const topProducts = [...productTotals.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 5);
+    const salesBySource = sourceGroups.map((group) => ({ source: group.source, orders: group._count._all, revenue: Number(group._sum.total_amount ?? 0) }));
 
     return new SalesReportEntity(
       totalOrders,
@@ -86,6 +142,10 @@ export class PrismaReportsRepository implements ReportsRepository {
       Number(sales._sum.total_amount ?? 0),
       filter?.startDate ?? null,
       filter?.endDate ?? null,
+      revenueOverTime,
+      ordersOverTime,
+      topProducts,
+      salesBySource,
     );
   }
 

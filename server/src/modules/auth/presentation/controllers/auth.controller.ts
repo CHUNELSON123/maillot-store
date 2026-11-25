@@ -6,6 +6,8 @@ import { JwtAuthGuard } from '../../../../common/guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { RolesGuard } from '../../../../common/guards/roles.guard';
+import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -23,6 +25,7 @@ export class AuthController {
   constructor(
     private readonly registerCustomerUseCase: RegisterCustomerUseCase,
     private readonly loginUseCase: LoginUseCase,
+    private readonly changePasswordUseCase: ChangePasswordUseCase,
   ) {}
 
   @Post('register')
@@ -48,5 +51,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getMe(@Req() request: AuthenticatedRequest) {
     return request.user;
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async changePassword(@Req() request: AuthenticatedRequest, @Body() dto: ChangePasswordDto) {
+    await this.changePasswordUseCase.execute(request.user.id, dto.currentPassword, dto.newPassword);
+    return { message: 'Password updated successfully' };
   }
 }

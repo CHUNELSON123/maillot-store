@@ -12,5 +12,6 @@ export class ReferralEntity {
     public readonly saleAmount: number | null = null,
     public readonly customerLabel: string | null = null,
     public readonly productNames: string[] = [],
+    public readonly commissionRateSnapshot: number | null = null,
   ) {}
 }

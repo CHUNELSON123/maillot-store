@@ -45,7 +45,7 @@ export class WithdrawalController {
     @Req() request: AuthenticatedRequest,
     @Body() dto: CreateWithdrawalRequestDto,
   ) {
-    return this.createWithdrawalRequestUseCase.executeForUser(request.user.id, dto.amount);
+    return this.createWithdrawalRequestUseCase.executeForUser(request.user.id, dto.amount, dto.payoutMethod, dto.payoutPhone);
   }
 
   @Get('me')
@@ -63,6 +63,8 @@ export class WithdrawalController {
     return this.createWithdrawalRequestUseCase.execute({
       influencerId,
       amount: dto.amount,
+      payoutMethod: dto.payoutMethod,
+      payoutPhone: dto.payoutPhone,
     });
   }
 

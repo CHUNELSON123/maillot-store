@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { Product, ProductImage } from "@/modules/catalogue/types/catalogue.types";
 import { ProductCard } from "@/modules/catalogue/components/product-card";
+import { Promotion } from "@/modules/cms/types/cms.types";
 
 type FeaturedProductsProps = {
   products: Product[];
   images: ProductImage[];
+  promotions?: Promotion[];
 };
 
-export function FeaturedProducts({ products, images }: FeaturedProductsProps) {
+export function FeaturedProducts({ products, images, promotions = [] }: FeaturedProductsProps) {
   const featuredProducts = products.slice(0, 6);
 
   return (
@@ -24,11 +26,12 @@ export function FeaturedProducts({ products, images }: FeaturedProductsProps) {
         </div>
 
         {featuredProducts.length > 0 ? (
-          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
             {featuredProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
+                promotions={promotions}
                 image={images.find(
                   (image) =>
                     image.productId === product.id && image.isPrimary,

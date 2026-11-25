@@ -8,18 +8,19 @@ export function useAdminSection(section: AdminSection) {
   const [data, setData] = useState<AdminPage>({ items: [], total: 0, page: 1, limit: 20 });
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [roleId, setRoleId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const refresh = useCallback(async (page = data.page, term = search, statusFilter = status) => {
+  const refresh = useCallback(async (page = data.page, term = search, statusFilter = status, roleFilter = roleId) => {
     setLoading(true);
     setError('');
-    try { setData(await adminService.getSection(section, page, term, statusFilter || undefined)); }
+    try { setData(await adminService.getSection(section, page, term, statusFilter || undefined, roleFilter || undefined)); }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not load this section.'); }
     finally { setLoading(false); }
-  }, [data.page, search, section, status]);
+  }, [data.page, search, section, status, roleId]);
   useEffect(() => { void refresh(1, ''); }, [section]);
   const update = (next: Partial<AdminPage>) => setData((current) => ({ ...current, ...next }));
-  return { ...data, search, setSearch, status, setStatus, loading, error, refresh, update };
+  return { ...data, search, setSearch, status, setStatus, roleId, setRoleId, loading, error, refresh, update };
 }
 
 export function getRecordValue(record: AdminRecord, path: string): unknown {

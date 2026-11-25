@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { ReactNode, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Bell, Boxes, ChartNoAxesCombined, ChevronDown, ClipboardList, ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingBag, Truck, Users, Wallet, X } from 'lucide-react';
+import { usePathname, useSelectedLayoutSegments } from 'next/navigation';
+import { Bell, Boxes, ChartNoAxesCombined, ChevronDown, ClipboardList, ExternalLink, FileText, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingBag, Truck, Users, Wallet } from 'lucide-react';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 import { authService } from '@/modules/auth/services/auth.service';
+import { useNotifications } from '@/modules/notifications/hooks/use-notifications';
+import { MobilePortalNavigation } from '@/components/shared/mobile-portal-navigation';
 
 const nav = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -26,12 +28,19 @@ const nav = [
 export function AdminPortalShell({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const path = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const routeSegments = useSelectedLayoutSegments();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const role = user?.roleName;
+  const activeSection = routeSegments[0] ?? path.split('/')[2] ?? 'dashboard';
   const allowed = role === 'Administrator' || role === 'Staff';
+  const { notifications } = useNotifications(isAuthenticated && allowed);
+  const unreadCount = notifications.filter((notification) => !notification.isRead).length;
   const signOut = () => { authService.logout(); logout(); window.location.assign('/login'); };
   const visibleNav = role === 'Administrator' ? nav : nav.filter(({ href }) => href !== '/admin/users' && href !== '/admin/settings');
-  const links = <>{visibleNav.map(({ label, href, icon: Icon }) => <Link key={href} href={href} onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-3 py-2.5 text-xs font-medium transition ${path === href ? 'bg-[#a86c00] text-white' : 'text-neutral-200 hover:bg-neutral-800'}`}><Icon size={15}/>{label}</Link>)}<button onClick={signOut} className="mt-auto flex w-full items-center gap-3 border-t border-neutral-800 px-3 py-4 text-xs text-white hover:text-[#D4AF37]"><LogOut size={15}/>Logout</button></>;
+  const mobilePrimaryHrefs = ['/admin/dashboard', '/admin/products', '/admin/orders', '/admin/inventory'];
+  const mobilePrimary = mobilePrimaryHrefs.flatMap(href => visibleNav.filter(item => item.href === href)).map(item => ({ ...item, exact: item.href === '/admin/dashboard' }));
+  const mobileMore = visibleNav.filter(item => !mobilePrimaryHrefs.includes(item.href));
+  const links = <>{visibleNav.map(({ label, href, icon: Icon }) => { const section = href.split('/')[2]; const isActive = activeSection === section || (path.startsWith(`${href}/`) && section === activeSection); return <Link key={href} title={sidebarCollapsed ? label : undefined} href={href} aria-current={isActive ? 'page' : undefined} className={`flex items-center gap-3 px-3 py-2.5 text-xs font-medium transition ${isActive ? 'bg-[#a86c00] text-white' : 'text-neutral-200 hover:bg-neutral-800'}`}><Icon size={15}/><span className={sidebarCollapsed ? 'sr-only' : ''}>{label}</span></Link>; })}<button onClick={signOut} className="mt-auto flex w-full items-center gap-3 border-t border-neutral-800 px-3 py-4 text-xs text-white hover:text-[#D4AF37]"><LogOut size={15}/><span className={sidebarCollapsed ? 'sr-only' : ''}>Logout</span></button></>;
 
   if (path === '/admin/setup' || path === '/admin/register' || path === '/admin/login') return <>{children}</>;
 
@@ -40,11 +49,19 @@ export function AdminPortalShell({ children }: { children: ReactNode }) {
 
   return <div className="min-h-screen bg-[#f5f5f5] text-neutral-950">
     <header className="fixed inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 sm:px-6">
-      <div className="flex items-center gap-4"><button className="lg:hidden" aria-label="Open admin navigation" onClick={() => setMobileOpen(true)}><Menu size={20}/></button><Link href="/" className="text-lg font-black leading-none">MAILLOT<span className="block text-[10px] font-bold text-[#b4830b]">STORE</span></Link><span className="hidden border-l border-neutral-200 pl-4 text-xs font-semibold text-neutral-500 sm:block">ADMINISTRATION</span></div>
-      <div className="flex items-center gap-3"><Link href="/" className="inline-flex items-center gap-1.5 border border-neutral-300 px-3 py-2 text-[11px] font-semibold hover:border-[#D4AF37] hover:text-[#8b6100]"><ExternalLink size={14}/><span className="hidden sm:inline">View storefront</span><span className="sm:hidden">Store</span></Link><Link href="/account/notifications" aria-label="Notifications" className="text-neutral-600"><Bell size={18}/></Link><div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-full bg-neutral-900 text-xs font-bold text-white">{user?.email.slice(0,1).toUpperCase()}</span><span className="hidden text-xs sm:block">{user?.email}<small className="block text-[10px] text-neutral-500">{role}</small></span><ChevronDown size={13}/></div></div>
+      <div className="flex items-center gap-4">
+        <button className="hidden lg:grid h-9 w-9 place-items-center text-neutral-700 hover:bg-neutral-100" aria-label={sidebarCollapsed ? 'Show admin sidebar' : 'Hide admin sidebar'} title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'} onClick={() => setSidebarCollapsed((current) => !current)}><Menu size={20}/></button>
+        <Link href="/" className="text-lg font-black leading-none">MAILLOT<span className="block text-[10px] font-bold text-[#b4830b]">STORE</span></Link>
+        <span className="hidden border-l border-neutral-200 pl-4 text-xs font-semibold text-neutral-500 sm:block">ADMINISTRATION</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <Link href="/" className="inline-flex items-center gap-1.5 border border-neutral-300 px-3 py-2 text-[11px] font-semibold hover:border-[#D4AF37] hover:text-[#8b6100]"><ExternalLink size={14}/><span className="hidden sm:inline">View storefront</span><span className="sm:hidden">Store</span></Link>
+        <Link href="/admin/notifications" aria-label={`Notifications, ${unreadCount} unread`} className="relative text-neutral-600"><Bell size={18}/>{unreadCount > 0 && <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}</Link>
+        <div className="flex items-center gap-2"><span className="grid h-8 w-8 place-items-center rounded-full bg-neutral-900 text-xs font-bold text-white">{user?.email.slice(0,1).toUpperCase()}</span><span className="hidden text-xs sm:block">{user?.email}<small className="block text-[10px] text-neutral-500">{role === 'Administrator' ? 'Super Administrator' : role}</small></span><ChevronDown size={13}/></div>
+      </div>
     </header>
-    <aside className="fixed bottom-0 left-0 top-16 z-20 hidden w-[230px] flex-col bg-[#080808] lg:flex"><p className="px-4 pb-3 pt-5 text-[10px] font-extrabold uppercase tracking-widest text-[#D4AF37]">ADMINISTRATION</p><nav className="flex flex-1 flex-col overflow-y-auto">{links}</nav></aside>
-    {mobileOpen && <div className="fixed inset-0 z-50 bg-black/60 lg:hidden"><div className="flex h-full w-[min(300px,85vw)] flex-col bg-[#080808] p-3"><div className="flex items-center justify-between px-2 py-3"><span className="text-[10px] font-extrabold tracking-widest text-[#D4AF37]">ADMINISTRATION</span><button aria-label="Close navigation" onClick={() => setMobileOpen(false)}><X className="text-white"/></button></div><nav className="flex flex-1 flex-col overflow-y-auto">{links}</nav></div></div>}
-    <main className="min-h-screen px-4 pb-10 pt-20 sm:px-6 lg:ml-[230px] lg:px-8">{children}</main>
+    <aside className={`fixed bottom-0 left-0 z-20 hidden flex-col bg-[#080808] pt-0 lg:flex ${sidebarCollapsed ? 'w-16' : 'w-[230px]'} top-16`}><p className={`px-4 pb-3 pt-5 text-[10px] font-extrabold uppercase tracking-widest text-[#D4AF37] ${sidebarCollapsed ? 'sr-only' : ''}`}>ADMINISTRATION</p><nav className="flex flex-1 flex-col overflow-y-auto">{links}</nav></aside>
+    <main className={`min-h-screen px-4 pb-24 pt-20 sm:px-6 lg:pb-10 lg:px-8 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-[230px]'}`}>{children}</main>
+    <MobilePortalNavigation primary={mobilePrimary} more={mobileMore} onLogout={signOut}/>
   </div>;
 }

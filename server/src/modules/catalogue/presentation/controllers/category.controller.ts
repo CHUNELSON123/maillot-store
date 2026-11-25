@@ -39,6 +39,7 @@ export class CategoryController {
     return this.createCategoryUseCase.execute({
       name: dto.name,
       description: dto.description,
+      imageUrl: dto.imageUrl,
     });
   }
 
@@ -59,6 +60,7 @@ export class CategoryController {
     return this.updateCategoryUseCase.execute(id, {
       name: dto.name,
       description: dto.description,
+      imageUrl: dto.imageUrl,
     });
   }
 

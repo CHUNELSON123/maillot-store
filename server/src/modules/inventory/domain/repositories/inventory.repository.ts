@@ -12,6 +12,13 @@ export interface UpdateInventoryData {
 }
 
 export abstract class InventoryRepository {
+  abstract getSummary(): Promise<{
+    totalItems: number;
+    totalQuantity: number;
+    lowStockItems: number;
+    outOfStockItems: number;
+  }>;
+
   abstract create(data: CreateInventoryData): Promise<InventoryEntity>;
 
   abstract findByVariantId(variantId: string): Promise<InventoryEntity | null>;

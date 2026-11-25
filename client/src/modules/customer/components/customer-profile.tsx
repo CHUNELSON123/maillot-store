@@ -4,11 +4,11 @@ export function CustomerProfile() {
   return (
     <section>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+          <h1 className="text-xl font-bold text-neutral-900">
           My Profile
         </h1>
 
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-1 text-xs text-neutral-500">
           Manage your personal information.
         </p>
       </div>

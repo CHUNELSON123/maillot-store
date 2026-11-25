@@ -1,0 +1,2 @@
+-- Promotion display metadata and targeting are stored in the existing system_settings table.
+-- This migration intentionally has no physical schema changes.

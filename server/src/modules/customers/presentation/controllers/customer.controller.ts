@@ -36,7 +36,7 @@ interface AuthenticatedRequest {
   version: '1',
 })
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('Customer')
+@Roles('Customer', 'Influencer')
 export class CustomerController {
   constructor(
     private readonly getCustomerProfileUseCase: GetCustomerProfileUseCase,

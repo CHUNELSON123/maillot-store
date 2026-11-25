@@ -15,6 +15,7 @@ export interface UpdateInfluencerData {
   customerDiscountRate?: number;
   referralCode?: string;
   status?: 'REJECTED';
+  rejectionReason?: string;
 }
 
 export interface CreateReferralData {
@@ -22,6 +23,7 @@ export interface CreateReferralData {
   orderId?: string;
   referralCode: string;
   status: string;
+  commissionRateSnapshot?: number | null;
 }
 
 export interface RegisterInfluencerData {
@@ -102,5 +104,5 @@ export abstract class InfluencerRepository {
   abstract createReferralClick(
     referralCode: string,
     tokenHash: string,
-  ): Promise<void>;
+  ): Promise<number>;
 }

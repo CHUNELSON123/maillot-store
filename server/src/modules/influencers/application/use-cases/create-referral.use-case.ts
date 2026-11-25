@@ -15,10 +15,14 @@ export class CreateReferralUseCase {
       throw new BadRequestException('Referral code is required');
     }
 
+    const influencer = await this.influencerRepository.findById(data.influencerId);
+    if (!influencer) throw new BadRequestException('Influencer not found');
+
     return this.influencerRepository.createReferral({
       ...data,
       referralCode,
       status: data.status.toUpperCase(),
+      commissionRateSnapshot: data.orderId ? influencer.commissionRate : null,
     });
   }
 }

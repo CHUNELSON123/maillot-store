@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { Banner } from "@/modules/cms/types/cms.types";
+import { pageContentValue } from "@/modules/cms/utils/page-content-defaults";
 
 interface HomeHeroProps {
   banner?: Banner;
+  content: Record<string, string>;
 }
 
 function resolveImageUrl(imageUrl?: string) {
@@ -29,7 +31,7 @@ function resolveImageUrl(imageUrl?: string) {
   }
 }
 
-export function HomeHero({ banner }: HomeHeroProps) {
+export function HomeHero({ banner, content }: HomeHeroProps) {
   const imageUrl = resolveImageUrl(banner?.imageUrl);
 
   return (
@@ -63,35 +65,31 @@ export function HomeHero({ banner }: HomeHeroProps) {
 
       <div className="relative mx-auto flex min-h-[430px] max-w-[1200px] items-start px-3 pb-40 pt-8 min-[380px]:px-4 sm:min-h-[400px] sm:px-8 sm:pb-32 sm:pt-10 lg:min-h-[300px] lg:items-center lg:px-10 lg:py-0">
         <div className="max-w-[540px]">
-          <h1 className="text-[33px] font-black uppercase leading-[0.92] tracking-normal min-[380px]:text-[36px] sm:text-[44px] lg:text-[50px]">
-            SPORTS
-            <br />
-            MERCHANDISE
+          <h1 className="whitespace-pre-line text-[33px] font-black uppercase leading-[0.92] tracking-normal min-[380px]:text-[36px] sm:text-[44px] lg:text-[50px]">
+            {banner?.title || pageContentValue(content, 'cms.home.hero.title')}
           </h1>
 
           <h2 className="mt-2 text-[19px] font-black uppercase leading-none tracking-normal text-[#D4AF37] min-[380px]:text-[21px] sm:text-[26px] lg:text-[29px]">
-            WEAR YOUR PASSION.
+            {pageContentValue(content, 'cms.home.hero.tagline')}
           </h2>
 
-          <p className="mt-3 max-w-[350px] text-[12px] leading-5 text-neutral-200 sm:text-[13px]">
-            Football, basketball jerseys and
-            <br />
-            sports merchandise for fans.
+          <p className="mt-3 max-w-[350px] whitespace-pre-line text-[12px] leading-5 text-neutral-200 sm:text-[13px]">
+            {pageContentValue(content, 'cms.home.hero.description')}
           </p>
 
           <div className="mt-4 flex max-w-[335px] flex-col gap-2 min-[380px]:flex-row min-[380px]:items-center sm:max-w-none">
             <Link
-              href="/shop"
+              href={banner?.linkUrl || "/shop"}
               className="inline-flex h-[34px] min-w-[132px] items-center justify-center bg-[#D4AF37] px-5 text-[10px] font-extrabold uppercase tracking-wide text-black transition hover:bg-[#e2bf4c]"
             >
-              SHOP NOW
+              {pageContentValue(content, 'cms.home.hero.primary_label')}
             </Link>
 
             <Link
-              href="/shop"
+              href={pageContentValue(content, 'cms.home.hero.secondary_link')}
               className="inline-flex h-[34px] min-w-[182px] items-center justify-center border border-[#D4AF37] bg-black/30 px-5 text-[10px] font-extrabold uppercase tracking-wide text-white transition hover:bg-[#D4AF37] hover:text-black"
             >
-              EXPLORE COLLECTION
+              {pageContentValue(content, 'cms.home.hero.secondary_label')}
             </Link>
           </div>
         </div>

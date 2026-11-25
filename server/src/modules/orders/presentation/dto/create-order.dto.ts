@@ -39,8 +39,9 @@ export class CreateOrderDto {
   @Length(64, 64)
   referralAttributionToken?: string;
 
+  @IsOptional()
   @IsIn(['mtn', 'orange', 'card', 'cash'])
-  paymentMethod!: 'mtn' | 'orange' | 'card' | 'cash';
+  paymentMethod?: 'mtn' | 'orange' | 'card' | 'cash';
 
   @IsOptional()
   @IsString()

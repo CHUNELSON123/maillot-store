@@ -55,8 +55,17 @@ export class PrismaProductVariantRepository implements ProductVariantRepository 
         },
       });
 
+      const thresholdSetting = await tx.systemSetting.findFirst({
+        where: { key: 'low_stock_threshold', deleted_at: null },
+        select: { value: true },
+      });
+      const threshold = Number(thresholdSetting?.value);
       await tx.inventory.create({
-        data: { variant_id: created.id, quantity: 0, min_stock: 0 },
+        data: {
+          variant_id: created.id,
+          quantity: 0,
+          min_stock: Number.isSafeInteger(threshold) && threshold >= 0 ? threshold : 0,
+        },
       });
 
       return created;

@@ -23,6 +23,12 @@ export class GetAdminRecordsUseCase {
   customer(customerId: string) {
     return this.repository.getCustomer(customerId);
   }
+  updateCustomer(customerId: string, input: { firstName: string; lastName: string; phone?: string; email: string }, actorId: string) {
+    return this.repository.updateCustomer(customerId, input, actorId);
+  }
+  updateCustomerStatus(customerId: string, active: boolean, actorId: string) {
+    return this.repository.updateCustomerStatus(customerId, active, actorId);
+  }
   users(query: AdminListQuery) {
     return this.repository.listUsers(query);
   }

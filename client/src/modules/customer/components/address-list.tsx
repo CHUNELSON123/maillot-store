@@ -60,7 +60,7 @@ export function AddressList() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {!showForm && (
         <button
           type="button"
@@ -68,7 +68,7 @@ export function AddressList() {
             setEditingAddress(null);
             setShowForm(true);
           }}
-          className="h-11 rounded-md bg-[#D4AF37] px-6 text-sm font-semibold text-white hover:bg-[#bf9828]"
+          className="h-9 bg-[#d28a00] px-4 text-[10px] font-bold text-white hover:bg-[#b87700]"
         >
           ADD NEW ADDRESS
         </button>
@@ -93,10 +93,10 @@ export function AddressList() {
       )}
 
       {!showForm && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {addresses.length === 0 && !isLoading ? (
             <div className="rounded-lg border border-neutral-200 bg-white p-8 text-center">
-              <p className="text-sm text-neutral-500">
+              <p className="text-xs text-neutral-500">
                 You have no saved addresses yet.
               </p>
             </div>

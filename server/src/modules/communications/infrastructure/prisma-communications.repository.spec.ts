@@ -35,22 +35,40 @@ describe('PrismaCommunicationsRepository', () => {
     });
   });
 
-  it('idempotently subscribes or reactivates a normalized address', async () => {
+  it('idempotently subscribes or reactivates an email address', async () => {
     const upsert = jest.fn().mockResolvedValue({});
     const repository = new PrismaCommunicationsRepository({
       newsletterSubscription: { upsert },
     } as unknown as PrismaService);
 
-    await repository.subscribeToNewsletter('customer@example.com');
+    await repository.subscribeToNewsletter({ email: 'customer@example.com' });
 
     expect(upsert).toHaveBeenCalledWith({
       where: { email: 'customer@example.com' },
-      create: { email: 'customer@example.com' },
+      create: { email: 'customer@example.com', phone: null, whatsapp_opt_in: false },
       update: {
         is_active: true,
         unsubscribed_at: null,
         deleted_at: null,
+        whatsapp_opt_in: false,
       },
     });
+  });
+
+  it('creates a phone-only subscription with explicit WhatsApp opt-in', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
+    const create = jest.fn().mockResolvedValue({});
+    const repository = new PrismaCommunicationsRepository({
+      newsletterSubscription: { findFirst, create },
+    } as unknown as PrismaService);
+
+    await repository.subscribeToNewsletter({ phone: '+237600000000' }, true);
+
+    expect(findFirst).toHaveBeenCalledWith({ where: { phone: '+237600000000' } });
+    expect(create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      email: null,
+      phone: '+237600000000',
+      whatsapp_opt_in: true,
+    }) });
   });
 });

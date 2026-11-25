@@ -8,5 +8,6 @@ export class NotificationEntity {
     public readonly isRead: boolean,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly targetUrl: string | null = null,
   ) {}
 }

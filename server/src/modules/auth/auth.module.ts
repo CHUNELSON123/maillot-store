@@ -6,6 +6,7 @@ import { RegisterCustomerUseCase } from './application/use-cases/register-custom
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { AuthController } from './presentation/controllers/auth.controller';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
     PrismaUserRepository,
     RegisterCustomerUseCase,
     LoginUseCase,
+    ChangePasswordUseCase,
     JwtStrategy,
     {
       provide: UserRepository,

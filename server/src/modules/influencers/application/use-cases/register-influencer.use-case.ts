@@ -59,7 +59,7 @@ export class RegisterInfluencerUseCase {
 
   private async generateUniqueReferralCode(): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt++) {
-      const code = `INF-${Math.random()
+      const code = `MS-${Math.random()
         .toString(36)
         .substring(2, 8)
         .toUpperCase()}`;

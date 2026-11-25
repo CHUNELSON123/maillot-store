@@ -11,8 +11,9 @@ export class CreateProductDto {
   @IsUUID()
   categoryId!: string;
 
+  @IsOptional()
   @IsUUID()
-  brandId!: string;
+  brandId?: string;
 
   @IsString()
   @Length(2, 200)
@@ -22,6 +23,16 @@ export class CreateProductDto {
   @IsString()
   @Length(0, 1000)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 30)
+  season?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  edition?: string;
 
   @IsNumber()
   @Min(0)

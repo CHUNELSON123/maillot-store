@@ -12,9 +12,9 @@ export function ReferralAttributionTracker() {
     const code = queryCode?.trim().toUpperCase();
     if (!code) return;
     const existing = referralAttributionStorage.get();
-    if (existing?.referralCode === code) return;
+    if (existing?.referralCode === code && existing.customerDiscountRate !== undefined) return;
     void influencerService.trackReferralClick(code)
-      .then(({ attributionToken }) => referralAttributionStorage.set({ referralCode: code, attributionToken }))
+      .then(({ attributionToken, customerDiscountRate }) => referralAttributionStorage.set({ referralCode: code, attributionToken, customerDiscountRate }))
       .catch(() => referralAttributionStorage.clear());
   }, [pathname, queryCode]);
   return null;

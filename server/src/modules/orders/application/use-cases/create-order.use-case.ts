@@ -17,7 +17,7 @@ export interface CreateOrderInput {
   items: CreateOrderItemInput[];
   referralCode?: string;
   referralAttributionToken?: string;
-  paymentMethod: 'mtn' | 'orange' | 'card' | 'cash';
+  paymentMethod?: 'mtn' | 'orange' | 'card' | 'cash';
 
   guestName?: string;
   guestEmail?: string;
@@ -28,6 +28,7 @@ export interface CreateOrderInput {
   deliveryAddress?: string;
   deliveryCity?: string;
   deliveryPostalCode?: string;
+  walkIn?: boolean;
 }
 
 @Injectable()
@@ -38,6 +39,7 @@ export class CreateOrderUseCase {
   ) {}
 
   async execute(input: CreateOrderInput) {
+    if (input.walkIn && !input.paymentMethod) throw new BadRequestException('Payment method is required for a walk-in sale');
     if (!input.items.length) {
       throw new BadRequestException('Order must contain at least one item');
     }
@@ -70,6 +72,10 @@ export class CreateOrderUseCase {
       if (!customerId) {
         throw new NotFoundException('Customer profile not found');
       }
+    } else if (input.walkIn) {
+      if (!input.guestName?.trim() || !input.guestPhone?.trim()) {
+        throw new BadRequestException('Customer name and phone are required for a walk-in sale');
+      }
     } else {
       // Guest checkout.
       if (!input.guestName?.trim()) {
@@ -101,7 +107,7 @@ export class CreateOrderUseCase {
 
     // The repository resolves current product variant prices from the database.
     // Delivery fees are determined by the backend, not the client.
-    const deliveryFee = input.deliveryMethod === 'DELIVERY' ? 2000 : 0;
+    const deliveryFee = 0;
 
     return this.orderRepository.create({
       customerId,
@@ -112,11 +118,12 @@ export class CreateOrderUseCase {
 
       orderNumber,
       source: input.source,
-      status: 'PENDING',
+      status: input.walkIn ? 'CONFIRMED' : 'PENDING',
       totalAmount: 0,
       referralCode: input.referralCode?.trim().toUpperCase() || null,
       referralAttributionToken: input.referralAttributionToken,
       paymentMethod: input.paymentMethod,
+      paymentStatus: input.walkIn ? 'PAID' : 'PENDING',
 
       deliveryMethod: input.deliveryMethod,
       deliveryFee,

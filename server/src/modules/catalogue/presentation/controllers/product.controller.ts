@@ -46,6 +46,8 @@ export class ProductController {
       brandId: dto.brandId,
       name: dto.name,
       description: dto.description,
+      season: dto.season,
+      edition: dto.edition,
       price: dto.price,
       status: dto.status,
     });
@@ -100,6 +102,8 @@ export class ProductController {
       brandId: dto.brandId,
       name: dto.name,
       description: dto.description,
+      season: dto.season,
+      edition: dto.edition,
       price: dto.price,
       status: dto.status,
     });

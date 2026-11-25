@@ -1,4 +1,6 @@
 
+"use client";
+
 import Link from "next/link";
 
 import { CustomerLayout } from "@/modules/customer/components/customer-layout";
@@ -6,8 +8,11 @@ import { ContactInformation } from "@/modules/customer/components/contact/contac
 import { ContactForm } from "@/modules/customer/components/contact/contact-form";
 import { ContactMap } from "@/modules/customer/components/contact/contact-map";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { pageContentValue } from "@/modules/cms/utils/page-content-defaults";
 
 export default function ContactPage() {
+  const { content } = useCms();
   return (
     <CustomerLayout>
       <main className="bg-white text-neutral-950">
@@ -32,11 +37,11 @@ export default function ContactPage() {
 
           <header className="mb-6">
             <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-              CONTACT US
+              {pageContentValue(content, 'cms.contact.title')}
             </h1>
 
             <p className="mt-2 text-xs leading-5 text-neutral-600">
-              We&apos;d love to hear from you. Reach out to us!
+              {pageContentValue(content, 'cms.contact.subtitle')}
             </p>
           </header>
 

@@ -1,9 +1,11 @@
 ﻿export type Product = {
   id: string;
   categoryId: string;
-  brandId: string;
+  brandId: string | null;
   name: string;
   description: string | null;
+  season?: string | null;
+  edition?: string | null;
   price: number;
   status: string;
   createdAt: string;
@@ -43,6 +45,7 @@ export type Category = {
   id: string;
   name: string;
   description: string | null;
+  imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 };

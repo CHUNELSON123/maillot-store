@@ -1,16 +1,15 @@
 
+"use client";
+
 import { ExternalLink, MapPin } from "lucide-react";
-
-const mapSearchUrl =
-  "https://www.google.com/maps/search/?api=1&query=" +
-  encodeURIComponent("Quarter 12, Molyko, Buea, Cameroon");
-
-const mapEmbedUrl =
-  "https://maps.google.com/maps?q=" +
-  encodeURIComponent("Quarter 12, Molyko, Buea, Cameroon") +
-  "&output=embed";
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { pageContentValue } from "@/modules/cms/utils/page-content-defaults";
 
 export function ContactMap() {
+  const { content } = useCms();
+  const address = pageContentValue(content, 'cms.contact.address');
+  const mapSearchUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+  const mapEmbedUrl = 'https://maps.google.com/maps?q=' + encodeURIComponent(address) + '&output=embed';
   return (
     <section
       aria-label="Maillot Store location"
@@ -21,9 +20,9 @@ export function ContactMap() {
           <MapPin size={17} className="shrink-0 text-[#b18b19]" />
 
           <div>
-            <h2 className="text-xs font-bold">Find Maillot Store</h2>
+            <h2 className="text-xs font-bold">{pageContentValue(content, 'cms.contact.map_title')}</h2>
             <p className="mt-0.5 text-[10px] text-neutral-500">
-              Molyko, Buea, Cameroon
+              {address}
             </p>
           </div>
         </div>
@@ -41,7 +40,7 @@ export function ContactMap() {
       </div>
 
       <iframe
-        title="Map showing the Maillot Store area in Molyko, Buea"
+        title={`Map showing ${address}`}
         src={mapEmbedUrl}
         className="min-h-[280px] w-full flex-1 border-0"
         loading="lazy"

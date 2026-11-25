@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import {
   applyInventoryDelta,
@@ -7,6 +7,8 @@ import {
 import { InventoryMovementEntity } from '../../domain/entities/inventory-movement.entity';
 import {
   CreateInventoryMovementData,
+  InventoryImportRow,
+  InventoryMovementListQuery,
   InventoryMovementRepository,
 } from '../../domain/repositories/inventory-movement.repository';
 
@@ -61,6 +63,66 @@ export class PrismaInventoryMovementRepository implements InventoryMovementRepos
       movement.created_at,
       movement.updated_at,
     );
+  }
+
+  async findAll(query: InventoryMovementListQuery) {
+    const where = {
+      deleted_at: null,
+      ...(query.movementType === 'DAMAGE_LOSS'
+        ? { movement_type: { in: ['DAMAGE', 'LOST'] } }
+        : query.movementType ? { movement_type: query.movementType } : {}),
+      ...(query.search ? { OR: [
+        { reference: { contains: query.search, mode: 'insensitive' as const } },
+        { variant: { is: { sku: { contains: query.search, mode: 'insensitive' as const } } } },
+        { variant: { is: { product: { is: { name: { contains: query.search, mode: 'insensitive' as const } } } } } },
+      ] } : {}),
+    };
+    const [items, total] = await Promise.all([
+      this.prisma.inventoryMovement.findMany({
+        where,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        orderBy: { created_at: 'desc' },
+        include: { variant: { include: { product: { include: { images: { where: { deleted_at: null }, orderBy: [{ is_primary: 'desc' }, { created_at: 'asc' }], take: 1 } } } } } },
+      }),
+      this.prisma.inventoryMovement.count({ where }),
+    ]);
+    return { items, total, page: query.page, limit: query.limit };
+  }
+
+  async importBySku(rows: InventoryImportRow[]) {
+    return this.prisma.$transaction(async (tx) => {
+      const variants = await tx.productVariant.findMany({
+        where: { sku: { in: rows.map((row) => row.sku) }, deleted_at: null },
+        select: { id: true, sku: true },
+      });
+      const variantsBySku = new Map(variants.map((variant) => [variant.sku, variant]));
+      const thresholdSetting = await tx.systemSetting.findFirst({
+        where: { key: 'low_stock_threshold', deleted_at: null },
+        select: { value: true },
+      });
+      const defaultThreshold = Number(thresholdSetting?.value);
+      const fallbackThreshold = Number.isSafeInteger(defaultThreshold) && defaultThreshold >= 0 ? defaultThreshold : 0;
+      const unknownSku = rows.find((row) => !variantsBySku.has(row.sku));
+      if (unknownSku) {
+        throw new BadRequestException(`SKU not found: ${unknownSku.sku}`);
+      }
+
+      for (const row of rows) {
+        const variant = variantsBySku.get(row.sku)!;
+        let inventory = await tx.inventory.findFirst({ where: { variant_id: variant.id, deleted_at: null } });
+        if (!inventory) {
+          inventory = await tx.inventory.create({ data: { variant_id: variant.id, quantity: 0, min_stock: row.minStock ?? fallbackThreshold } });
+        }
+        if (row.minStock !== undefined) {
+          await tx.inventory.update({ where: { id: inventory.id }, data: { min_stock: row.minStock } });
+        }
+        if (row.quantity !== inventory.quantity) {
+          await setInventoryQuantity(tx, variant.id, row.quantity, `Stock import (${row.sku})`);
+        }
+      }
+      return { imported: rows.length };
+    });
   }
 
   async findByVariantId(variantId: string): Promise<InventoryMovementEntity[]> {

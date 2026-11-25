@@ -128,9 +128,7 @@ export function CategoriesPageContent() {
                     key={category.id}
                     name={category.name}
                     count={category.count}
-                    imageUrl={categoryImages.get(
-                      category.id,
-                    )}
+                    imageUrl={category.imageUrl || categoryImages.get(category.id)}
                   />
                 ))}
               </div>

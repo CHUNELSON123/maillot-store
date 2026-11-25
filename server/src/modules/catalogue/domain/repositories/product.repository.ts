@@ -2,18 +2,22 @@ import { ProductEntity } from '../entities/product.entity';
 
 export interface CreateProductData {
   categoryId: string;
-  brandId: string;
+  brandId?: string;
   name: string;
   description?: string;
+  season?: string;
+  edition?: string;
   price: number;
   status: string;
 }
 
 export interface UpdateProductData {
   categoryId?: string;
-  brandId?: string;
+  brandId?: string | null;
   name?: string;
   description?: string;
+  season?: string | null;
+  edition?: string | null;
   price?: number;
   status?: string;
 }

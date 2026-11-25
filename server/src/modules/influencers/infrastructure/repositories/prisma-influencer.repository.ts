@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import { notifyAdministrators } from '../../../../infrastructure/database/admin-notifications';
+import { notifyInfluencer } from '../../../../infrastructure/database/influencer-notifications';
 import { InfluencerEntity, InfluencerProfileData } from '../../domain/entities/influencer.entity';
 import { ReferralEntity } from '../../domain/entities/referral.entity';
 import {
@@ -196,8 +198,13 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
       lastName: influencer.last_name,
       phone: influencer.phone,
       country: influencer.country,
+      dateOfBirth: influencer.date_of_birth,
+      gender: influencer.gender,
       city: influencer.city,
       occupation: influencer.occupation,
+      bio: influencer.bio,
+      applicationNote: influencer.application_note,
+      termsAcceptedAt: influencer.terms_accepted_at,
       instagramUrl: influencer.instagram_url,
       tiktokUrl: influencer.tiktok_url,
       youtubeUrl: influencer.youtube_url,
@@ -236,12 +243,14 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
       }
     }
 
-    const influencer = await this.prisma.influencer.update({
+    const influencer = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.influencer.update({
       where: {
         id: influencerId,
       },
       data: {
         ...(data.status !== undefined && { status: data.status }),
+        ...(data.rejectionReason !== undefined && { rejection_reason: data.rejectionReason }),
         ...(data.commissionRate !== undefined && {
           commission_rate: data.commissionRate,
         }),
@@ -252,6 +261,11 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
           referral_code: data.referralCode,
         }),
       },
+      });
+      if (data.status === 'REJECTED' && existingInfluencer.status !== 'REJECTED') {
+        await notifyInfluencer(tx, updated.user_id, { title: 'Influencer application update', message: `Your application was not approved. Reason: ${data.rejectionReason ?? 'Please contact the store for details.'}`, type: 'INFLUENCER', targetUrl: '/influencer/portal/notifications' });
+      }
+      return updated;
     });
 
     return this.toInfluencerEntity(influencer);
@@ -309,6 +323,7 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
         order_id: data.orderId,
         referral_code: data.referralCode,
         status: data.status,
+        commission_rate_snapshot: data.orderId ? data.commissionRateSnapshot ?? influencer.commission_rate : null,
       },
     });
 
@@ -370,7 +385,7 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
   async register(data: RegisterInfluencerData): Promise<InfluencerEntity> {
     const existingEmailUser = await this.prisma.user.findUnique({ where: { email: data.email } });
     if (existingEmailUser && existingEmailUser.id !== data.userId) {
-      throw new ConflictException('Email is already registered to another account');
+      throw new ConflictException('Email is already registered. Sign in to apply again with this account.');
     }
     const existingUser = data.userId
       ? await this.prisma.user.findFirst({
@@ -382,7 +397,7 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
     if (existingUser && existingUser.role.name !== 'Customer' && existingUser.role.name !== 'Influencer') {
       throw new ConflictException('Only customer accounts can apply to the influencer program');
     }
-    if (existingUser?.influencer) throw new ConflictException('An influencer application already exists for this account');
+    if (existingUser?.influencer && existingUser.influencer.status !== 'REJECTED') throw new ConflictException('An influencer application already exists for this account');
     if (!data.userId && !data.passwordHash) throw new ConflictException('Password is required for a new account');
 
     const influencerRole = await this.prisma.role.findUnique({
@@ -406,6 +421,12 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
+      const [commissionSetting, discountSetting] = await Promise.all([
+        tx.systemSetting.findFirst({ where: { key: 'influencer_default_commission_rate', deleted_at: null }, select: { value: true } }),
+        tx.systemSetting.findFirst({ where: { key: 'influencer_default_customer_discount_rate', deleted_at: null }, select: { value: true } }),
+      ]);
+      const defaultCommissionRate = Number(commissionSetting?.value);
+      const defaultDiscountRate = Number(discountSetting?.value);
       const user = existingUser
         ? await tx.user.update({
             where: { id: existingUser.id },
@@ -435,13 +456,11 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
         });
       }
 
-      const influencer = await tx.influencer.create({
-        data: {
-          user_id: user.id,
+      const application = {
           referral_code: data.referralCode,
           status: data.status,
-          commission_rate: data.commissionRate,
-          customer_discount_rate: data.customerDiscountRate ?? 0,
+          commission_rate: Number.isFinite(defaultCommissionRate) && defaultCommissionRate >= 0 && defaultCommissionRate <= 100 ? defaultCommissionRate : data.commissionRate,
+          customer_discount_rate: Number.isFinite(defaultDiscountRate) && defaultDiscountRate >= 0 && defaultDiscountRate <= 100 ? defaultDiscountRate : data.customerDiscountRate ?? 0,
           first_name: data.firstName,
           last_name: data.lastName,
           phone: data.phone,
@@ -458,9 +477,18 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
           facebook_url: data.facebookUrl ?? null,
           x_url: data.xUrl ?? null,
           terms_accepted_at: data.termsAcceptedAt,
-        },
-      });
+          rejection_reason: null,
+      };
+      let influencer;
+      if (existingUser?.influencer) {
+        const updated = await tx.influencer.updateMany({ where: { id: existingUser.influencer.id, status: 'REJECTED', deleted_at: null }, data: application });
+        if (updated.count !== 1) throw new ConflictException('Application status changed. Refresh and try again.');
+        influencer = await tx.influencer.findUniqueOrThrow({ where: { id: existingUser.influencer.id } });
+      } else {
+        influencer = await tx.influencer.create({ data: { user_id: user.id, ...application } });
+      }
 
+      await notifyAdministrators(tx, { title: 'Influencer application', message: `${data.firstName} ${data.lastName} submitted an influencer application.`, type: 'INFLUENCER', targetUrl: `/admin/influencers?influencer=${encodeURIComponent(influencer.id)}` });
       return influencer;
     });
 
@@ -480,15 +508,16 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
     return influencer !== null;
   }
 
-  async createReferralClick(referralCode: string, tokenHash: string): Promise<void> {
+  async createReferralClick(referralCode: string, tokenHash: string): Promise<number> {
     const influencer = await this.prisma.influencer.findFirst({
       where: { referral_code: referralCode, status: 'ACTIVE', deleted_at: null },
-      select: { id: true },
+      select: { id: true, customer_discount_rate: true },
     });
     if (!influencer) throw new NotFoundException('Active referral code not found');
     await this.prisma.referral.create({
       data: { influencer_id: influencer.id, referral_code: referralCode, status: 'CLICKED', attribution_token_hash: tokenHash },
     });
+    return Number(influencer.customer_discount_rate);
   }
 
   async approve(influencerId: string): Promise<InfluencerEntity> {
@@ -511,13 +540,17 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
       throw new ConflictException('Only pending influencers can be approved');
     }
 
-    const influencer = await this.prisma.influencer.update({
+    const influencer = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.influencer.update({
       where: {
         id: influencerId,
       },
       data: {
         status: 'ACTIVE',
       },
+      });
+      await notifyInfluencer(tx, updated.user_id, { title: 'Influencer application approved', message: 'Your influencer application was approved. Your portal is now available.', type: 'INFLUENCER', targetUrl: '/influencer/portal/dashboard' });
+      return updated;
     });
 
     return this.toInfluencerEntity(influencer);
@@ -569,6 +602,7 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
     status: string;
     created_at: Date;
     updated_at: Date;
+    commission_rate_snapshot: unknown;
     order?: {
       order_number: string;
       status: string;
@@ -591,6 +625,9 @@ export class PrismaInfluencerRepository implements InfluencerRepository {
       referral.order ? Number(referral.order.total_amount) : null,
       referral.order?.guest_name ? 'Guest' : referral.order?.customer ? 'Customer' : null,
       referral.order?.items.map((item) => item.variant.product.name) ?? [],
+      referral.commission_rate_snapshot === null || referral.commission_rate_snapshot === undefined
+        ? null
+        : Number(referral.commission_rate_snapshot),
     );
   }
 }

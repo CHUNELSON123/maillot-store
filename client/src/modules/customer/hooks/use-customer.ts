@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { ApiError } from "@/services/api/api-error";
 import { customerService } from "../services/customer.service";
 import {
   Customer,
@@ -15,10 +16,12 @@ export function useCustomer() {
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errorStatusCode, setErrorStatusCode] = useState<number | null>(null);
 
   const getProfile = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    setErrorStatusCode(null);
 
     try {
       const data = await customerService.getProfile();
@@ -31,6 +34,7 @@ export function useCustomer() {
           : "Unable to load customer profile.";
 
       setError(message);
+      setErrorStatusCode(error instanceof ApiError ? error.statusCode : null);
       throw error;
     } finally {
       setIsLoading(false);
@@ -179,6 +183,7 @@ export function useCustomer() {
     addresses,
     isLoading,
     error,
+    errorStatusCode,
     getProfile,
     updateProfile,
     getAddresses,

@@ -16,10 +16,12 @@ import { ProductVariant } from "@/modules/catalogue/types/catalogue.types";
 import { CheckoutAccountPrompt } from "@/modules/checkout/components/checkout-account-prompt";
 import { CheckoutContactForm } from "./checkout-contact-form";
 import { CheckoutDeliveryForm } from "./checkout-delivery-form";
-import { CheckoutPaymentMethods } from "./checkout-payment-methods";
 import { CheckoutOrderSummary } from "./checkout-order-summary";
 import { orderConfirmationStorage } from "@/modules/orders/services/order-confirmation-storage";
 import { referralAttributionStorage } from "@/modules/influencers/services/influencer.service";
+import { cmsService } from "@/modules/cms/services/cms.service";
+import { buyNowStorage } from "../../services/buy-now-storage";
+import type { CartItem } from "../../types/cart.types";
 
 export type DeliveryMethod = "delivery" | "pickup";
 
@@ -58,8 +60,24 @@ function createGuestAccessToken(): string {
 }
 
 export function CheckoutPageContent() {
-  const { items, itemCount, subtotal, deliveryFee, clearCart, updateVariant } =
+  const { items: cartItems, itemCount: cartItemCount, subtotal: cartSubtotal, customerDiscountAmount: cartDiscount, customerDiscountRate, deliveryRate, deliveryEnabled, freeDeliveryThreshold, deliveryInformation, clearCart, updateVariant } =
     useCart();
+  const [checkoutMode, setCheckoutMode] = useState<"loading" | "cart" | "buy-now">("loading");
+  const [buyNowItem, setBuyNowItem] = useState<CartItem | null>(null);
+
+  useEffect(() => {
+    const isBuyNow = new URLSearchParams(window.location.search).get("mode") === "buy-now";
+    if (isBuyNow) setBuyNowItem(buyNowStorage.get());
+    setCheckoutMode(isBuyNow ? "buy-now" : "cart");
+  }, []);
+
+  const isBuyNow = checkoutMode === "buy-now";
+  const items = isBuyNow ? (buyNowItem ? [buyNowItem] : []) : cartItems;
+  const itemCount = isBuyNow ? (buyNowItem?.quantity ?? 0) : cartItemCount;
+  const subtotal = isBuyNow && buyNowItem ? (buyNowItem.variant?.price ?? buyNowItem.product.price) * buyNowItem.quantity : isBuyNow ? 0 : cartSubtotal;
+  const customerDiscountAmount = isBuyNow ? Math.round(subtotal * customerDiscountRate) / 100 : cartDiscount;
+  const freeDelivery = freeDeliveryThreshold > 0 && subtotal - customerDiscountAmount >= freeDeliveryThreshold;
+  const deliveryFee = items.length > 0 && deliveryEnabled && !freeDelivery ? deliveryRate : 0;
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -72,7 +90,17 @@ export function CheckoutPageContent() {
   const [deliveryMethod, setDeliveryMethod] =
     useState<DeliveryMethod>("delivery");
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("mtn");
+  useEffect(() => {
+    if (!deliveryEnabled) setDeliveryMethod("pickup");
+  }, [deliveryEnabled]);
+
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+
+  useEffect(() => {
+    void cmsService.getPublicContent().then((content) => {
+      setWhatsappNumber(content["store.whatsapp_number"] ?? "");
+    }).catch(() => undefined);
+  }, []);
 
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +109,7 @@ export function CheckoutPageContent() {
   const [isRegisteredCustomer, setIsRegisteredCustomer] = useState(false);
 
   useEffect(() => {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
     if (!token) return;
 
     setIsRegisteredCustomer(true);
@@ -106,19 +134,27 @@ export function CheckoutPageContent() {
   }, []);
 
   const handleVariantChange = useCallback(
-    (itemId: string, variant: ProductVariant) => {
-      updateVariant(itemId, variant);
+    async (itemId: string, variant: ProductVariant) => {
+      if (isBuyNow) {
+        if (!buyNowItem || buyNowItem.id !== itemId) throw new Error("Buy Now item is no longer available.");
+        const updated = { ...buyNowItem, variant, product: { ...buyNowItem.product, price: variant.price ?? buyNowItem.product.price } };
+        buyNowStorage.save(updated);
+        setBuyNowItem(updated);
+        setErrorMessage("");
+        return;
+      }
+      await updateVariant(itemId, variant);
       setErrorMessage("");
     },
-    [updateVariant],
+    [updateVariant, isBuyNow, buyNowItem],
   );
 
   const actualDeliveryFee = deliveryMethod === "delivery" ? deliveryFee : 0;
-  const actualTotal = subtotal + actualDeliveryFee;
+  const actualTotal = subtotal - customerDiscountAmount + actualDeliveryFee;
 
   const validateCheckout = () => {
     if (items.length === 0) {
-      setErrorMessage("Your cart is empty.");
+      setErrorMessage(isBuyNow ? "Select a product to buy." : "Your cart is empty.");
       return false;
     }
 
@@ -176,7 +212,7 @@ export function CheckoutPageContent() {
     setErrorMessage("");
 
     try {
-      const token = authStorage.getToken();
+      const token = authStorage.getStorefrontToken();
       let confirmationName = fullName.trim();
       let confirmationPhone = phone.trim();
       let confirmationEmail = email.trim();
@@ -199,7 +235,6 @@ export function CheckoutPageContent() {
         ...(token ? { token } : {}),
         body: JSON.stringify({
           source: "WEBSITE",
-          paymentMethod,
 
           items: items.map((item) => ({
             variantId: item.variant!.id,
@@ -210,6 +245,7 @@ export function CheckoutPageContent() {
           guestEmail: token ? undefined : email.trim(),
           guestPhone: token ? undefined : phone.trim(),
           guestAccessToken,
+          referralCode: referralAttribution?.referralCode,
           referralAttributionToken: referralAttribution?.attributionToken,
 
           deliveryMethod: deliveryMethod === "delivery" ? "DELIVERY" : "PICKUP",
@@ -247,7 +283,6 @@ export function CheckoutPageContent() {
           quantity: orderItem.quantity,
         };
       });
-      referralAttributionStorage.clear();
       const persistedSubtotal = response.items.reduce(
         (sum, item) => sum + item.unitPrice * item.quantity,
         0,
@@ -293,8 +328,10 @@ export function CheckoutPageContent() {
         total: response.totalAmount,
       });
 
-      clearCart();
-      window.location.href = "/order-confirmed";
+      sessionStorage.setItem('maillot-pending-notch', JSON.stringify({ orderId: response.id, guestAccessToken, email: confirmationEmail }));
+      if (isBuyNow) buyNowStorage.clear();
+      else void clearCart();
+      window.location.href = "/payment";
     } catch (error) {
       console.error("Order creation failed:", error);
 
@@ -313,7 +350,7 @@ export function CheckoutPageContent() {
       return;
     }
 
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       setShowAccountPrompt(true);
@@ -321,6 +358,28 @@ export function CheckoutPageContent() {
     }
 
     void submitOrder();
+  };
+
+  const handleWhatsAppOrder = () => {
+    if (!validateCheckout()) return;
+    const number = whatsappNumber.replace(/\D/g, "");
+    if (!number) {
+      setErrorMessage("The store WhatsApp number is not configured yet. Please place your order normally or contact the store.");
+      return;
+    }
+    const itemLines = items.map((item) =>
+      `- ${item.product.name}${item.variant?.size ? ` (${item.variant.size})` : ""} × ${item.quantity}`,
+    ).join("\n");
+    const message = [
+      "Hello Maillot Store, I would like to place this order:",
+      itemLines,
+      `Total: ${actualTotal.toLocaleString()} XAF`,
+      `Fulfillment: ${deliveryMethod === "delivery" ? `Delivery to ${address.trim()}, ${city.trim()}` : "Store pickup"}`,
+      `Name: ${fullName.trim()}`,
+      `Phone: ${phone.trim()}`,
+      email.trim() ? `Email: ${email.trim()}` : "",
+    ].filter(Boolean).join("\n");
+    window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   };
 
   const handleContinueAsGuest = () => {
@@ -362,14 +421,14 @@ export function CheckoutPageContent() {
             </p>
           </div>
 
-          {items.length === 0 ? (
+          {checkoutMode === "loading" ? <p className="py-12 text-center text-sm text-neutral-500">Loading checkout...</p> : items.length === 0 ? (
             <div className="flex min-h-[350px] flex-col items-center justify-center text-center">
               <h2 className="text-[18px] font-extrabold uppercase">
-                YOUR CART IS EMPTY
+                {isBuyNow ? "BUY NOW ITEM IS UNAVAILABLE" : "YOUR CART IS EMPTY"}
               </h2>
 
               <p className="mt-2 text-[11px] text-neutral-500">
-                Add products to your cart before checking out.
+                {isBuyNow ? "Return to a product page and select Buy Now again." : "Add products to your cart before checking out."}
               </p>
 
               <Link
@@ -415,14 +474,14 @@ export function CheckoutPageContent() {
                   onAddressChange={setAddress}
                   onCityChange={setCity}
                   onPostalCodeChange={setPostalCode}
+                deliveryEnabled={deliveryEnabled}
+                deliveryFee={deliveryFee}
+                freeDeliveryThreshold={freeDeliveryThreshold}
+                freeDelivery={freeDelivery}
+                deliveryInformation={deliveryInformation}
                 />
 
-                <CheckoutPaymentMethods
-                  paymentMethod={paymentMethod}
-                  onPaymentMethodChange={setPaymentMethod}
-                  termsAccepted={termsAccepted}
-                  onTermsChange={setTermsAccepted}
-                />
+                <label className="mt-5 flex items-center gap-2 text-xs"><input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} className="h-4 w-4 accent-[#D4AF37]"/>I agree to the Terms &amp; Conditions <span className="text-red-500">*</span></label>
 
                 {errorMessage && (
                   <div className="mt-3 rounded-[4px] border border-red-200 bg-red-50 px-3 py-2 text-[10px] text-red-700">
@@ -440,6 +499,10 @@ export function CheckoutPageContent() {
                   {isSubmitting ? "PROCESSING..." : "PLACE ORDER"}
                 </button>
 
+                <button type="button" onClick={handleWhatsAppOrder} disabled={isSubmitting} className="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-[4px] border border-green-700 text-[10px] font-extrabold uppercase text-green-800 hover:bg-green-50 disabled:opacity-50">
+                  Order via WhatsApp
+                </button>
+
                 <div className="mt-3 flex items-center justify-center gap-1.5 text-center text-[9px] text-neutral-600">
                   <Lock size={11} />
                   Payment stays pending until it is verified
@@ -452,8 +515,10 @@ export function CheckoutPageContent() {
                   itemCount={itemCount}
                   subtotal={subtotal}
                   deliveryFee={actualDeliveryFee}
+                  customerDiscountAmount={customerDiscountAmount}
                   total={actualTotal}
                   onVariantChange={handleVariantChange}
+                  buyNow={isBuyNow}
                 />
               </div>
             </div>
@@ -466,6 +531,7 @@ export function CheckoutPageContent() {
           <CheckoutAccountPrompt
             onContinueAsGuest={handleContinueAsGuest}
             onClose={() => setShowAccountPrompt(false)}
+            returnUrl={isBuyNow ? "/checkout?mode=buy-now" : "/checkout"}
           />
         )}
       </main>

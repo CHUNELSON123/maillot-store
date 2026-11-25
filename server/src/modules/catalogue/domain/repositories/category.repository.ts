@@ -3,11 +3,13 @@ import { CategoryEntity } from '../entities/category.entity';
 export interface CreateCategoryData {
   name: string;
   description?: string;
+  imageUrl?: string;
 }
 
 export interface UpdateCategoryData {
   name?: string;
   description?: string;
+  imageUrl?: string;
 }
 
 export abstract class CategoryRepository {

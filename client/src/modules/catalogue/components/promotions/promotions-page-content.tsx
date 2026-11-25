@@ -6,9 +6,14 @@ import { NewsletterSection } from "@/components/shared/newsletter-section";
 import { useCms } from "@/modules/cms/hooks/use-cms";
 
 import { PromotionBanner } from "./promotion-banner";
+import { useCatalogue } from "@/modules/catalogue/hooks/use-catalogue";
+import { ProductGrid } from "@/modules/catalogue/components/product-grid";
+import { promotionAppliesToProduct } from "@/modules/cms/utils/promotion-pricing";
 
 export function PromotionsPageContent() {
   const { promotions, isLoading, error } = useCms();
+  const { products, images, isLoading: productsLoading } = useCatalogue();
+  const discountedProducts = products.filter((product) => promotions.some((promotion) => promotionAppliesToProduct(product, promotion)));
 
   return (
     <main className="bg-white text-neutral-950">
@@ -30,7 +35,7 @@ export function PromotionsPageContent() {
           </p>
         </div>
 
-        {isLoading && (
+        {(isLoading || productsLoading) && (
           <div className="flex min-h-[180px] items-center justify-center">
             <p className="text-[9px] text-neutral-500">Loading promotions...</p>
           </div>
@@ -42,15 +47,11 @@ export function PromotionsPageContent() {
           </div>
         )}
 
-        {!isLoading && !error && promotions.length > 0 && (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {promotions.map((promotion) => (
-              <PromotionBanner key={promotion.id} promotion={promotion} />
-            ))}
-          </div>
-        )}
+        {!isLoading && !error && promotions.length > 0 && <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{promotions.map((promotion) => <PromotionBanner key={promotion.id} promotion={promotion} />)}</div>}
 
-        {!isLoading && !error && promotions.length === 0 && (
+        {!isLoading && !error && promotions.length > 0 && discountedProducts.length > 0 && <section className="mt-8"><header className="mb-4 flex items-center justify-between"><h2 className="text-sm font-extrabold uppercase">Products on promotion</h2><Link href="/shop" className="text-xs font-semibold text-blue-700">Shop all deals</Link></header><ProductGrid products={discountedProducts} images={images} promotions={promotions}/></section>}
+
+        {!isLoading && !productsLoading && !error && promotions.length === 0 && (
           <div className="py-12 text-center text-[9px] text-neutral-500">
             No active promotions are available right now.
           </div>

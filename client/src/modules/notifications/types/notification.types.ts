@@ -7,4 +7,5 @@ export type Notification = {
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
+  targetUrl?: string | null;
 };

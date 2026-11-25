@@ -16,6 +16,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
       data: {
         name: data.name,
         description: data.description,
+        image_url: data.imageUrl,
       },
     });
 
@@ -23,6 +24,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
       category.id,
       category.name,
       category.description,
+      category.image_url,
       category.created_at,
       category.updated_at,
     );
@@ -44,6 +46,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
           category.id,
           category.name,
           category.description,
+          category.image_url,
           category.created_at,
           category.updated_at,
         ),
@@ -66,6 +69,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
       category.id,
       category.name,
       category.description,
+      category.image_url,
       category.created_at,
       category.updated_at,
     );
@@ -79,6 +83,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
         ...(data.description !== undefined && {
           description: data.description,
         }),
+        ...(data.imageUrl !== undefined && { image_url: data.imageUrl }),
       },
     });
 
@@ -86,6 +91,7 @@ export class PrismaCategoryRepository implements CategoryRepository {
       category.id,
       category.name,
       category.description,
+      category.image_url,
       category.created_at,
       category.updated_at,
     );

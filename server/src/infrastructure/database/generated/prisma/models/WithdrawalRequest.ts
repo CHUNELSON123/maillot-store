@@ -40,6 +40,8 @@ export type WithdrawalRequestMinAggregateOutputType = {
   amount: runtime.Decimal | null
   status: string | null
   payment_reference: string | null
+  payout_method: string | null
+  payout_phone: string | null
   processed_at: Date | null
   created_at: Date | null
   updated_at: Date | null
@@ -55,6 +57,8 @@ export type WithdrawalRequestMaxAggregateOutputType = {
   amount: runtime.Decimal | null
   status: string | null
   payment_reference: string | null
+  payout_method: string | null
+  payout_phone: string | null
   processed_at: Date | null
   created_at: Date | null
   updated_at: Date | null
@@ -70,6 +74,8 @@ export type WithdrawalRequestCountAggregateOutputType = {
   amount: number
   status: number
   payment_reference: number
+  payout_method: number
+  payout_phone: number
   processed_at: number
   created_at: number
   updated_at: number
@@ -95,6 +101,8 @@ export type WithdrawalRequestMinAggregateInputType = {
   amount?: true
   status?: true
   payment_reference?: true
+  payout_method?: true
+  payout_phone?: true
   processed_at?: true
   created_at?: true
   updated_at?: true
@@ -110,6 +118,8 @@ export type WithdrawalRequestMaxAggregateInputType = {
   amount?: true
   status?: true
   payment_reference?: true
+  payout_method?: true
+  payout_phone?: true
   processed_at?: true
   created_at?: true
   updated_at?: true
@@ -125,6 +135,8 @@ export type WithdrawalRequestCountAggregateInputType = {
   amount?: true
   status?: true
   payment_reference?: true
+  payout_method?: true
+  payout_phone?: true
   processed_at?: true
   created_at?: true
   updated_at?: true
@@ -227,6 +239,8 @@ export type WithdrawalRequestGroupByOutputType = {
   amount: runtime.Decimal
   status: string
   payment_reference: string | null
+  payout_method: string | null
+  payout_phone: string | null
   processed_at: Date | null
   created_at: Date
   updated_at: Date
@@ -265,6 +279,8 @@ export type WithdrawalRequestWhereInput = {
   amount?: Prisma.DecimalFilter<"WithdrawalRequest"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"WithdrawalRequest"> | string
   payment_reference?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_method?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_phone?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   processed_at?: Prisma.DateTimeNullableFilter<"WithdrawalRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
@@ -281,6 +297,8 @@ export type WithdrawalRequestOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   payment_reference?: Prisma.SortOrderInput | Prisma.SortOrder
+  payout_method?: Prisma.SortOrderInput | Prisma.SortOrder
+  payout_phone?: Prisma.SortOrderInput | Prisma.SortOrder
   processed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -300,6 +318,8 @@ export type WithdrawalRequestWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.DecimalFilter<"WithdrawalRequest"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"WithdrawalRequest"> | string
   payment_reference?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_method?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_phone?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   processed_at?: Prisma.DateTimeNullableFilter<"WithdrawalRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
@@ -316,6 +336,8 @@ export type WithdrawalRequestOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   payment_reference?: Prisma.SortOrderInput | Prisma.SortOrder
+  payout_method?: Prisma.SortOrderInput | Prisma.SortOrder
+  payout_phone?: Prisma.SortOrderInput | Prisma.SortOrder
   processed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -339,6 +361,8 @@ export type WithdrawalRequestScalarWhereWithAggregatesInput = {
   amount?: Prisma.DecimalWithAggregatesFilter<"WithdrawalRequest"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringWithAggregatesFilter<"WithdrawalRequest"> | string
   payment_reference?: Prisma.StringNullableWithAggregatesFilter<"WithdrawalRequest"> | string | null
+  payout_method?: Prisma.StringNullableWithAggregatesFilter<"WithdrawalRequest"> | string | null
+  payout_phone?: Prisma.StringNullableWithAggregatesFilter<"WithdrawalRequest"> | string | null
   processed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"WithdrawalRequest"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"WithdrawalRequest"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"WithdrawalRequest"> | Date | string
@@ -353,6 +377,8 @@ export type WithdrawalRequestCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -369,6 +395,8 @@ export type WithdrawalRequestUncheckedCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -383,6 +411,8 @@ export type WithdrawalRequestUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -399,6 +429,8 @@ export type WithdrawalRequestUncheckedUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -414,6 +446,8 @@ export type WithdrawalRequestCreateManyInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -428,6 +462,8 @@ export type WithdrawalRequestUpdateManyMutationInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -443,6 +479,8 @@ export type WithdrawalRequestUncheckedUpdateManyInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -468,6 +506,8 @@ export type WithdrawalRequestCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   payment_reference?: Prisma.SortOrder
+  payout_method?: Prisma.SortOrder
+  payout_phone?: Prisma.SortOrder
   processed_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -487,6 +527,8 @@ export type WithdrawalRequestMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   payment_reference?: Prisma.SortOrder
+  payout_method?: Prisma.SortOrder
+  payout_phone?: Prisma.SortOrder
   processed_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -502,6 +544,8 @@ export type WithdrawalRequestMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   payment_reference?: Prisma.SortOrder
+  payout_method?: Prisma.SortOrder
+  payout_phone?: Prisma.SortOrder
   processed_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -562,6 +606,8 @@ export type WithdrawalRequestCreateWithoutInfluencerInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -576,6 +622,8 @@ export type WithdrawalRequestUncheckedCreateWithoutInfluencerInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -620,6 +668,8 @@ export type WithdrawalRequestScalarWhereInput = {
   amount?: Prisma.DecimalFilter<"WithdrawalRequest"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFilter<"WithdrawalRequest"> | string
   payment_reference?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_method?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
+  payout_phone?: Prisma.StringNullableFilter<"WithdrawalRequest"> | string | null
   processed_at?: Prisma.DateTimeNullableFilter<"WithdrawalRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"WithdrawalRequest"> | Date | string
@@ -634,6 +684,8 @@ export type WithdrawalRequestCreateManyInfluencerInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status: string
   payment_reference?: string | null
+  payout_method?: string | null
+  payout_phone?: string | null
   processed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -648,6 +700,8 @@ export type WithdrawalRequestUpdateWithoutInfluencerInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -662,6 +716,8 @@ export type WithdrawalRequestUncheckedUpdateWithoutInfluencerInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -676,6 +732,8 @@ export type WithdrawalRequestUncheckedUpdateManyWithoutInfluencerInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   payment_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_method?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   processed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -693,6 +751,8 @@ export type WithdrawalRequestSelect<ExtArgs extends runtime.Types.Extensions.Int
   amount?: boolean
   status?: boolean
   payment_reference?: boolean
+  payout_method?: boolean
+  payout_phone?: boolean
   processed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -709,6 +769,8 @@ export type WithdrawalRequestSelectCreateManyAndReturn<ExtArgs extends runtime.T
   amount?: boolean
   status?: boolean
   payment_reference?: boolean
+  payout_method?: boolean
+  payout_phone?: boolean
   processed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -725,6 +787,8 @@ export type WithdrawalRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   amount?: boolean
   status?: boolean
   payment_reference?: boolean
+  payout_method?: boolean
+  payout_phone?: boolean
   processed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -741,6 +805,8 @@ export type WithdrawalRequestSelectScalar = {
   amount?: boolean
   status?: boolean
   payment_reference?: boolean
+  payout_method?: boolean
+  payout_phone?: boolean
   processed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
@@ -750,7 +816,7 @@ export type WithdrawalRequestSelectScalar = {
   deleted_by?: boolean
 }
 
-export type WithdrawalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "amount" | "status" | "payment_reference" | "processed_at" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["withdrawalRequest"]>
+export type WithdrawalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "influencer_id" | "amount" | "status" | "payment_reference" | "payout_method" | "payout_phone" | "processed_at" | "created_at" | "updated_at" | "deleted_at" | "created_by" | "updated_by" | "deleted_by", ExtArgs["result"]["withdrawalRequest"]>
 export type WithdrawalRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   influencer?: boolean | Prisma.InfluencerDefaultArgs<ExtArgs>
 }
@@ -772,6 +838,8 @@ export type $WithdrawalRequestPayload<ExtArgs extends runtime.Types.Extensions.I
     amount: runtime.Decimal
     status: string
     payment_reference: string | null
+    payout_method: string | null
+    payout_phone: string | null
     processed_at: Date | null
     created_at: Date
     updated_at: Date
@@ -1208,6 +1276,8 @@ export interface WithdrawalRequestFieldRefs {
   readonly amount: Prisma.FieldRef<"WithdrawalRequest", 'Decimal'>
   readonly status: Prisma.FieldRef<"WithdrawalRequest", 'String'>
   readonly payment_reference: Prisma.FieldRef<"WithdrawalRequest", 'String'>
+  readonly payout_method: Prisma.FieldRef<"WithdrawalRequest", 'String'>
+  readonly payout_phone: Prisma.FieldRef<"WithdrawalRequest", 'String'>
   readonly processed_at: Prisma.FieldRef<"WithdrawalRequest", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"WithdrawalRequest", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"WithdrawalRequest", 'DateTime'>

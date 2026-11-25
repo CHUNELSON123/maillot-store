@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
+import { notifyInfluencer } from '../../../../infrastructure/database/influencer-notifications';
 import { CommissionEntity } from '../../domain/entities/commission.entity';
 import {
   CommissionRepository,
@@ -60,7 +61,8 @@ export class PrismaCommissionRepository implements CommissionRepository {
       }
     }
 
-    const commission = await this.prisma.commission.create({
+    const commission = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.commission.create({
       data: {
         influencer_id: data.influencerId,
         referral_id: data.referralId,
@@ -68,6 +70,9 @@ export class PrismaCommissionRepository implements CommissionRepository {
         status: data.status,
         commission_rate_snapshot: data.commissionRateSnapshot,
       },
+      });
+      await notifyInfluencer(tx, influencer.user_id, { title: 'New commission recorded', message: `A commission of ${Number(created.amount).toLocaleString()} XAF has been recorded with status ${created.status}.`, type: 'COMMISSION', targetUrl: '/influencer/portal/earnings?tab=commissions' });
+      return created;
     });
 
     return this.toEntity(commission);
@@ -132,13 +137,21 @@ export class PrismaCommissionRepository implements CommissionRepository {
       throw new NotFoundException('Commission not found');
     }
 
-    const commission = await this.prisma.commission.update({
+    const commission = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.commission.update({
       where: {
         id: commissionId,
       },
       data: {
         status,
       },
+      });
+      if (existingCommission.status !== status) {
+        const influencer = await tx.influencer.findFirstOrThrow({ where: { id: updated.influencer_id, deleted_at: null }, select: { user_id: true } });
+        const message = status === 'APPROVED' ? 'Your commission has been approved and is available for withdrawal.' : `Your commission status changed to ${status}.`;
+        await notifyInfluencer(tx, influencer.user_id, { title: `Commission ${status.toLowerCase()}`, message: `${message} Amount: ${Number(updated.amount).toLocaleString()} XAF.`, type: 'COMMISSION', targetUrl: '/influencer/portal/earnings?tab=commissions' });
+      }
+      return updated;
     });
 
     return this.toEntity(commission);

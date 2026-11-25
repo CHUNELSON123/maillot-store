@@ -8,6 +8,7 @@ import type {
 } from "@/modules/catalogue/types/catalogue.types";
 import type { WishlistItem } from "../types/wishlist.types";
 import { wishlistService } from "../services/wishlist.service";
+import { authStorage } from "@/lib/auth/auth-storage";
 
 export function useWishlist() {
   const [items, setItems] = useState<WishlistItem[]>([]);
@@ -15,11 +16,14 @@ export function useWishlist() {
   const [error, setError] = useState<string | null>(null);
 
   const refreshWishlist = useCallback(async () => {
+    const token = authStorage.getStorefrontToken();
     try {
       const updatedItems = await wishlistService.getItems();
+      if (authStorage.getStorefrontToken() !== token) return;
       setItems(updatedItems);
       setError(null);
     } catch (err) {
+      if (authStorage.getStorefrontToken() !== token) return;
       setError(
         err instanceof Error
           ? err.message
@@ -41,10 +45,12 @@ useEffect(() => {
 
   window.addEventListener(eventName, handleUpdate);
   window.addEventListener("storage", handleUpdate);
+    window.addEventListener("maillot-auth-updated", handleUpdate);
 
   return () => {
     window.removeEventListener(eventName, handleUpdate);
     window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("maillot-auth-updated", handleUpdate);
   };
 }, [refreshWishlist]);
 

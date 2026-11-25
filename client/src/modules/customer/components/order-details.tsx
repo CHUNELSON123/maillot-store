@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Check, Circle } from "lucide-react";
 import { useOrders } from "../hooks/use-orders";
 import {
   CustomerDelivery,
@@ -63,6 +64,14 @@ export function OrderDetails({ orderId, tracking = false }: OrderDetailsProps) {
     );
   }
 
+  const progressStates = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"];
+  const deliveryStatus = delivery?.deliveryStatus?.toUpperCase() ?? "";
+  const orderStatus = order.status.toUpperCase();
+  const progressIndex = orderStatus === "CANCELLED" ? -1 : orderStatus === "DELIVERED" || deliveryStatus === "DELIVERED"
+    ? 4
+    : deliveryStatus === "IN_TRANSIT" || orderStatus === "SHIPPED" ? 3
+    : Math.max(0, progressStates.indexOf(orderStatus));
+
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-neutral-200 bg-white p-6">
@@ -84,15 +93,20 @@ export function OrderDetails({ orderId, tracking = false }: OrderDetailsProps) {
 
       {tracking && (
         <div className="rounded-lg border border-neutral-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-neutral-900">Delivery Tracking</h2>
-          <div className="mt-4 space-y-2 text-sm">
+          <h2 className="text-sm font-bold text-neutral-900">Order Status</h2>
+          {orderStatus === "CANCELLED" ? <p className="mt-3 inline-flex rounded bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700">Order cancelled</p> : <ol className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-5">{progressStates.map((status, index) => {
+            const done = index <= progressIndex;
+            return <li key={status} className="flex items-center gap-2 sm:flex-col sm:items-start">
+              <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full ${done ? "bg-green-600 text-white" : "border border-neutral-300 text-neutral-300"}`}>{done ? <Check size={13}/> : <Circle size={9}/>}</span>
+              <span className={`text-[9px] font-semibold ${done ? "text-neutral-800" : "text-neutral-400"}`}>{status === "SHIPPED" ? "In Transit" : status.toLowerCase().replaceAll("_", " ")}</span>
+            </li>;
+          })}</ol>}
+          <div className="mt-4 space-y-2 border-t border-neutral-100 pt-3 text-xs">
             {order.deliveryMethod === "PICKUP" ? (
-              <p>Pickup order status: {order.status.toLowerCase().replaceAll("_", " ")}.</p>
+              <p>Collection status: {order.status.toLowerCase().replaceAll("_", " ")}.</p>
             ) : delivery ? (
               <>
-                <p className="font-medium">
-                  Delivery status: {delivery.deliveryStatus.toLowerCase().replaceAll("_", " ")}
-                </p>
+                <p className="font-medium">Delivery status: {delivery.deliveryStatus.toLowerCase().replaceAll("_", " ")}</p>
                 {delivery.provider && <p>Provider: {delivery.provider}</p>}
                 {delivery.trackingNumber && <p>Tracking number: {delivery.trackingNumber}</p>}
                 {delivery.deliveredAt && (

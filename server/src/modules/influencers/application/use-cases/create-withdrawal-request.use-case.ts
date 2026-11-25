@@ -2,14 +2,18 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { CommissionRepository } from '../../domain/repositories/commission.repository';
 import { InfluencerRepository } from '../../domain/repositories/influencer.repository';
 import { WithdrawalRepository } from '../../domain/repositories/withdrawal.repository';
+import { WhatsAppNotificationService } from '../../../communications/infrastructure/whatsapp-notification.service';
 
 export interface CreateWithdrawalRequestInput {
   influencerId: string;
   amount: number;
+  payoutMethod?: 'MTN' | 'ORANGE';
+  payoutPhone?: string;
 }
 
 @Injectable()
@@ -18,6 +22,7 @@ export class CreateWithdrawalRequestUseCase {
     private readonly influencerRepository: InfluencerRepository,
     private readonly commissionRepository: CommissionRepository,
     private readonly withdrawalRepository: WithdrawalRepository,
+    @Optional() private readonly whatsapp?: WhatsAppNotificationService,
   ) {}
 
   async execute(input: CreateWithdrawalRequestInput) {
@@ -65,16 +70,26 @@ export class CreateWithdrawalRequestUseCase {
       );
     }
 
-    return this.withdrawalRepository.create({
+    const withdrawal = await this.withdrawalRepository.create({
       influencerId: input.influencerId,
       amount: input.amount,
       status: 'PENDING',
+      payoutMethod: input.payoutMethod,
+      payoutPhone: input.payoutPhone,
     });
+    const profile = await this.influencerRepository.findProfileByUserId(influencer.userId);
+    const adminPhone = process.env.WHATSAPP_ADMIN_PHONE;
+    if (adminPhone) {
+      try { await this.whatsapp?.notifyAdminWithdrawal(adminPhone, `${profile?.profile.firstName ?? 'Influencer'} ${profile?.profile.lastName ?? ''}`.trim(), `${withdrawal.amount.toLocaleString()} XAF`); }
+      catch { /* Withdrawal requests must remain saved if the messaging provider is unavailable. */ }
+    }
+    return withdrawal;
   }
 
-  async executeForUser(userId: string, amount: number) {
+  async executeForUser(userId: string, amount: number, payoutMethod?: 'MTN' | 'ORANGE', payoutPhone?: string) {
     const influencer = await this.influencerRepository.findByUserId(userId);
     if (!influencer) throw new NotFoundException('Influencer profile not found');
-    return this.execute({ influencerId: influencer.id, amount });
+    if (!payoutMethod || !payoutPhone) throw new BadRequestException('Choose a mobile money provider and enter the receiving number');
+    return this.execute({ influencerId: influencer.id, amount, payoutMethod, payoutPhone });
   }
 }

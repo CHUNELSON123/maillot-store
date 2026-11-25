@@ -17,6 +17,7 @@ describe('CmsController public reads and management access', () => {
       getPromotionsUseCase as never,
       {} as never,
       {} as never,
+      {} as never,
     );
 
     controller.getPublicBanners();

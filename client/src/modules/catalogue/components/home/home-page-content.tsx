@@ -31,12 +31,23 @@ export function HomePageContent() {
   const {
     banners,
     promotions,
+    content: cmsContent,
     isLoading: cmsLoading,
     error: cmsError,
   } = useCms();
 
   const heroBanner = banners[0];
   const promotion = promotions[0];
+  let featuredProductIds: string[] = [];
+  try {
+    const savedIds: unknown = JSON.parse(cmsContent['cms.featured_product_ids'] ?? '[]');
+    if (Array.isArray(savedIds)) featuredProductIds = savedIds.map(String);
+  } catch {
+    featuredProductIds = [];
+  }
+  const selectedProducts = featuredProductIds.length
+    ? featuredProductIds.map((id) => products.find((product) => product.id === id)).filter((product) => product !== undefined)
+    : products.slice(0, 6);
 
   const isLoading =
     productsLoading ||
@@ -50,7 +61,7 @@ export function HomePageContent() {
 
   return (
     <main className="min-h-screen bg-[#090909] text-white">
-      <HomeHero banner={heroBanner} />
+      <HomeHero banner={heroBanner} content={cmsContent} />
 
       {isLoading && (
         <div className="mx-auto max-w-[1200px] px-3 py-4 min-[380px]:px-4 sm:px-8 lg:px-10">
@@ -71,8 +82,9 @@ export function HomePageContent() {
       <HomeCategories categories={categories} />
 
       <FeaturedProducts
-        products={products.slice(0, 6)}
+        products={selectedProducts}
         images={images}
+        promotions={promotions}
       />
 
       {(promotion || banners[1]) && (

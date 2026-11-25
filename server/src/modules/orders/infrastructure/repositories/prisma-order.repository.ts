@@ -6,7 +6,7 @@ import {
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { applyInventoryDelta } from '../../../../infrastructure/database/inventory-stock';
-import { createReferralCommissionIfComplete } from '../../../../infrastructure/database/referral-commission';
+import { createReferralCommissionIfPaid } from '../../../../infrastructure/database/referral-commission';
 import { OrderEntity } from '../../domain/entities/order.entity';
 import { OrderItemEntity } from '../../domain/entities/order-item.entity';
 import {
@@ -46,15 +46,15 @@ export class PrismaOrderRepository implements OrderRepository {
         card: 'Bank Card',
         cash: 'Cash Before Delivery',
       } as const;
-      const paymentMethod = await tx.paymentMethod.findFirst({
+      const paymentMethod = data.paymentMethod ? await tx.paymentMethod.findFirst({
         where: {
           name: paymentMethodNames[data.paymentMethod],
           is_active: true,
           deleted_at: null,
         },
-      });
+      }) : null;
 
-      if (!paymentMethod) {
+      if (data.paymentMethod && !paymentMethod) {
         throw new BadRequestException('Selected payment method is unavailable');
       }
 
@@ -68,20 +68,50 @@ export class PrismaOrderRepository implements OrderRepository {
         select: {
           id: true,
           price: true,
+          product: { select: { id: true, brand_id: true, category_id: true } },
         },
       });
 
-      const variantPrices = new Map(
-        variants.map((variant) => [
-          variant.id,
-          variant.price === null ? null : Number(variant.price),
-        ]),
-      );
+      const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
+      const now = new Date();
+      const activePromotions = await tx.promotion.findMany({
+        where: { deleted_at: null, is_active: true, start_date: { lte: now }, end_date: { gte: now } },
+        select: { id: true, discount_type: true, discount_value: true },
+      });
+      const promotionSettings = activePromotions.length
+        ? await tx.systemSetting.findMany({
+            where: { key: { in: activePromotions.map(({ id }) => `cms.promotion.${id}`) }, deleted_at: null },
+            select: { key: true, value: true },
+          })
+        : [];
+      const promotionTargets = new Map(promotionSettings.map((setting) => {
+        try { return [setting.key.slice('cms.promotion.'.length), JSON.parse(setting.value) as { targetType?: string; targetIds?: string[] }]; }
+        catch { return [setting.key.slice('cms.promotion.'.length), { targetType: 'ALL', targetIds: [] }]; }
+      }));
+
+      const priceWithPromotion = (originalPrice: number, product: { id: string; brand_id: string | null; category_id: string }) => {
+        let bestPrice = originalPrice;
+        for (const promotion of activePromotions) {
+          const target = promotionTargets.get(promotion.id) ?? { targetType: 'ALL', targetIds: [] };
+          const applies = target.targetType === 'ALL'
+            || (target.targetType === 'PRODUCT' && target.targetIds?.includes(product.id))
+            || (target.targetType === 'BRAND' && product.brand_id !== null && target.targetIds?.includes(product.brand_id))
+            || (target.targetType === 'CATEGORY' && target.targetIds?.includes(product.category_id));
+          if (!applies) continue;
+          const value = Number(promotion.discount_value);
+          const type = promotion.discount_type.toUpperCase();
+          const candidate = type === 'PERCENTAGE' || type === 'PERCENT'
+            ? originalPrice * Math.max(0, 1 - Math.min(value, 100) / 100)
+            : Math.max(0, originalPrice - value);
+          bestPrice = Math.min(bestPrice, Math.round(candidate * 100) / 100);
+        }
+        return bestPrice;
+      };
 
       const itemsWithPrices = data.items.map((item) => {
-        const unitPrice = variantPrices.get(item.variantId);
+        const variant = variantsById.get(item.variantId);
 
-        if (unitPrice === undefined || unitPrice === null) {
+        if (!variant || variant.price === null) {
           throw new Error(
             `Product variant not found or has no price: ${item.variantId}`,
           );
@@ -90,7 +120,7 @@ export class PrismaOrderRepository implements OrderRepository {
         return {
           variantId: item.variantId,
           quantity: item.quantity,
-          unitPrice,
+          unitPrice: priceWithPromotion(Number(variant.price), variant.product),
         };
       });
 
@@ -103,6 +133,7 @@ export class PrismaOrderRepository implements OrderRepository {
       let eligibleInfluencer: {
         id: string;
         customer_discount_rate: unknown;
+        commission_rate: unknown;
       } | null = null;
       if (data.referralCode) {
         eligibleInfluencer = await tx.influencer.findFirst({
@@ -111,22 +142,21 @@ export class PrismaOrderRepository implements OrderRepository {
             status: 'ACTIVE',
             deleted_at: null,
           },
-          select: { id: true, customer_discount_rate: true },
+          select: { id: true, customer_discount_rate: true, commission_rate: true },
         });
 
         const discountRate = Number(eligibleInfluencer?.customer_discount_rate);
-        if (
-          !eligibleInfluencer ||
-          !Number.isFinite(discountRate) ||
-          discountRate <= 0 ||
-          discountRate > 100
-        ) {
+        if (!eligibleInfluencer || !Number.isFinite(discountRate) || discountRate < 0 || discountRate > 100) {
           throw new BadRequestException(
-            'Referral code is invalid or not eligible for a discount',
+            'Referral code is invalid',
           );
         }
 
-        discount = Math.round(((subtotal * discountRate) / 100) * 100) / 100;
+        if (discountRate === 0 && !data.referralAttributionToken) {
+          throw new BadRequestException('This referral code does not provide a customer discount');
+        }
+
+        if (discountRate > 0) discount = Math.round(((subtotal * discountRate) / 100) * 100) / 100;
       }
 
       const attributionHash = data.referralAttributionToken
@@ -136,12 +166,10 @@ export class PrismaOrderRepository implements OrderRepository {
         ? await tx.referral.findFirst({
             where: {
               attribution_token_hash: attributionHash,
-              order_id: null,
-              status: 'CLICKED',
               deleted_at: null,
               influencer: { status: 'ACTIVE', deleted_at: null },
             },
-            select: { id: true, influencer_id: true },
+            include: { influencer: { select: { commission_rate: true } } },
           })
         : null;
       if (attributionHash && !attributedReferral) {
@@ -151,7 +179,21 @@ export class PrismaOrderRepository implements OrderRepository {
         throw new BadRequestException('Referral code does not match its attribution');
       }
 
-      const deliveryFee = data.deliveryMethod === 'DELIVERY' ? 2000 : 0;
+      const deliverySettings = await tx.systemSetting.findMany({
+        where: { key: { in: ['delivery_enabled', 'delivery_fee', 'free_delivery_threshold'] }, deleted_at: null },
+        select: { key: true, value: true },
+      });
+      const deliveryConfig = new Map(deliverySettings.map((setting) => [setting.key, setting.value]));
+      if (data.deliveryMethod === 'DELIVERY' && deliveryConfig.get('delivery_enabled') === 'false') {
+        throw new BadRequestException('Home delivery is currently unavailable. Select store pickup instead.');
+      }
+      const configuredFee = deliveryConfig.has('delivery_fee') ? Number(deliveryConfig.get('delivery_fee')) : 2000;
+      const freeThreshold = deliveryConfig.has('free_delivery_threshold') ? Number(deliveryConfig.get('free_delivery_threshold')) : 50000;
+      const eligibleSubtotal = subtotal - discount;
+      const isFreeDelivery = Number.isFinite(freeThreshold) && freeThreshold > 0 && eligibleSubtotal >= freeThreshold;
+      const deliveryFee = data.deliveryMethod === 'DELIVERY' && !isFreeDelivery
+        ? Number.isFinite(configuredFee) && configuredFee >= 0 ? configuredFee : 2000
+        : 0;
       const totalAmount = subtotal - discount + deliveryFee;
 
       const stockByVariant = new Map<string, number>();
@@ -201,13 +243,14 @@ export class PrismaOrderRepository implements OrderRepository {
               unit_price: item.unitPrice,
             })),
           },
-          payment: {
+          ...(paymentMethod ? { payment: {
             create: {
               payment_method_id: paymentMethod.id,
               amount: totalAmount,
-              status: 'PENDING',
+              status: data.paymentStatus ?? 'PENDING',
+              paid_at: data.paymentStatus === 'PAID' ? new Date() : null,
             },
-          },
+          } } : {}),
           ...(eligibleInfluencer && data.referralCode && !attributedReferral
             ? {
                 referrals: {
@@ -215,6 +258,7 @@ export class PrismaOrderRepository implements OrderRepository {
                     influencer_id: eligibleInfluencer.id,
                     referral_code: data.referralCode,
                     status: 'PENDING',
+                    commission_rate_snapshot: Number(eligibleInfluencer.commission_rate),
                   },
                 },
               }
@@ -231,13 +275,19 @@ export class PrismaOrderRepository implements OrderRepository {
       });
 
       if (attributedReferral) {
-        const linkedReferral = await tx.referral.updateMany({
-          where: { id: attributedReferral.id, order_id: null },
-          data: { order_id: order.id, status: 'ORDERED' },
+        await tx.referral.create({
+          data: {
+            influencer_id: attributedReferral.influencer_id,
+            order_id: order.id,
+            referral_code: attributedReferral.referral_code,
+            status: 'ORDERED',
+            commission_rate_snapshot: Number(attributedReferral.influencer.commission_rate),
+          },
         });
-        if (linkedReferral.count !== 1) {
-          throw new BadRequestException('Referral attribution was already used');
-        }
+      }
+
+      if (data.paymentStatus === 'PAID') {
+        await createReferralCommissionIfPaid(tx, order.id, data.paymentStatus);
       }
 
       await this.notifyCustomer(
@@ -247,6 +297,7 @@ export class PrismaOrderRepository implements OrderRepository {
         `Your order ${order.order_number} has been received and is pending processing.`,
         'ORDER',
       );
+      await this.notifyAdmins(tx, order.order_number);
 
       return this.toEntity(order);
     });
@@ -431,7 +482,7 @@ export class PrismaOrderRepository implements OrderRepository {
       }
 
       if (data.status === 'DELIVERED') {
-        await createReferralCommissionIfComplete(
+        await createReferralCommissionIfPaid(
           tx,
           orderId,
           existingOrder.payment?.status ?? null,
@@ -560,6 +611,12 @@ export class PrismaOrderRepository implements OrderRepository {
   ) {
     if (!customerId) return;
 
+    const notificationSetting = await tx.systemSetting.findFirst({
+      where: { key: 'customer_order_notifications', deleted_at: null },
+      select: { value: true },
+    });
+    if (notificationSetting?.value === 'false') return;
+
     const customer = await tx.customer.findUnique({
       where: { id: customerId },
       select: { user_id: true },
@@ -574,6 +631,28 @@ export class PrismaOrderRepository implements OrderRepository {
         message,
         type,
       },
+    });
+  }
+
+  private async notifyAdmins(tx: any, orderNumber: string) {
+    const setting = await tx.systemSetting.findFirst({
+      where: { key: 'admin_order_notifications', deleted_at: null },
+      select: { value: true },
+    });
+    if (setting?.value === 'false') return;
+    const admins = await tx.user.findMany({
+      where: { deleted_at: null, role: { is: { name: 'Administrator', deleted_at: null } } },
+      select: { id: true },
+    });
+    if (!admins.length) return;
+    await tx.notification.createMany({
+      data: admins.map(({ id }: { id: string }) => ({
+        user_id: id,
+        title: 'New order received',
+        message: `Order ${orderNumber} was placed.`,
+        type: 'ORDER',
+        target_url: `/admin/orders?search=${encodeURIComponent(orderNumber)}`,
+      })),
     });
   }
 }

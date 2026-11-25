@@ -17,7 +17,7 @@ interface AuthenticatedRequest {
   version: '1',
 })
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('Customer')
+@Roles('Customer', 'Administrator', 'Staff')
 export class NotificationController {
   constructor(
     private readonly getNotificationsUseCase: GetNotificationsUseCase,

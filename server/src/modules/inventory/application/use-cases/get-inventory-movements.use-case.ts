@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InventoryMovementRepository } from '../../domain/repositories/inventory-movement.repository';
+import { InventoryMovementListQuery, InventoryMovementRepository } from '../../domain/repositories/inventory-movement.repository';
 
 @Injectable()
 export class GetInventoryMovementsUseCase {
@@ -9,5 +9,9 @@ export class GetInventoryMovementsUseCase {
 
   async execute(variantId: string) {
     return this.inventoryMovementRepository.findByVariantId(variantId);
+  }
+
+  executeAll(query: InventoryMovementListQuery) {
+    return this.inventoryMovementRepository.findAll(query);
   }
 }

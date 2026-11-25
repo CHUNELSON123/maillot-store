@@ -4,7 +4,7 @@ import { RolesGuard } from '../../../../common/guards/roles.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { GetAdminRecordsUseCase } from '../../application/use-cases/get-admin-records.use-case';
 import { AdminListQueryDto } from '../dto/admin-list-query.dto';
-import { CreateAdminRoleDto, CreateAdminUserDto, UpdateAdminRoleDto, UpdateAdminSettingDto, UpdateAdminUserDto } from '../dto/admin-access.dto';
+import { CreateAdminRoleDto, CreateAdminUserDto, UpdateAdminCustomerDto, UpdateAdminCustomerStatusDto, UpdateAdminRoleDto, UpdateAdminSettingDto, UpdateAdminUserDto } from '../dto/admin-access.dto';
 import { CreateAdminUserUseCase } from '../../application/use-cases/create-admin-user.use-case';
 
 interface AdminRequest { user: { id: string } }
@@ -20,6 +20,8 @@ export class AdminReadController {
   @Get('deliveries') deliveries(@Query() query: AdminListQueryDto) { return this.records.deliveries(query); }
   @Get('customers') customers(@Query() query: AdminListQueryDto) { return this.records.customers(query); }
   @Get('customers/:id') customer(@Param('id') id: string) { return this.records.customer(id); }
+  @Patch('customers/:id') updateCustomer(@Param('id') id: string, @Body() dto: UpdateAdminCustomerDto, @Req() request: AdminRequest) { return this.records.updateCustomer(id, dto, request.user.id); }
+  @Patch('customers/:id/status') updateCustomerStatus(@Param('id') id: string, @Body() dto: UpdateAdminCustomerStatusDto, @Req() request: AdminRequest) { return this.records.updateCustomerStatus(id, dto.active, request.user.id); }
   @Get('users') @Roles('Administrator') users(@Query() query: AdminListQueryDto) { return this.records.users(query); }
   @Get('inventory') inventory(@Query() query: AdminListQueryDto) { return this.records.inventory(query); }
   @Get('audit-logs') @Roles('Administrator') auditLogs(@Query() query: AdminListQueryDto) { return this.records.auditLogs(query); }

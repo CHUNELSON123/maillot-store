@@ -35,9 +35,11 @@ export class ReportsController {
 
   @Get('sales')
   getSalesReport(@Query() dto: ReportFilterDto) {
+    const startDate = dto.startDate ? new Date(`${dto.startDate.slice(0, 10)}T00:00:00.000Z`) : undefined;
+    const endDate = dto.endDate ? new Date(`${dto.endDate.slice(0, 10)}T23:59:59.999Z`) : undefined;
     return this.getSalesReportUseCase.execute({
-      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      startDate,
+      endDate,
     });
   }
 
@@ -49,8 +51,8 @@ export class ReportsController {
   @Get('commissions')
   getCommissionReport(@Query() dto: ReportFilterDto) {
     return this.getCommissionReportUseCase.execute({
-      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      startDate: dto.startDate ? new Date(`${dto.startDate.slice(0, 10)}T00:00:00.000Z`) : undefined,
+      endDate: dto.endDate ? new Date(`${dto.endDate.slice(0, 10)}T23:59:59.999Z`) : undefined,
     });
   }
 

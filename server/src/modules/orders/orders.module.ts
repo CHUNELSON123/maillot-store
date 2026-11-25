@@ -26,6 +26,6 @@ import { OrderController } from './presentation/controllers/order.controller';
       useExisting: PrismaOrderRepository,
     },
   ],
-  exports: [OrderRepository],
+  exports: [OrderRepository, GetOrderUseCase],
 })
 export class OrdersModule {}

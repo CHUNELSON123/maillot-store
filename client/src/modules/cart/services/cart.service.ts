@@ -36,7 +36,7 @@ const UPDATED_EVENT = "maillot-cart-updated";
 let cachedItems: CartItem[] = [];
 let cachedToken: string | null = null;
 let hasLoaded = false;
-let loadingRequest: Promise<CartItem[]> | null = null;
+let loadingRequest: { token: string; promise: Promise<CartItem[]> } | null = null;
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -123,16 +123,18 @@ async function fetchAccountCart(token: string): Promise<CartItem[]> {
     token,
   });
 
-  cachedItems = response.map(mapApiItem);
-  cachedToken = token;
-  hasLoaded = true;
-
-  return cachedItems;
+  const items = response.map(mapApiItem);
+  if (authStorage.getStorefrontToken() === token) {
+    cachedItems = items;
+    cachedToken = token;
+    hasLoaded = true;
+  }
+  return items;
 }
 
 export const cartService = {
   getSyncItems(): CartItem[] {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
     if (token && hasLoaded && cachedToken === token) {
       return cachedItems;
     }
@@ -140,7 +142,7 @@ export const cartService = {
   },
 
   async getItems(): Promise<CartItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestCart();
@@ -154,17 +156,19 @@ export const cartService = {
       return cachedItems;
     }
 
-    if (!loadingRequest) {
-      loadingRequest = fetchAccountCart(token).finally(() => {
-        loadingRequest = null;
-      });
+    if (!loadingRequest || loadingRequest.token !== token) {
+      const request = { token, promise: fetchAccountCart(token) };
+      loadingRequest = request;
+      void request.promise.finally(() => {
+        if (loadingRequest === request) loadingRequest = null;
+      }).catch(() => undefined);
     }
 
-    return loadingRequest;
+    return loadingRequest.promise;
   },
 
   async addItem(input: AddToCartInput): Promise<CartItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestCart();
@@ -217,7 +221,7 @@ export const cartService = {
     itemId: string,
     variant: ProductVariant,
   ): Promise<CartItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestCart();
@@ -243,6 +247,11 @@ export const cartService = {
         (other) => other.id === updatedId && other.id !== itemId,
       );
 
+      const combinedQuantity = item.quantity + (matchingItem?.quantity ?? 0);
+      if (variant.status !== "ACTIVE" || !Number.isFinite(variant.stockQuantity) || combinedQuantity > variant.stockQuantity) {
+        throw new Error("The selected size does not have enough stock for this quantity.");
+      }
+
       const updatedItems = items
         .filter((other) => other.id !== matchingItem?.id)
         .map((other) =>
@@ -252,7 +261,7 @@ export const cartService = {
                 id: updatedId,
                 product: { ...other.product, price },
                 variant,
-                quantity: other.quantity + (matchingItem?.quantity ?? 0),
+                quantity: combinedQuantity,
               }
             : other,
         );
@@ -279,7 +288,7 @@ export const cartService = {
     itemId: string,
     quantity: number,
   ): Promise<CartItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestCart();
@@ -320,7 +329,7 @@ export const cartService = {
   },
 
   async removeItem(itemId: string): Promise<CartItem[]> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       const items = readGuestCart();
@@ -341,7 +350,7 @@ export const cartService = {
   },
 
   async clearCart(): Promise<void> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
 
     if (!token) {
       saveGuestCart([]);
@@ -359,7 +368,7 @@ export const cartService = {
   },
 
   async syncGuestItems(): Promise<void> {
-    const token = authStorage.getToken();
+    const token = authStorage.getStorefrontToken();
     if (!token) return;
 
     const guestItems = readGuestCart();

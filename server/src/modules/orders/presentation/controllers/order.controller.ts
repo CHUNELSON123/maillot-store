@@ -66,6 +66,24 @@ export class OrderController {
     });
   }
 
+  @Post('walk-in')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Administrator', 'Staff')
+  createWalkIn(@Body() dto: CreateOrderDto) {
+    return this.createOrderUseCase.execute({
+      source: 'WALK_IN',
+      walkIn: true,
+      items: dto.items.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
+      paymentMethod: dto.paymentMethod,
+      guestName: dto.guestName,
+      guestPhone: dto.guestPhone,
+      guestEmail: dto.guestEmail,
+      deliveryMethod: dto.deliveryMethod,
+      deliveryAddress: dto.deliveryAddress,
+      deliveryCity: dto.deliveryCity,
+    });
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Customer')

@@ -10,5 +10,5 @@ export abstract class CommunicationsRepository {
     data: SubmitContactMessageData,
   ): Promise<{ id: string; createdAt: Date }>;
 
-  abstract subscribeToNewsletter(email: string): Promise<{ status: string }>;
+  abstract subscribeToNewsletter(contact: { email?: string; phone?: string }, whatsappOptIn?: boolean): Promise<{ status: string }>;
 }

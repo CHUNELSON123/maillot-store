@@ -7,7 +7,7 @@ import { apiClient } from '@/services/api/api-client';
 import { influencerService } from '../services/influencer.service';
 import { InfluencerPortalData } from '../types/influencer.types';
 
-type PortalContextValue = { data: InfluencerPortalData | null; loading: boolean; error: string; refresh: () => Promise<void> };
+type PortalContextValue = { data: InfluencerPortalData | null; loading: boolean; error: string; canViewNotifications: boolean; refresh: () => Promise<void> };
 const Context = createContext<PortalContextValue | null>(null);
 
 export function InfluencerPortalProvider({ children }: { children: ReactNode }) {
@@ -15,6 +15,7 @@ export function InfluencerPortalProvider({ children }: { children: ReactNode }) 
   const [data, setData] = useState<InfluencerPortalData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [canViewNotifications, setCanViewNotifications] = useState(false);
   const refresh = useCallback(async () => {
     const accessToken = authStorage.getToken();
     if (!accessToken) {
@@ -23,12 +24,14 @@ export function InfluencerPortalProvider({ children }: { children: ReactNode }) 
     }
     setLoading(true);
     setError('');
+    setCanViewNotifications(false);
     try {
       const user = await apiClient<{ roleName?: string }>('/auth/me', { method: 'GET', token: accessToken });
       if (user.roleName !== 'Influencer' && user.roleName !== 'Customer') {
         setError('This portal is only available to influencer accounts.');
         return;
       }
+      setCanViewNotifications(true);
       const portal = await influencerService.getPortal();
       setData(portal);
     } catch (cause) {
@@ -37,7 +40,7 @@ export function InfluencerPortalProvider({ children }: { children: ReactNode }) 
   }, [pathname]);
 
   useEffect(() => { void refresh(); }, [refresh]);
-  return <Context.Provider value={{ data, loading, error, refresh }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ data, loading, error, canViewNotifications, refresh }}>{children}</Context.Provider>;
 }
 
 export function useInfluencerPortal() {

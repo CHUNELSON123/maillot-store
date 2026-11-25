@@ -4,6 +4,8 @@ export interface CreateWithdrawalData {
   influencerId: string;
   amount: number;
   status: string;
+  payoutMethod?: 'MTN' | 'ORANGE';
+  payoutPhone?: string;
 }
 
 export interface UpdateWithdrawalData {
@@ -13,6 +15,8 @@ export interface UpdateWithdrawalData {
 }
 
 export abstract class WithdrawalRepository {
+  abstract getMinimumWithdrawalAmount(): Promise<number>;
+
   abstract create(data: CreateWithdrawalData): Promise<WithdrawalRequestEntity>;
 
   abstract findById(

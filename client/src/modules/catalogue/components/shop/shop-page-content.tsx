@@ -11,6 +11,7 @@ import { ProductGrid } from "@/modules/catalogue/components/product-grid";
 import { ShopCategories } from "./shop-categories";
 import { ShopFilters } from "./shop-filters";
 import { ShopHero } from "./shop-hero";
+import { useCms } from "@/modules/cms/hooks/use-cms";
 
 export function ShopPageContent() {
   const [search, setSearch] = useState("");
@@ -18,6 +19,7 @@ export function ShopPageContent() {
   const [sort, setSort] = useState("Featured");
   const [page, setPage] = useState(1);
   const { categories, error: categoriesError } = useCategories();
+  const { promotions } = useCms();
   const { products, images, total, totalPages, isLoading, error } =
     useShopCatalogue({ page, categoryId, search, sort });
 
@@ -80,7 +82,7 @@ export function ShopPageContent() {
                     ? "No products found."
                     : `Showing ${(page - 1) * 12 + 1}–${Math.min(page * 12, total)} of ${total} products`}
                 </p>
-                <ProductGrid products={products} images={images} />
+                <ProductGrid products={products} images={images} promotions={promotions} />
                 {totalPages > 1 && (
                   <nav aria-label="Product pages" className="mt-8 flex items-center justify-center gap-4">
                     <button

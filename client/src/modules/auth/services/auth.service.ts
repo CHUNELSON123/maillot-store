@@ -11,6 +11,16 @@ import { wishlistService } from "@/modules/wishlist/services/wishlist.service";
 import { cartService } from "@/modules/cart/services/cart.service";
 
 export const authService = {
+  async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
+    const token = authStorage.getToken();
+    if (!token) throw new Error('Sign in to update your password.');
+    await apiClient<{ message: string }>("/auth/change-password", {
+      method: "POST",
+      token,
+      body: JSON.stringify(data),
+    });
+  },
+
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await apiClient<AuthResponse>(
       "/auth/login",

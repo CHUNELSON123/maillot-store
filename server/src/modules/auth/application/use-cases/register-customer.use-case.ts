@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../../domain/repositories/user.repository';
 
@@ -15,6 +15,9 @@ export class RegisterCustomerUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
   async execute(input: RegisterCustomerInput) {
+    if (!(await this.userRepository.isRegistrationAllowed())) {
+      throw new ForbiddenException('New customer registration is currently disabled');
+    }
     const existingUser = await this.userRepository.findByEmail(input.email);
 
     if (existingUser) {
@@ -29,6 +32,7 @@ export class RegisterCustomerUseCase {
       firstName: input.firstName,
       lastName: input.lastName,
       phone: input.phone,
+      registrationSource: 'WEBSITE',
     });
 
     return {

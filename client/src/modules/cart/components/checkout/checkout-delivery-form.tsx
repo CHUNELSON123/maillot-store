@@ -13,6 +13,11 @@ type Props = {
   onAddressChange: (value: string) => void;
   onCityChange: (value: string) => void;
   onPostalCodeChange: (value: string) => void;
+  deliveryEnabled: boolean;
+  deliveryFee: number;
+  freeDeliveryThreshold: number;
+  freeDelivery: boolean;
+  deliveryInformation?: string;
 };
 
 export function CheckoutDeliveryForm({
@@ -24,6 +29,11 @@ export function CheckoutDeliveryForm({
   onAddressChange,
   onCityChange,
   onPostalCodeChange,
+  deliveryEnabled,
+  deliveryFee,
+  freeDeliveryThreshold,
+  freeDelivery,
+  deliveryInformation,
 }: Props) {
   return (
     <section className="mt-4">
@@ -39,7 +49,7 @@ export function CheckoutDeliveryForm({
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <div>
-          <label className="block">
+          <label className={`block ${deliveryMethod === "pickup" || !deliveryEnabled ? "opacity-50" : ""}`}>
             <span className="mb-1 block text-[10px] font-semibold">
               Delivery Address{" "}
               <span className="text-red-500">*</span>
@@ -47,6 +57,7 @@ export function CheckoutDeliveryForm({
 
             <input
               type="text"
+              disabled={deliveryMethod === "pickup" || !deliveryEnabled}
               value={address}
               onChange={(event) =>
                 onAddressChange(event.target.value)
@@ -65,6 +76,7 @@ export function CheckoutDeliveryForm({
 
               <input
                 type="text"
+              disabled={deliveryMethod === "pickup" || !deliveryEnabled}
                 value={city}
                 onChange={(event) =>
                   onCityChange(event.target.value)
@@ -84,6 +96,7 @@ export function CheckoutDeliveryForm({
 
               <input
                 type="text"
+              disabled={deliveryMethod === "pickup" || !deliveryEnabled}
                 value={postalCode}
                 onChange={(event) =>
                   onPostalCodeChange(event.target.value)
@@ -101,7 +114,7 @@ export function CheckoutDeliveryForm({
             <span className="text-red-500">*</span>
           </h3>
 
-          <button
+          {deliveryEnabled && <button
             type="button"
             onClick={() =>
               onDeliveryMethodChange("delivery")
@@ -123,14 +136,14 @@ export function CheckoutDeliveryForm({
             <span className="min-w-0 flex-1">
               <span className="flex justify-between gap-3 text-[11px] font-bold">
                 <span>Home Delivery</span>
-                <span>2,000 XAF</span>
+                <span>{freeDelivery ? "Free" : `${deliveryFee.toLocaleString()} XAF`}</span>
               </span>
 
               <span className="mt-0.5 block text-[9px] text-neutral-500">
-                Delivery to your provided address
+                {freeDelivery ? `Free for orders of ${freeDeliveryThreshold.toLocaleString()} XAF or more` : freeDeliveryThreshold > 0 ? `Delivery to your provided address · free over ${freeDeliveryThreshold.toLocaleString()} XAF` : "Delivery to your provided address"}
               </span>
             </span>
-          </button>
+          </button>}
 
           <button
             type="button"
@@ -162,6 +175,7 @@ export function CheckoutDeliveryForm({
               </span>
             </span>
           </button>
+          {deliveryInformation && <p className="mt-3 border-t border-neutral-100 pt-2 text-[9px] leading-4 text-neutral-500">{deliveryInformation}</p>}
         </div>
       </div>
     </section>

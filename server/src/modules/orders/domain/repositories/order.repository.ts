@@ -19,7 +19,8 @@ export interface CreateOrderData {
   totalAmount: number;
   referralCode?: string | null;
   referralAttributionToken?: string | null;
-  paymentMethod: 'mtn' | 'orange' | 'card' | 'cash';
+  paymentMethod?: 'mtn' | 'orange' | 'card' | 'cash';
+  paymentStatus?: 'PENDING' | 'PAID';
 
   deliveryMethod: 'DELIVERY' | 'PICKUP';
   deliveryFee: number;

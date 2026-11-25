@@ -4,6 +4,7 @@ import { CategoryRepository } from '../../domain/repositories/category.repositor
 export interface CreateCategoryInput {
   name: string;
   description?: string;
+  imageUrl?: string;
 }
 
 @Injectable()
@@ -14,6 +15,7 @@ export class CreateCategoryUseCase {
     return this.categoryRepository.create({
       name: input.name,
       description: input.description,
+      imageUrl: input.imageUrl,
     });
   }
 }

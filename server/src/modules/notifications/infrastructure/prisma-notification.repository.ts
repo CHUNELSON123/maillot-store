@@ -29,6 +29,7 @@ export class PrismaNotificationRepository implements NotificationRepository {
           notification.is_read,
           notification.created_at,
           notification.updated_at,
+          notification.target_url,
         ),
     );
   }
@@ -67,6 +68,7 @@ export class PrismaNotificationRepository implements NotificationRepository {
       updated.is_read,
       updated.created_at,
       updated.updated_at,
+      updated.target_url,
     );
   }
 

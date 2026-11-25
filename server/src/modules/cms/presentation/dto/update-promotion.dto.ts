@@ -1,9 +1,12 @@
 import {
   IsBoolean,
+  IsArray,
   IsDateString,
   IsNumber,
   IsOptional,
+  IsIn,
   IsString,
+  IsUUID,
   Length,
   Min,
 } from 'class-validator';
@@ -20,12 +23,25 @@ export class UpdatePromotionDto {
 
   @IsOptional()
   @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsString()
   discountType?: string;
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   discountValue?: number;
+
+  @IsOptional()
+  @IsIn(['ALL', 'BRAND', 'CATEGORY', 'PRODUCT'])
+  targetType?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  targetIds?: string[];
 
   @IsOptional()
   @IsDateString()

@@ -37,7 +37,7 @@ export function HomePromotion({
   promotion,
   banner,
 }: HomePromotionProps) {
-  const imageUrl = resolveImageUrl(banner?.imageUrl);
+  const imageUrl = resolveImageUrl(promotion?.imageUrl || banner?.imageUrl);
 
   const discountText = (() => {
     if (!promotion || !Number.isFinite(promotion.discountValue) || promotion.discountValue <= 0) {
@@ -49,7 +49,7 @@ export function HomePromotion({
       case "percent":
         return `${promotion.discountValue}% OFF`;
       default:
-        return null;
+        return `${promotion.discountValue.toLocaleString()} XAF OFF`;
     }
   })();
 
@@ -58,8 +58,7 @@ export function HomePromotion({
 
   const description = promotion?.description;
 
-  const link =
-    banner?.linkUrl || "/shop";
+  const link = promotion ? "/promotions" : banner?.linkUrl || "/shop";
 
   return (
     <section className="bg-[#090909] px-3 py-2 min-[380px]:px-4 sm:px-8 lg:px-10">
@@ -67,7 +66,7 @@ export function HomePromotion({
         <div className="relative min-h-[190px] overflow-hidden rounded-[3px] border border-[#8B6900] bg-black sm:min-h-[155px] lg:min-h-[130px]">
           <Image
             src={imageUrl}
-            alt={banner?.title || "Promotion"}
+            alt={promotion?.title || banner?.title || "Promotion"}
             fill
             sizes="1200px"
             className="object-cover object-[70%_48%]"

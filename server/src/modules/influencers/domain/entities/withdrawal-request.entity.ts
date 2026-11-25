@@ -8,5 +8,7 @@ export class WithdrawalRequestEntity {
     public readonly processedAt: Date | null,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly payoutMethod: string | null = null,
+    public readonly payoutPhone: string | null = null,
   ) {}
 }

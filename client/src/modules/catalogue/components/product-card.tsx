@@ -3,7 +3,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Heart,
@@ -19,6 +18,8 @@ import {
 import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
 import { catalogueService } from "../services/catalogue.service";
+import { Promotion } from "@/modules/cms/types/cms.types";
+import { getProductPromotion } from "@/modules/cms/utils/promotion-pricing";
 
 type ProductCardProps = {
   product: Product;
@@ -28,6 +29,7 @@ type ProductCardProps = {
   showWishlist?: boolean;
   showAddToCart?: boolean;
   badge?: string | null;
+  promotions?: Promotion[];
 };
 
 const productThemes = [
@@ -82,16 +84,24 @@ export function ProductCard({
   showWishlist = true,
   showAddToCart = true,
   badge = null,
+  promotions = [],
 }: ProductCardProps) {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
-  const router = useRouter();
 
   const [isAdding, setIsAdding] = useState(false);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [added, setAdded] = useState(false);
 
   const isFavorite = isInWishlist(product.id);
+
+  const editionLabel = product.edition?.trim() && !/^(active|inactive|pending|draft|\d+)$/i.test(product.edition.trim())
+    ? product.edition.trim()
+    : null;
+  const seasonLabel = product.season?.trim() && /^\d{4}\/\d{4}$/.test(product.season.trim())
+    ? product.season.trim()
+    : null;
 
   const imageUrl = resolveImageUrl(
     image?.imageUrl,
@@ -100,13 +110,14 @@ export function ProductCard({
   const formatPrice = (price: number) =>
     `${price.toLocaleString("en-US")} FCFA`;
 
-  const formattedPrice = formatPrice(
-    product.price,
-  );
+  const promotionPrice = getProductPromotion(product, promotions);
+  const currentPrice = promotionPrice?.discountedPrice ?? product.price;
+  const currentDiscountPercentage = discountPercentage ?? promotionPrice?.discountPercentage ?? null;
+  const formattedPrice = formatPrice(currentPrice);
 
   const formattedOriginalPrice =
-    originalPrice !== null
-      ? formatPrice(originalPrice)
+    originalPrice !== null || promotionPrice
+      ? formatPrice(originalPrice ?? product.price)
       : null;
 
   const handleAddToCart = async (
@@ -121,6 +132,7 @@ export function ProductCard({
 
     setIsAdding(true);
     setErrorMessage("");
+    setAdded(false);
 
     try {
       const variants = await catalogueService.getProductVariants(
@@ -129,6 +141,8 @@ export function ProductCard({
 
       const purchasableVariants = variants.filter(
         (variant): variant is ProductVariant & { price: number } =>
+          variant.status === "ACTIVE" &&
+          variant.stockQuantity > 0 &&
           typeof variant.price === "number" &&
           Number.isFinite(variant.price) &&
           variant.price >= 0,
@@ -140,19 +154,8 @@ export function ProductCard({
         return;
       }
 
-      if (purchasableVariants.length > 1) {
-        router.push(`/shop/${product.id}`);
-        return;
-      }
-
-      const variant = purchasableVariants[0];
-
-      addItem({
-        product: { ...product, price: variant.price },
-        variant,
-        imageUrl,
-        quantity: 1,
-      });
+      await addItem({ product: { ...product, price: currentPrice }, variant: null, imageUrl, quantity: 1 });
+      setAdded(true);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
@@ -168,7 +171,7 @@ export function ProductCard({
     <article className="group min-w-0 overflow-hidden rounded-[3px] border border-[#8B6A00] bg-[#101010]">
       <div className="relative">
         <Link href={`/shop/${product.id}`}>
-          <div className="relative aspect-[1/0.86] overflow-hidden bg-[#151515] sm:aspect-[1/0.9] lg:aspect-[1/0.78]">
+          <div className="relative aspect-square overflow-hidden bg-white">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -177,8 +180,8 @@ export function ProductCard({
                   product.name
                 }
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                className="object-contain"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
             ) : (
               <div
@@ -214,20 +217,24 @@ export function ProductCard({
               </span>
             )}
 
-            {discountPercentage !== null &&
-              discountPercentage > 0 && (
+            {currentDiscountPercentage !== null &&
+              currentDiscountPercentage > 0 && (
                 <span className="absolute left-2 top-2 rounded-[2px] bg-[#E31B23] px-2 py-1 text-[8px] font-extrabold leading-none text-white">
-                  -{discountPercentage}%
+                  -{currentDiscountPercentage}%
                 </span>
               )}
 
+
+          </div>
+        </Link>
             {showWishlist && (
               <button
                 type="button"
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  toggleItem(product, image ?? null);
+                  setErrorMessage("");
+                  void toggleItem(product, image ?? null).catch((error: unknown) => setErrorMessage(error instanceof Error ? error.message : "Unable to update your wishlist."));
                 }}
                 className={`absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border transition ${
                   isFavorite
@@ -248,8 +255,6 @@ export function ProductCard({
                 />
               </button>
             )}
-          </div>
-        </Link>
       </div>
 
       <div className="px-2 pb-2 pt-2 min-[380px]:px-2.5 sm:px-3 sm:pb-2.5 sm:pt-2.5">
@@ -258,6 +263,12 @@ export function ProductCard({
             {product.name}
           </h3>
         </Link>
+
+        {(editionLabel || seasonLabel) && (
+          <p className="mt-0.5 line-clamp-1 text-[8px] text-neutral-400 sm:text-[9px]">
+            {[editionLabel, seasonLabel].filter(Boolean).join(" ")}
+          </p>
+        )}
 
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <p className="text-[10px] font-extrabold text-white sm:text-[11px]">
@@ -291,11 +302,13 @@ export function ProductCard({
           </button>
         )}
 
+
         {errorMessage && (
           <p role="alert" className="mt-2 text-[10px] text-red-400">
             {errorMessage}
           </p>
         )}
+        {added && <p role="status" className="mt-2 text-[10px] text-green-300">Added to your cart.</p>}
       </div>
     </article>
   );

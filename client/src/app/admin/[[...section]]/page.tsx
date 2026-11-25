@@ -12,10 +12,17 @@ import { AdminLoginPage } from '@/modules/admin/components/admin-login-page';
 import { AdminProductsPage } from '@/modules/admin/components/admin-products-page';
 import { AdminSection } from '@/modules/admin/types/admin.types';
 import { AdminInfluencersPage } from '@/modules/admin/components/admin-influencers-page';
+import { AdminInventoryPage } from '@/modules/admin/components/admin-inventory-page';
+import { AdminOrdersPage } from '@/modules/admin/components/admin-orders-page';
+import { AdminCustomersPage } from '@/modules/admin/components/admin-customers-page';
+import { AdminPaymentsPage } from '@/modules/admin/components/admin-payments-page';
+import { AdminDeliveriesPage } from '@/modules/admin/components/admin-deliveries-page';
+import { AdminWebsiteContentPage } from '@/modules/admin/components/admin-website-content-page';
+import { AdminNotificationsPage } from '@/modules/admin/components/admin-notifications-page';
 
 const sections = new Set<AdminSection>([
   'dashboard', 'products', 'categories-brands', 'inventory', 'orders', 'customers',
-  'influencers', 'payments', 'delivery', 'reports', 'cms', 'users', 'settings',
+  'influencers', 'payments', 'delivery', 'reports', 'cms', 'users', 'settings', 'notifications',
 ]);
 
 export default function AdminPage() {
@@ -31,5 +38,12 @@ export default function AdminPage() {
   if (section === 'users') return <AdminUsersPage/>;
   if (section === 'settings') return <AdminSettingsPage/>;
   if (section === 'influencers') return <AdminInfluencersPage />;
+  if (section === 'inventory') return <AdminInventoryPage />;
+  if (section === 'orders') return <AdminOrdersPage />;
+  if (section === 'customers') return <AdminCustomersPage />;
+  if (section === 'payments') return <AdminPaymentsPage />;
+  if (section === 'delivery') return <AdminDeliveriesPage />;
+  if (section === 'cms') return <AdminWebsiteContentPage />;
+  if (section === 'notifications') return <AdminNotificationsPage />;
   return <AdminSectionPage section={section as Exclude<AdminSection, 'dashboard' | 'reports'>}/>;
 }

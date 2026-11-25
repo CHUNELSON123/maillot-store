@@ -18,12 +18,12 @@ export const communicationsService = {
     );
   },
 
-  subscribeToNewsletter(email: string) {
+  subscribeToNewsletter(data: { contact: string; whatsappOptIn?: boolean }) {
     return apiClient<{ status: string }>(
       "/communications/newsletter/subscriptions",
       {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(data),
       },
     );
   },

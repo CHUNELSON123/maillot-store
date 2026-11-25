@@ -14,6 +14,7 @@ import { CreatePromotionUseCase } from './application/use-cases/create-promotion
 import { GetPromotionsUseCase } from './application/use-cases/get-promotions.use-case';
 import { UpdatePromotionUseCase } from './application/use-cases/update-promotion.use-case';
 import { DeletePromotionUseCase } from './application/use-cases/delete-promotion.use-case';
+import { GetPublicContentUseCase } from './application/use-cases/get-public-content.use-case';
 
 @Module({
   controllers: [CmsController],
@@ -30,6 +31,7 @@ import { DeletePromotionUseCase } from './application/use-cases/delete-promotion
     GetPromotionsUseCase,
     UpdatePromotionUseCase,
     DeletePromotionUseCase,
+    GetPublicContentUseCase,
 
     {
       provide: CmsRepository,

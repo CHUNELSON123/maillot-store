@@ -21,4 +21,4 @@ export interface AdminPage<T = AdminRecord> {
 export type AdminSection =
   | 'dashboard' | 'products' | 'categories-brands' | 'inventory' | 'orders'
   | 'customers' | 'influencers' | 'payments' | 'delivery' | 'reports'
-  | 'cms' | 'users' | 'settings';
+  | 'cms' | 'users' | 'settings' | 'notifications';

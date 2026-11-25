@@ -14,8 +14,10 @@ type Props = {
   itemCount: number;
   subtotal: number;
   deliveryFee: number;
+  customerDiscountAmount: number;
   total: number;
-  onVariantChange: (itemId: string, variant: ProductVariant) => void;
+  onVariantChange: (itemId: string, variant: ProductVariant) => Promise<void>;
+  buyNow?: boolean;
 };
 
 function resolveImageUrl(
@@ -52,8 +54,10 @@ export function CheckoutOrderSummary({
   itemCount,
   subtotal,
   deliveryFee,
+  customerDiscountAmount,
   total,
   onVariantChange,
+  buyNow = false,
 }: Props) {
   return (
     <aside className="rounded-[8px] border border-neutral-200 p-4">
@@ -63,10 +67,10 @@ export function CheckoutOrderSummary({
         </h2>
 
         <Link
-          href="/cart"
+          href={buyNow && items[0] ? `/shop/${items[0].product.id}` : "/cart"}
           className="text-[10px] font-semibold text-blue-600 hover:underline"
         >
-          Edit Cart
+          {buyNow ? "Edit product" : "Edit Cart"}
         </Link>
       </div>
 
@@ -75,7 +79,7 @@ export function CheckoutOrderSummary({
         {itemCount === 1
           ? "Item"
           : "Items"}{" "}
-        in Cart
+        {buyNow ? "in this order" : "in Cart"}
       </p>
 
       <div className="mt-3">
@@ -157,6 +161,8 @@ export function CheckoutOrderSummary({
           </span>
         </div>
 
+        {customerDiscountAmount > 0 && <div className="flex items-center justify-between text-green-700"><span>Influencer customer discount</span><span className="font-semibold">−{formatPrice(customerDiscountAmount)}</span></div>}
+
         <div className="flex items-center justify-between">
           <span>Delivery Fee</span>
           <span className="font-semibold">
@@ -218,6 +224,8 @@ function MissingCartVariant({
           await catalogueService.getProductVariants(item.product.id)
         ).filter(
           (variant) =>
+            variant.status === "ACTIVE" &&
+            variant.stockQuantity >= item.quantity &&
             typeof variant.price === "number" &&
             Number.isFinite(variant.price) &&
             variant.price >= 0,
@@ -230,7 +238,7 @@ function MissingCartVariant({
         setVariants(availableVariants);
 
         if (availableVariants.length === 1) {
-          onVariantChange(item.id, availableVariants[0]);
+          await onVariantChange(item.id, availableVariants[0]);
         }
       } catch (error) {
         if (!cancelled) {
@@ -246,7 +254,7 @@ function MissingCartVariant({
     return () => {
       cancelled = true;
     };
-  }, [item.id, item.product.id, onVariantChange, retryCount]);
+  }, [item.id, item.product.id, item.quantity, onVariantChange, retryCount]);
 
   if (error) {
     return (
@@ -285,13 +293,7 @@ function MissingCartVariant({
           const variant = variants.find((variant) => variant.id === event.target.value);
 
           if (variant) {
-            try {
-              onVariantChange(item.id, variant);
-            } catch (error) {
-              setError(
-                error instanceof Error ? error.message : "Unable to update your cart.",
-              );
-            }
+            void onVariantChange(item.id, variant).catch((error: unknown) => setError(error instanceof Error ? error.message : "Unable to update your cart."));
           }
         }}
         className="mt-1 w-full rounded-[4px] border border-neutral-300 p-1 font-normal"

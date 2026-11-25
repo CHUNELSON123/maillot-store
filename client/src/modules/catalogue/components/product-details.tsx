@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
   Heart,
   Headphones,
   RefreshCcw,
@@ -27,6 +28,9 @@ import { ProductCard } from "./product-card";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
 
 import { useWishlist } from "@/modules/wishlist/hooks/use-wishlist";
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { getProductPromotion } from "@/modules/cms/utils/promotion-pricing";
+import { buyNowStorage } from "@/modules/cart/services/buy-now-storage";
 
 type Props = {
   product: ProductDetailsType;
@@ -36,12 +40,16 @@ export function ProductDetails({ product }: Props) {
   const { addItem } = useCart();
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedEdition, setSelectedEdition] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedEdition, setSelectedEdition] = useState(product.edition ?? "");
+  const [selectedSize, setSelectedSize] = useState(product.variants?.find((variant) => variant.status === "ACTIVE" && variant.stockQuantity > 0)?.size ?? "");
   const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
+  const [cartError, setCartError] = useState("");
+  const [wishlistError, setWishlistError] = useState("");
   const [activeTab, setActiveTab] = useState("Description");
   const { toggleItem, isInWishlist } = useWishlist();
+  const { promotions, content } = useCms();
 
   const isFavorite = isInWishlist(product.id);
 
@@ -64,46 +72,22 @@ export function ProductDetails({ product }: Props) {
       .filter((value): value is string => Boolean(value)),
   )];
 
-  const colors = [...new Set(
-    variants
-      .map((variant) => variant.color)
-      .filter((value): value is string => Boolean(value)),
-  )];
-
   const sizes = [...new Set(
     variants
       .map((variant) => variant.size)
       .filter((value): value is string => Boolean(value)),
   )];
 
-  const hasAvailableCombination = (
-    field: "edition" | "color" | "size",
-    value: string,
-  ) =>
-    purchasableVariants.some((variant) => {
-      if (variant[field] !== value) return false;
-
-      // Changing edition resets color and size.
-      if (field !== "edition" && selectedEdition && variant.edition !== selectedEdition) {
-        return false;
-      }
-
-      // Changing color resets size.
-      if (field === "size" && selectedColor && variant.color !== selectedColor) {
-        return false;
-      }
-
-      return true;
-    });
+  const hasAvailableSize = (size: string) =>
+    purchasableVariants.some((variant) => variant.size === size &&
+      (editions.length <= 1 || !selectedEdition || variant.edition === selectedEdition));
 
   const selectedVariant = purchasableVariants.find(
     (variant) =>
-      (!editions.length || variant.edition === selectedEdition) &&
-      (!colors.length || variant.color === selectedColor) &&
+      (!editions.length || editions.length === 1 || variant.edition === selectedEdition) &&
       (!sizes.length || variant.size === selectedSize),
   ) ?? (
-    !editions.length &&
-    !colors.length &&
+    (!editions.length || editions.length === 1) &&
     !sizes.length &&
     purchasableVariants.length === 1
       ? purchasableVariants[0]
@@ -142,6 +126,7 @@ export function ProductDetails({ product }: Props) {
     activeImage?.imageUrl,
   );
 
+  const productPromotion = getProductPromotion({ ...product, price: selectedVariant?.price ?? product.price }, promotions);
   const formattedPrice = new Intl.NumberFormat(
     "en-CM",
     {
@@ -149,22 +134,39 @@ export function ProductDetails({ product }: Props) {
       currency: "XAF",
       maximumFractionDigits: 0,
     },
-  ).format(selectedVariant?.price ?? product.price);
+  ).format(productPromotion?.discountedPrice ?? selectedVariant?.price ?? product.price);
+  const formattedOriginalPrice = productPromotion ? new Intl.NumberFormat('en-CM', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(selectedVariant?.price ?? product.price) : null;
+  const editionLabel = product.edition?.trim() && !/^(active|inactive|pending|draft|\d+)$/i.test(product.edition.trim()) ? product.edition.trim() : null;
+  const seasonLabel = product.season?.trim() && /^\d{4}\/\d{4}$/.test(product.season.trim()) ? product.season.trim() : null;
+  const freeDeliveryThreshold = Number(content["store.free_delivery_threshold"]);
+  const deliveryEnabled = content["store.delivery_enabled"] !== "false";
 
-  const handleAddToCart = (buyNow = false) => {
-    if (!selectedVariant || !canPurchase) {
+  const handleAddToCart = async (buyNow = false) => {
+    if (!selectedVariant || !canPurchase || isAdding) {
       return;
     }
 
-    addItem({
-      product: { ...product, price: selectedVariant.price },
-      variant: selectedVariant,
-      imageUrl: mainImageUrl,
-      quantity,
-    });
-
-    if (buyNow) {
-      router.push("/checkout");
+    setIsAdding(true);
+    setCartError("");
+    setCartMessage("");
+    try {
+      const purchase = {
+        product: { ...product, price: getProductPromotion({ ...product, price: selectedVariant.price }, promotions)?.discountedPrice ?? selectedVariant.price },
+        variant: selectedVariant,
+        imageUrl: mainImageUrl,
+        quantity,
+      };
+      if (buyNow) {
+        buyNowStorage.save({ ...purchase, id: `buy-now-${product.id}-${selectedVariant.id}` });
+        router.push("/checkout?mode=buy-now");
+      } else {
+        await addItem(purchase);
+        setCartMessage("Added to your cart.");
+      }
+    } catch (error) {
+      setCartError(error instanceof Error ? error.message : buyNow ? "Unable to start checkout. Please try again." : "Unable to add this product to your cart.");
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -249,9 +251,10 @@ export function ProductDetails({ product }: Props) {
 
               <button
                 type="button"
-                onClick={() =>
-                  toggleItem(product, activeImage ?? null)
-                }
+                onClick={() => {
+                  setWishlistError("");
+                  void toggleItem(product, activeImage ?? null).catch((error: unknown) => setWishlistError(error instanceof Error ? error.message : "Unable to update your wishlist."));
+                }}
                 className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm transition hover:scale-105"
                 aria-label={
                   isFavorite
@@ -314,7 +317,7 @@ export function ProductDetails({ product }: Props) {
 
                 <div className="flex flex-1 gap-3 overflow-hidden">
                   {images
-                    .slice(0, 5)
+                    .slice(0, 4)
                     .map((image, index) => {
                       const url = getImageUrl(
                         image.imageUrl,
@@ -367,57 +370,33 @@ export function ProductDetails({ product }: Props) {
           </div>
 
           {/* Product Information */}
-          <div className="lg:pt-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#B58D00]">
-              Maillot Store
-            </p>
-
-            <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
+          <div className="lg:pt-1">
+            <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
               {product.name}
             </h1>
 
-            {/* Rating */}
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex text-[#E6A400]">
-                ★★★★★
-              </div>
-
-              <span className="text-sm text-neutral-600">
-                4.8
-              </span>
-
-              <span className="text-sm text-neutral-500">
-                124 reviews
-              </span>
-            </div>
+            {(editionLabel || seasonLabel) && <p className="mt-1 text-sm text-neutral-600">{[editionLabel, seasonLabel].filter(Boolean).join(" ")}</p>}
 
             {/* Price */}
-            <div className="mt-5">
-              <span className="text-3xl font-bold">
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="text-2xl font-bold sm:text-3xl">
                 {formattedPrice}
               </span>
+              {formattedOriginalPrice && <span className="ml-3 text-sm text-neutral-500 line-through">{formattedOriginalPrice}</span>}
+              {productPromotion?.discountPercentage ? <span className="rounded bg-red-600 px-2 py-1 text-xs font-bold text-white">-{productPromotion.discountPercentage}%</span> : null}
             </div>
 
             {/* Stock */}
-            <div
-              className={`mt-2 text-sm font-semibold ${
-                !selectedVariant
-                  ? "text-neutral-500"
-                  : availableStock > 0
-                    ? "text-green-700"
-                    : "text-red-600"
-              }`}
-            >
-              {!selectedVariant
-                ? "Select your product options"
-                : `${availableStock} unit(s) available`}
+            <div className={`mt-2 inline-flex items-center gap-1.5 text-sm font-semibold ${purchasableVariants.length > 0 ? "text-green-700" : "text-red-600"}`}>
+              <CheckCircle2 size={15} />
+              {purchasableVariants.length > 0 ? "In Stock" : "Out of Stock"}
             </div>
 
             <div className="my-6 h-px bg-neutral-200" />
 
             {/* Product options */}
             <div className="space-y-5">
-              {editions.length > 0 && (
+              {editions.length > 1 && (
                 <div>
                   <label
                     htmlFor="product-edition"
@@ -430,7 +409,6 @@ export function ProductDetails({ product }: Props) {
                     value={selectedEdition}
                     onChange={(event) => {
                       setSelectedEdition(event.target.value);
-                      setSelectedColor("");
                       setSelectedSize("");
                       setQuantity(1);
                     }}
@@ -438,7 +416,7 @@ export function ProductDetails({ product }: Props) {
                   >
                     <option value="">Choose an edition</option>
                     {editions.map((edition) => {
-                      const available = hasAvailableCombination("edition", edition);
+                      const available = purchasableVariants.some((variant) => variant.edition === edition);
                       return (
                         <option key={edition} value={edition} disabled={!available}>
                           {edition}{!available ? " — Unavailable" : ""}
@@ -449,64 +427,15 @@ export function ProductDetails({ product }: Props) {
                 </div>
               )}
 
-              {colors.length > 0 && (
-                <div>
-                  <label
-                    htmlFor="product-color"
-                    className="mb-2 block text-sm font-bold"
-                  >
-                    Color
-                  </label>
-                  <select
-                    id="product-color"
-                    value={selectedColor}
-                    onChange={(event) => {
-                      setSelectedColor(event.target.value);
-                      setSelectedSize("");
-                      setQuantity(1);
-                    }}
-                    className="h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
-                  >
-                    <option value="">Choose a color</option>
-                    {colors.map((color) => {
-                      const available = hasAvailableCombination("color", color);
-                      return (
-                        <option key={color} value={color} disabled={!available}>
-                          {color}{!available ? " — Unavailable" : ""}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              )}
-
               {sizes.length > 0 && (
                 <div>
-                  <label
-                    htmlFor="product-size"
-                    className="mb-2 block text-sm font-bold"
-                  >
-                    Size
-                  </label>
-                  <select
-                    id="product-size"
-                    value={selectedSize}
-                    onChange={(event) => {
-                      setSelectedSize(event.target.value);
-                      setQuantity(1);
-                    }}
-                    className="h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm"
-                  >
-                    <option value="">Choose a size</option>
+                  <p className="mb-2 text-sm font-bold">Size</p>
+                  <div className="flex flex-wrap gap-2">
                     {sizes.map((size) => {
-                      const available = hasAvailableCombination("size", size);
-                      return (
-                        <option key={size} value={size} disabled={!available}>
-                          {size}{!available ? " — Unavailable" : ""}
-                        </option>
-                      );
+                      const available = hasAvailableSize(size);
+                      return <button key={size} type="button" disabled={!available} aria-pressed={selectedSize === size} onClick={() => { setSelectedSize(size); setQuantity(1); }} className={`min-h-10 min-w-11 border px-3 text-sm font-semibold transition ${selectedSize === size ? "border-black bg-black text-white" : "border-neutral-300 bg-white text-neutral-900 hover:border-black"} disabled:cursor-not-allowed disabled:opacity-40`}>{size}</button>;
                     })}
-                  </select>
+                  </div>
                 </div>
               )}
             </div>
@@ -515,7 +444,7 @@ export function ProductDetails({ product }: Props) {
               <p className="mt-3 text-sm text-neutral-600">
                 {purchasableVariants.length === 0
                   ? "This product is currently unavailable."
-                  : "Select the available options to continue."}
+                  : "Choose an available size to continue."}
               </p>
             )}
 
@@ -559,17 +488,17 @@ export function ProductDetails({ product }: Props) {
               <button
                 type="button"
                 onClick={() => handleAddToCart()}
-                disabled={!canPurchase}
+                disabled={!canPurchase || isAdding}
                 className="flex h-12 items-center justify-center gap-2 rounded-lg bg-[#D4AF37] text-sm font-bold text-black hover:bg-[#c49d2e] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingCart size={18} />
-                ADD TO CART
+                {isAdding ? "ADDING..." : "ADD TO CART"}
               </button>
 
               <button
                 type="button"
                 onClick={() => handleAddToCart(true)}
-                disabled={!canPurchase}
+                disabled={!canPurchase || isAdding}
                 className="flex h-12 items-center justify-center gap-2 rounded-lg bg-black text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Zap
@@ -579,6 +508,9 @@ export function ProductDetails({ product }: Props) {
                 BUY NOW
               </button>
             </div>
+            {cartMessage && <p role="status" className="mt-3 text-sm text-green-700">{cartMessage}</p>}
+            {cartError && <p role="alert" className="mt-3 text-sm text-red-700">{cartError}</p>}
+            {wishlistError && <p role="alert" className="mt-3 text-sm text-red-700">{wishlistError}</p>}
 
             {/* Benefits */}
             <div className="mt-8 grid grid-cols-2 gap-y-7 border-b border-neutral-200 pb-7 sm:grid-cols-4">
@@ -588,7 +520,7 @@ export function ProductDetails({ product }: Props) {
                   className="mx-auto"
                 />
                 <p className="mt-2 text-xs font-medium">
-                  Free Delivery
+                  {!deliveryEnabled ? "Store Pickup" : freeDeliveryThreshold > 0 ? `Free over ${freeDeliveryThreshold.toLocaleString()} XAF` : "Delivery Available"}
                 </p>
               </div>
 
@@ -625,12 +557,8 @@ export function ProductDetails({ product }: Props) {
 
             {/* Product tabs */}
             <div className="mt-7">
-              <div className="flex gap-7 border-b border-neutral-200">
-                {[
-                  "Description",
-                  "Details",
-                  "Reviews (124)",
-                ].map((tab) => (
+                <div className="flex gap-7 border-b border-neutral-200">
+                {["Description", "Details"].map((tab) => (
                   <button
                     key={tab}
                     type="button"
@@ -668,22 +596,20 @@ export function ProductDetails({ product }: Props) {
                     </p>
 
                     <p>
-                      <strong>Status:</strong>{" "}
-                      {product.status}
+                      <strong>Edition:</strong>{" "}
+                      {editionLabel ?? "—"}
                     </p>
 
                     <p>
-                      <strong>Variants:</strong>{" "}
-                      {variants.length}
+                      <strong>Season:</strong>{" "}
+                      {seasonLabel ?? "—"}
+                    </p>
+
+                    <p>
+                      <strong>Available sizes:</strong>{" "}
+                      {sizes.join(", ") || "Standard"}
                     </p>
                   </div>
-                )}
-
-                {activeTab === "Reviews (124)" && (
-                  <p>
-                    Reviews will be connected to the
-                    Reviews module when implemented.
-                  </p>
                 )}
               </div>
             </div>
@@ -720,6 +646,7 @@ function RelatedProductsContent({
   currentProductId: string;
 }) {
   const { products, images } = useCatalogue();
+  const { promotions } = useCms();
 
   const relatedProducts = products
     .filter(
@@ -759,6 +686,7 @@ function RelatedProductsContent({
             <ProductCard
               key={product.id}
               product={product}
+              promotions={promotions}
               image={image}
             />
           );

@@ -1,12 +1,13 @@
-﻿'use client';
+'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check, ChevronLeft, ChevronRight, Download, Eye, Search,
-  Settings2, X, Users, ShoppingBag, Wallet, Clock,
+  Settings2, X, Users, ShoppingBag, Wallet, MoreHorizontal, Filter,
 } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import { AdminRecord } from '../types/admin.types';
+import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 type InfluencerStatus = 'ALL' | 'PENDING' | 'ACTIVE' | 'REJECTED';
 
@@ -33,14 +34,18 @@ type Influencer = AdminRecord & {
     xUrl?: string;
     phone?: string;
     country?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    termsAcceptedAt?: string;
     city?: string;
     occupation?: string;
     bio?: string;
     applicationNote?: string;
+    profilePictureUrl?: string;
   };
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 function money(value: number) {
   return new Intl.NumberFormat('en-US', {
@@ -111,6 +116,8 @@ function socialHandle(record: Influencer) {
 }
 
 export function AdminInfluencersPage() {
+  const { user } = useAuth();
+  const isAdministrator = user?.roleName === 'Administrator';
   const [records, setRecords] = useState<Influencer[]>([]);
   const [performance, setPerformance] = useState<
     Record<string, InfluencerPerformance>
@@ -119,8 +126,10 @@ export function AdminInfluencersPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<InfluencerStatus>('ALL');
+  const statusSelectRef = useRef<HTMLSelectElement>(null);
   const [page, setPage] = useState(1);
 
   const [selected, setSelected] = useState<Influencer | null>(null);
@@ -130,10 +139,13 @@ export function AdminInfluencersPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const [decision, setDecision] = useState('');
+  const [rejectionReason, setRejectionReason] = useState('');
   const [commissionRate, setCommissionRate] = useState('0');
   const [discountRate, setDiscountRate] = useState('0');
   const [working, setWorking] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [paymentReferences, setPaymentReferences] = useState<Record<string, string>>({});
+  const [menuId, setMenuId] = useState('');
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [defaultCommission, setDefaultCommission] = useState('0');
@@ -301,6 +313,9 @@ export function AdminInfluencersPage() {
     1,
     Math.ceil(filtered.length / PAGE_SIZE),
   );
+  const pageNumbers = [...new Set([1, 2, 3, page - 1, page, page + 1, totalPages])]
+    .filter((number) => number >= 1 && number <= totalPages)
+    .sort((left, right) => left - right);
 
   const pageRecords = filtered.slice(
     (page - 1) * PAGE_SIZE,
@@ -326,9 +341,11 @@ export function AdminInfluencersPage() {
     ).length,
   }), [records]);
 
-  const openDetails = async (record: Influencer) => {
+  const openDetails = useCallback(async (record: Influencer) => {
+    setMenuId('');
     setSelected(record);
     setDecision('');
+    setRejectionReason('');
     setCommissionRate(String(record.commissionRate ?? 0));
     setDiscountRate(String(record.customerDiscountRate ?? 0));
     setActionError('');
@@ -361,10 +378,68 @@ export function AdminInfluencersPage() {
     } finally {
       setHistoryLoading(false);
     }
+  }, []);
+
+  const openedNotification = useRef('');
+  useEffect(() => {
+    const influencerId = new URLSearchParams(window.location.search).get('influencer');
+    if (!influencerId || openedNotification.current === influencerId || loading) return;
+    openedNotification.current = influencerId;
+    const record = records.find((item) => item.id === influencerId);
+    if (record) { void openDetails(record); return; }
+    void adminService.getSection('influencers', 1, influencerId).then((result) => {
+      const match = (result.items as Influencer[]).find((item) => item.id === influencerId);
+      if (match) void openDetails(match);
+      else setError('The influencer linked to this notification could not be found.');
+    }).catch(() => setError('Could not load the influencer linked to this notification.'));
+  }, [records, loading, openDetails]);
+
+  useEffect(() => {
+    if (!selected || historyLoading) return;
+    const section = window.location.hash.slice(1);
+    if (section !== 'commission-review' && section !== 'withdrawal-requests') return;
+    const timer = window.setTimeout(() => document.getElementById(section)?.scrollIntoView({ block: 'start' }), 100);
+    return () => window.clearTimeout(timer);
+  }, [selected, historyLoading]);
+
+  const copyReferralCode = async (record: Influencer) => {
+    setMenuId('');
+    if (!record.referralCode) return;
+    try {
+      await navigator.clipboard.writeText(record.referralCode);
+      setNotice(`Referral code ${record.referralCode} copied.`);
+      window.setTimeout(() => setNotice(''), 2500);
+    } catch {
+      setNotice('Could not copy the referral code from this browser.');
+      window.setTimeout(() => setNotice(''), 3500);
+    }
+  };
+
+  const reviewCommission = async (id: string) => {
+    if (!selected) return;
+    setWorking(true); setActionError('');
+    try { await adminService.updateCommissionStatus(id, 'APPROVED'); setCommissions(await adminService.getInfluencerCommissions(selected.id)); }
+    catch (cause) { setActionError(cause instanceof Error ? cause.message : 'Could not approve commission.'); }
+    finally { setWorking(false); }
+  };
+
+  const reviewWithdrawal = async (id: string, status: 'APPROVED' | 'REJECTED' | 'PAID') => {
+    if (!selected) return;
+    const reference = paymentReferences[id]?.trim();
+    if (status === 'PAID' && !reference) { setActionError('Enter the reference of the completed payment.'); return; }
+    setWorking(true); setActionError('');
+    try { await adminService.updateWithdrawalStatus(id, status, reference); setWithdrawals(await adminService.getInfluencerWithdrawals(selected.id)); }
+    catch (cause) { setActionError(cause instanceof Error ? cause.message : 'Could not update withdrawal.'); }
+    finally { setWorking(false); }
   };
 
   const saveInfluencer = async () => {
     if (!selected) return;
+
+    if (decision === 'REJECTED' && !rejectionReason.trim()) {
+      setActionError('Enter a reason for rejecting this application.');
+      return;
+    }
 
     const commission = Number(commissionRate);
     const discount = Number(discountRate);
@@ -410,15 +485,12 @@ export function AdminInfluencersPage() {
       ) {
         await adminService.updateInfluencer(selected.id, {
           status: 'REJECTED',
+          rejectionReason: rejectionReason.trim(),
         });
       }
 
-      if (
-        commission !== Number(selected.commissionRate ?? 0)
-        || discount !== Number(selected.customerDiscountRate ?? 0)
-      ) {
+      if (discount !== Number(selected.customerDiscountRate ?? 0)) {
         await adminService.updateInfluencer(selected.id, {
-          commissionRate: commission,
           customerDiscountRate: discount,
         });
       }
@@ -512,7 +584,7 @@ export function AdminInfluencersPage() {
     }
   };
 
-  // Save default rates for new influencer registrations.
+  // The global commission rate updates all influencer profiles. Past orders retain their saved rate.
   const saveDefaultSettings = async () => {
     const commission = Number(defaultCommission);
     const discount = Number(defaultDiscount);
@@ -539,7 +611,7 @@ export function AdminInfluencersPage() {
         adminService.updateSetting(
           'influencer_default_commission_rate',
           String(commission),
-          'Default commission rate for new influencers',
+          'Global commission rate; applied to all influencers for purchases placed after each change',
         ),
         adminService.updateSetting(
           'influencer_default_customer_discount_rate',
@@ -548,7 +620,7 @@ export function AdminInfluencersPage() {
         ),
       ]);
 
-      setSettingsMessage('Default rates saved successfully.');
+      setSettingsMessage('Commission rate applied to all influencers. Future purchases use this value; existing commissions remain unchanged.');
     } catch (cause) {
       setSettingsMessage(
         cause instanceof Error
@@ -585,21 +657,17 @@ export function AdminInfluencersPage() {
     <div className="mx-auto max-w-[1500px] space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs text-neutral-500">
-            Administration / Influencers
-          </p>
-
-          <h1 className="mt-1 text-3xl font-black tracking-tight">
+          <h1 className="text-2xl font-black tracking-tight">
             Influencers
           </h1>
 
-          <p className="mt-1 text-sm text-neutral-600">
-            Review applications, monitor referrals, and manage commissions.
+          <p className="mt-1 text-xs text-neutral-600">
+            Manage influencer applications, accounts, commissions and withdrawals.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
+          {isAdministrator && <button
             type="button"
             onClick={() => {
               setSettingsOpen(true);
@@ -609,7 +677,7 @@ export function AdminInfluencersPage() {
           >
             <Settings2 size={15} />
             Commission Settings
-          </button>
+          </button>}
 
           <button
             type="button"
@@ -623,30 +691,7 @@ export function AdminInfluencersPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'All Influencers', value: stats.all, icon: Users },
-          { label: 'Pending Approval', value: stats.pending, icon: Clock },
-          { label: 'Approved', value: stats.approved, icon: Check },
-          { label: 'Rejected', value: stats.rejected, icon: X },
-        ].map(({ label, value, icon: Icon }) => (
-          <div
-            key={label}
-            className="border border-neutral-200 bg-white p-4 shadow-sm"
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-neutral-500">
-                {label}
-              </p>
-              <Icon size={17} className="text-neutral-400" />
-            </div>
-
-            <p className="mt-3 text-2xl font-black">
-              {value.toLocaleString()}
-            </p>
-          </div>
-        ))}
-      </div>
+      {notice && <p role="status" className="border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{notice}</p>}
 
       <section className="border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-200 px-4 pt-4 sm:px-5">
@@ -677,7 +722,7 @@ export function AdminInfluencersPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id)}
-                className={`border-b-2 pb-3 text-xs font-bold transition ${
+                className={`border-b-2 pb-3 text-[11px] font-bold transition ${
                   filter === tab.id
                     ? 'border-[#D4AF37] text-neutral-950'
                     : 'border-transparent text-neutral-500 hover:text-neutral-900'
@@ -692,31 +737,33 @@ export function AdminInfluencersPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <label className="flex h-10 w-full max-w-md items-center gap-2 border border-neutral-200 px-3">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:px-5">
+          <label className="flex h-9 w-full max-w-md items-center gap-2 border border-neutral-200 px-3">
             <Search size={15} className="text-neutral-400" />
 
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search influencers, email, or handle..."
-              className="min-w-0 flex-1 text-sm outline-none"
+              placeholder="Search influencers..."
+              className="min-w-0 flex-1 text-xs outline-none"
             />
           </label>
 
           <select
             aria-label="Filter influencer status"
+            ref={statusSelectRef}
             value={filter}
             onChange={(event) =>
               setFilter(event.target.value as InfluencerStatus)
             }
-            className="h-10 border border-neutral-200 bg-white px-3 text-xs"
+            className="h-9 border border-neutral-200 bg-white px-3 text-xs"
           >
             <option value="ALL">All statuses</option>
             <option value="PENDING">Pending approval</option>
             <option value="ACTIVE">Approved</option>
             <option value="REJECTED">Rejected</option>
           </select>
+          <button type="button" onClick={() => { const select = statusSelectRef.current as (HTMLSelectElement & { showPicker?: () => void }) | null; if (select?.showPicker) select.showPicker(); else select?.focus(); }} className="inline-flex h-9 items-center gap-2 border border-neutral-300 px-4 text-xs font-semibold hover:border-[#D4AF37]"><Filter size={14}/>Filter</button>
         </div>
 
         {error ? (
@@ -741,7 +788,7 @@ export function AdminInfluencersPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1050px] text-left text-xs">
+            <table className="w-full min-w-[900px] text-left text-[11px]">
               <thead className="bg-neutral-50 text-[10px] uppercase tracking-wide text-neutral-500">
                 <tr>
                   {[
@@ -755,7 +802,7 @@ export function AdminInfluencersPage() {
                   ].map((heading) => (
                     <th
                       key={heading}
-                      className="whitespace-nowrap px-4 py-4 font-semibold sm:px-5"
+                      className="whitespace-nowrap px-3 py-3 font-semibold"
                     >
                       {heading}
                     </th>
@@ -767,12 +814,12 @@ export function AdminInfluencersPage() {
                 {pageRecords.map((record) => (
                   <tr
                     key={record.id}
-                    className="hover:bg-neutral-50/70"
+                    className="hover:bg-neutral-50"
                   >
-                    <td className="px-4 py-4 sm:px-5">
+                    <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-neutral-100 text-sm font-bold text-neutral-600">
-                          {fullName(record).slice(0, 1).toUpperCase()}
+                        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-neutral-100 bg-cover bg-center text-xs font-bold text-neutral-600" style={record.profile?.profilePictureUrl ? { backgroundImage: `url("${record.profile.profilePictureUrl}")` } : undefined}>
+                          {!record.profile?.profilePictureUrl && fullName(record).slice(0, 1).toUpperCase()}
                         </div>
 
                         <div>
@@ -780,18 +827,18 @@ export function AdminInfluencersPage() {
                             {fullName(record)}
                           </p>
 
-                          <p className="mt-1 text-[11px] text-neutral-500">
+                          <p className="mt-1 text-[10px] text-neutral-500">
                             {socialHandle(record)}
                           </p>
                         </div>
                       </div>
                     </td>
 
-                    <td className="px-4 py-4 text-neutral-600 sm:px-5">
-                      {record.profile?.email || 'â€”'}
+                    <td className="px-3 py-3 text-neutral-600">
+                      {record.profile?.email || '—'}
                     </td>
 
-                    <td className="px-4 py-4 sm:px-5">
+                    <td className="px-3 py-3">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold ${statusStyle(record.status)}`}
                       >
@@ -799,39 +846,36 @@ export function AdminInfluencersPage() {
                       </span>
                     </td>
 
-                    <td className="px-4 py-4 text-neutral-700 sm:px-5">
+                    <td className="px-3 py-3 text-neutral-700">
                       {performanceLoading
-                        ? 'â€¦'
+                        ? '…'
                         : performance[record.id]
                           ? performance[record.id].referrals.toLocaleString('en-US')
-                          : 'â€”'}
+                          : '—'}
                     </td>
 
-                    <td className="px-4 py-4 text-neutral-700 sm:px-5">
+                    <td className="px-3 py-3 text-neutral-700">
                       {performanceLoading
-                        ? 'â€¦'
+                        ? '…'
                         : performance[record.id]
                           ? money(performance[record.id].sales)
-                          : 'â€”'}
+                          : '—'}
                     </td>
 
-                    <td className="px-4 py-4 text-neutral-700 sm:px-5">
+                    <td className="px-3 py-3 text-neutral-700">
                       {performanceLoading
-                        ? 'â€¦'
+                        ? '…'
                         : performance[record.id]
                           ? money(performance[record.id].commission)
-                          : 'â€”'}
+                          : '—'}
                     </td>
 
-                    <td className="px-4 py-4 sm:px-5">
-                      <button
-                        type="button"
-                        onClick={() => void openDetails(record)}
-                        className="inline-flex items-center gap-1.5 border border-neutral-300 px-3 py-2 text-[11px] font-bold hover:border-[#D4AF37]"
-                      >
-                        <Eye size={14} />
-                        View
-                      </button>
+                    <td className="px-3 py-3">
+                      <div className="relative flex items-center gap-1.5">
+                        <button type="button" aria-label={`View ${fullName(record)}`} onClick={() => void openDetails(record)} className="grid h-8 w-8 place-items-center rounded border border-neutral-200 text-neutral-600 hover:border-[#D4AF37]"><Eye size={14}/></button>
+                        <button type="button" aria-label={`More actions for ${fullName(record)}`} onClick={() => setMenuId(menuId === record.id ? '' : record.id)} className="grid h-8 w-8 place-items-center rounded border border-neutral-200 text-neutral-600 hover:border-[#D4AF37]"><MoreHorizontal size={16}/></button>
+                        {menuId === record.id && <div className="absolute right-0 top-9 z-20 min-w-44 border border-neutral-200 bg-white py-1 shadow-lg"><button type="button" onClick={() => void openDetails(record)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-neutral-50"><Eye size={14}/>View and manage</button><button type="button" disabled={!record.referralCode} onClick={() => void copyReferralCode(record)} className="w-full px-3 py-2 text-left text-xs hover:bg-neutral-50 disabled:opacity-40">Copy referral code</button></div>}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -843,11 +887,11 @@ export function AdminInfluencersPage() {
         <footer className="flex items-center justify-between border-t border-neutral-100 px-4 py-3 text-xs text-neutral-500 sm:px-5">
           <span>
             Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
-            {'â€“'}
+            {'–'}
             {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               type="button"
               aria-label="Previous page"
@@ -855,14 +899,12 @@ export function AdminInfluencersPage() {
               onClick={() =>
                 setPage((current) => Math.max(1, current - 1))
               }
-              className="border border-neutral-200 p-2 disabled:opacity-40"
+              className="grid h-8 w-8 place-items-center border border-neutral-200 disabled:opacity-40"
             >
               <ChevronLeft size={14} />
             </button>
 
-            <span>
-              {page} / {totalPages}
-            </span>
+            {pageNumbers.map((pageNumber, index) => <span key={pageNumber} className="flex items-center gap-1">{index > 0 && pageNumber - pageNumbers[index - 1] > 1 && <span className="px-1">…</span>}<button type="button" aria-current={page === pageNumber ? 'page' : undefined} onClick={() => setPage(pageNumber)} className={`grid h-8 min-w-8 place-items-center border px-2 ${page === pageNumber ? 'border-[#b97800] bg-[#d48100] font-bold text-white' : 'border-neutral-200 hover:border-[#D4AF37]'}`}>{pageNumber}</button></span>)}
 
             <button
               type="button"
@@ -871,7 +913,7 @@ export function AdminInfluencersPage() {
               onClick={() =>
                 setPage((current) => Math.min(totalPages, current + 1))
               }
-              className="border border-neutral-200 p-2 disabled:opacity-40"
+              className="grid h-8 w-8 place-items-center border border-neutral-200 disabled:opacity-40"
             >
               <ChevronRight size={14} />
             </button>
@@ -949,8 +991,11 @@ export function AdminInfluencersPage() {
                       ].filter(Boolean).join(', '),
                     ],
                     ['Occupation', selected.profile?.occupation],
+                    ['Date of birth', selected.profile?.dateOfBirth ? new Date(selected.profile.dateOfBirth).toLocaleDateString() : ''],
+                    ['Gender', selected.profile?.gender],
                     ['Bio', selected.profile?.bio],
                     ['Application note', selected.profile?.applicationNote],
+                    ['Terms accepted', selected.profile?.termsAcceptedAt ? new Date(selected.profile.termsAcceptedAt).toLocaleString() : ''],
                   ].map(([label, value]) => (
                     <div
                       key={label}
@@ -968,6 +1013,30 @@ export function AdminInfluencersPage() {
                 </dl>
               </section>
 
+              <section>
+                <h3 className="text-sm font-bold">Social profiles</h3>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                  {([
+                    ['Instagram', selected.profile?.instagramUrl],
+                    ['TikTok', selected.profile?.tiktokUrl],
+                    ['YouTube', selected.profile?.youtubeUrl],
+                    ['Facebook', selected.profile?.facebookUrl],
+                    ['X', selected.profile?.xUrl],
+                  ] as const).filter(([, url]) => Boolean(url)).map(([label, url]) => (
+                    <a key={label} href={url!} target="_blank" rel="noreferrer" className="border border-neutral-200 px-3 py-2 font-semibold text-[#8b6100] underline">
+                      Open {label}
+                    </a>
+                  ))}
+                  {!([
+                    selected.profile?.instagramUrl,
+                    selected.profile?.tiktokUrl,
+                    selected.profile?.youtubeUrl,
+                    selected.profile?.facebookUrl,
+                    selected.profile?.xUrl,
+                  ].some(Boolean)) && <p className="text-neutral-500">No social profiles supplied.</p>}
+                </div>
+              </section>
+
               {selected.status?.toUpperCase() === 'PENDING' && (
                 <label className="block text-xs font-semibold">
                   Application decision
@@ -978,11 +1047,13 @@ export function AdminInfluencersPage() {
                     className="mt-1 block w-full border border-neutral-300 bg-white px-3 py-2.5 text-sm"
                   >
                     <option value="">No decision</option>
-                    <option value="APPROVED">Approve application</option>
+                    {isAdministrator && <option value="APPROVED">Approve application</option>}
                     <option value="REJECTED">Reject application</option>
                   </select>
                 </label>
               )}
+
+              {decision === 'REJECTED' && <label className="block text-xs font-semibold">Reason for rejection<textarea required maxLength={1000} value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} className="mt-1 block w-full border border-neutral-300 px-3 py-2 text-sm" /></label>}
 
               <section className="border-t border-neutral-200 pt-4">
                 <h3 className="text-sm font-bold">
@@ -990,7 +1061,7 @@ export function AdminInfluencersPage() {
                 </h3>
 
                 <p className="mt-1 text-xs text-neutral-500">
-                  Rate changes affect future eligible commissions.
+                  The commission rate is managed globally in Commission Settings and applies to all influencers. Existing sales keep their saved rate.
                 </p>
 
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -1003,10 +1074,8 @@ export function AdminInfluencersPage() {
                       max="100"
                       step="0.1"
                       value={commissionRate}
-                      onChange={(event) =>
-                        setCommissionRate(event.target.value)
-                      }
-                      className="mt-1 block w-full border border-neutral-300 px-3 py-2.5 text-sm"
+                      readOnly
+                      className="mt-1 block w-full border border-neutral-300 bg-neutral-50 px-3 py-2.5 text-sm"
                     />
                   </label>
 
@@ -1083,6 +1152,17 @@ export function AdminInfluencersPage() {
                     </p>
                   </>
                 )}
+              </section>
+
+              <section id="commission-review" className="border-t border-neutral-200 pt-4">
+                <h3 className="text-sm font-bold">Commission review</h3>
+                <p className="mt-1 text-xs text-neutral-500">Approved commissions become available for withdrawal. Pending commissions are included in recorded earnings but cannot yet be withdrawn.</p>
+                {commissions.length ? <ul className="mt-3 divide-y border-y">{commissions.map((item) => <li key={String(item.id)} className="flex flex-wrap items-center justify-between gap-2 py-3 text-xs"><span>{money(Number(item.amount ?? 0))} XAF · {String(item.status)}</span>{item.status === 'PENDING' && <button disabled={working} onClick={() => void reviewCommission(String(item.id))} className="border px-3 py-2 font-semibold disabled:opacity-50">Approve commission</button>}</li>)}</ul> : <p className="mt-2 text-xs text-neutral-500">No commissions recorded.</p>}
+              </section>
+              <section id="withdrawal-requests" className="border-t border-neutral-200 pt-4">
+                <h3 className="text-sm font-bold">Withdrawal requests</h3>
+                <p className="mt-1 text-xs text-neutral-500">Record a payment only after the transfer has actually completed, using its payment reference.</p>
+                {withdrawals.length ? <ul className="mt-3 divide-y border-y">{withdrawals.map((item) => { const id = String(item.id); return <li key={id} className="space-y-2 py-3 text-xs"><p>{money(Number(item.amount ?? 0))} XAF · {String(item.status)}</p><p>Recipient: {String(item.payoutMethod ?? "Not supplied")} · {String(item.payoutPhone ?? "Not supplied")}</p>{item.status === 'PENDING' && <div className="flex gap-2"><button disabled={working} onClick={() => void reviewWithdrawal(id, 'APPROVED')} className="border px-3 py-2">Approve</button><button disabled={working} onClick={() => void reviewWithdrawal(id, 'REJECTED')} className="border px-3 py-2">Reject</button></div>}{item.status === 'APPROVED' && <div className="flex gap-2"><input aria-label="Completed payment reference" value={paymentReferences[id] ?? ''} onChange={(event) => setPaymentReferences((current) => ({ ...current, [id]: event.target.value }))} placeholder="Completed payment reference" className="min-w-0 flex-1 border px-3 py-2"/><button disabled={working} onClick={() => void reviewWithdrawal(id, 'PAID')} className="border px-3 py-2">Record payment</button></div>}{Boolean(item.paymentReference) && <p>Reference: {String(item.paymentReference)}</p>}</li>; })}</ul> : <p className="mt-2 text-xs text-neutral-500">No withdrawal requests.</p>}
               </section>
 
               {actionError && (

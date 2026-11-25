@@ -5,6 +5,22 @@ jest.mock('../../../../infrastructure/database/prisma.service', () => ({
 import { PrismaService } from '../../../../infrastructure/database/prisma.service';
 import { PrismaProductRepository } from './prisma-product.repository';
 
+describe('PrismaProductRepository.update', () => {
+  it('updates base-priced variants while leaving custom-priced variants unchanged', async () => {
+    const tx = {
+      product: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue({ price: 100 }),
+        update: jest.fn().mockResolvedValue({ id: 'p', category_id: 'c', brand_id: null, name: 'Jersey', description: null, season: null, edition: null, price: 120, status: 'ACTIVE', created_at: new Date(), updated_at: new Date() }),
+      },
+      productVariant: { updateMany: jest.fn().mockResolvedValue({ count: 1 }) },
+    };
+    const prisma = { $transaction: jest.fn((callback) => callback(tx)) };
+    const repository = new PrismaProductRepository(prisma as never);
+    await repository.update('p', { price: 120 });
+    expect(tx.productVariant.updateMany).toHaveBeenCalledWith({ where: { product_id: 'p', deleted_at: null, price: 100 }, data: { price: 120 } });
+  });
+});
+
 describe('PrismaProductRepository.findPage', () => {
   it('applies database category/search filters and paging', async () => {
     const findMany = jest.fn().mockResolvedValue([]);

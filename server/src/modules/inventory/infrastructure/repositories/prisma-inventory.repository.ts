@@ -15,6 +15,29 @@ import {
 export class PrismaInventoryRepository implements InventoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getSummary() {
+    const [summary] = await this.prisma.$queryRaw<{
+      total_items: bigint;
+      total_quantity: bigint;
+      low_stock_items: bigint;
+      out_of_stock_items: bigint;
+    }[]>`
+      SELECT
+        COUNT(*)::bigint AS total_items,
+        COALESCE(SUM(quantity), 0)::bigint AS total_quantity,
+        COUNT(*) FILTER (WHERE quantity > 0 AND quantity <= min_stock)::bigint AS low_stock_items,
+        COUNT(*) FILTER (WHERE quantity = 0)::bigint AS out_of_stock_items
+      FROM inventory
+      WHERE deleted_at IS NULL
+    `;
+    return {
+      totalItems: Number(summary?.total_items ?? 0),
+      totalQuantity: Number(summary?.total_quantity ?? 0),
+      lowStockItems: Number(summary?.low_stock_items ?? 0),
+      outOfStockItems: Number(summary?.out_of_stock_items ?? 0),
+    };
+  }
+
   async create(data: CreateInventoryData): Promise<InventoryEntity> {
     if (
       data.quantity !== undefined &&
@@ -26,11 +49,16 @@ export class PrismaInventoryRepository implements InventoryRepository {
     }
 
     const inventory = await this.prisma.$transaction(async (tx) => {
+      const thresholdSetting = await tx.systemSetting.findFirst({
+        where: { key: 'low_stock_threshold', deleted_at: null },
+        select: { value: true },
+      });
+      const configuredThreshold = Number(thresholdSetting?.value);
       const created = await tx.inventory.create({
         data: {
           variant_id: data.variantId,
           quantity: 0,
-          min_stock: data.minStock ?? 0,
+          min_stock: data.minStock ?? (Number.isSafeInteger(configuredThreshold) && configuredThreshold >= 0 ? configuredThreshold : 0),
         },
       });
 

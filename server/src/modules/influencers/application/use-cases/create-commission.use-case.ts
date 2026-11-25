@@ -70,8 +70,9 @@ export class CreateCommissionUseCase {
       );
     }
 
+    const commissionRate = referral.commissionRateSnapshot ?? influencer.commissionRate;
     const commissionAmount =
-      (commissionableAmount * influencer.commissionRate) / 100;
+      (commissionableAmount * commissionRate) / 100;
 
     if (commissionAmount <= 0) {
       throw new BadRequestException(
@@ -84,7 +85,7 @@ export class CreateCommissionUseCase {
       referralId: referral.id,
       amount: commissionAmount,
       status: 'PENDING',
-      commissionRateSnapshot: influencer.commissionRate,
+      commissionRateSnapshot: commissionRate,
     });
   }
 }

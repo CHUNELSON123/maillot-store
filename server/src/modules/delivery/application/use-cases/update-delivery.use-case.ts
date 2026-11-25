@@ -12,10 +12,13 @@ export class UpdateDeliveryUseCase {
     if (data.deliveryStatus !== undefined) {
       const allowedStatuses = [
         'PENDING',
+        'ASSIGNED',
         'PROCESSING',
         'SHIPPED',
+        'IN_TRANSIT',
         'OUT_FOR_DELIVERY',
         'DELIVERED',
+        'FAILED',
         'CANCELLED',
       ];
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { notificationService } from "../services/notification.service";
 import { Notification } from "../types/notification.types";
 
-export function useNotifications() {
+export function useNotifications(enabled = true) {
   const [notifications, setNotifications] = useState<
     Notification[]
   >([]);
@@ -32,8 +32,14 @@ export function useNotifications() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
     void loadNotifications();
-  }, [loadNotifications]);
+    const refresh = () => { void loadNotifications(); };
+    const interval = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("maillot-notifications-updated", refresh);
+    return () => { window.clearInterval(interval); window.removeEventListener("focus", refresh); window.removeEventListener("maillot-notifications-updated", refresh); };
+  }, [loadNotifications, enabled]);
 
   const markAsRead = async (id: string) => {
     try {
@@ -46,6 +52,7 @@ export function useNotifications() {
         ),
       );
       setError("");
+      window.dispatchEvent(new Event("maillot-notifications-updated"));
     } catch {
       setError("Unable to mark this notification as read.");
     }
@@ -58,6 +65,7 @@ export function useNotifications() {
         current.map((notification) => ({ ...notification, isRead: true })),
       );
       setError("");
+      window.dispatchEvent(new Event("maillot-notifications-updated"));
     } catch {
       setError("Unable to mark notifications as read.");
     }

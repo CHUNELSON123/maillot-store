@@ -36,24 +36,24 @@ export default function TrackOrderPage() {
   return (
     <section>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-xl font-bold text-neutral-900">
           Track Order
         </h1>
 
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-1 text-xs text-neutral-500">
           Enter your order number to check its status and delivery tracking.
         </p>
       </div>
 
-      <div className="max-w-xl rounded-lg border border-neutral-200 bg-white p-6 sm:p-8">
+      <div className="max-w-2xl border border-neutral-200 bg-white p-5 sm:p-6">
         <form
           onSubmit={handleSubmit}
-          className="space-y-5"
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
         >
           <div>
             <label
               htmlFor="orderId"
-              className="mb-2 block text-sm font-medium text-neutral-900"
+              className="mb-1 block text-[10px] font-semibold text-neutral-900"
             >
               Order Number
             </label>
@@ -67,7 +67,7 @@ export default function TrackOrderPage() {
               }
               placeholder="e.g. ORD-123456789"
               required
-              className="h-12 w-full rounded-md border border-neutral-300 px-4 text-sm outline-none transition focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
+              className="h-9 w-full border border-neutral-300 px-3 text-xs outline-none transition focus:border-[#D4AF37] sm:min-w-[300px]"
             />
           </div>
 
@@ -76,7 +76,7 @@ export default function TrackOrderPage() {
           <button
             type="submit"
             disabled={isSearching}
-            className="h-12 w-full rounded-md bg-[#D4AF37] px-6 text-sm font-semibold text-white transition hover:bg-[#bf9828]"
+            className="h-9 shrink-0 bg-[#d28a00] px-6 text-[10px] font-bold text-white transition hover:bg-[#b87700]"
           >
             {isSearching ? "SEARCHING..." : "TRACK ORDER"}
           </button>

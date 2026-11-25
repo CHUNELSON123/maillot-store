@@ -1,4 +1,6 @@
 
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,6 +13,8 @@ import {
 
 import { CustomerLayout } from "@/modules/customer/components/customer-layout";
 import { NewsletterSection } from "@/components/shared/newsletter-section";
+import { useCms } from "@/modules/cms/hooks/use-cms";
+import { pageContentValue, resolveContentImage } from "@/modules/cms/utils/page-content-defaults";
 
 const trustFeatures = [
   {
@@ -36,6 +40,8 @@ const trustFeatures = [
 ];
 
 export default function AboutPage() {
+  const { content } = useCms();
+  const aboutParagraphs = pageContentValue(content, 'cms.about.description').split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean);
   return (
     <CustomerLayout>
       <main className="bg-white text-neutral-950">
@@ -61,30 +67,15 @@ export default function AboutPage() {
           <section className="grid items-center gap-7 md:grid-cols-[1fr_0.9fr] md:gap-10 lg:gap-14">
             <div>
               <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-                ABOUT MAILLOT STORE
+                {pageContentValue(content, 'cms.about.title')}
               </h1>
 
               <p className="mt-2 text-sm font-medium text-neutral-800">
-                Your Ultimate Destination for Sports Merchandise
+                {pageContentValue(content, 'cms.about.subtitle')}
               </p>
 
               <div className="mt-5 space-y-4 text-xs leading-6 text-neutral-700 sm:text-sm">
-                <p>
-                  Maillot Store was founded with a passion for football
-                  and a mission to bring authentic, high-quality sports
-                  merchandise closer to fans.
-                </p>
-
-                <p>
-                  We offer a wide range of jerseys, training wear,
-                  footwear, and accessories from the world&apos;s biggest
-                  clubs and brands.
-                </p>
-
-                <p>
-                  Our goal is simple: provide fans with original products,
-                  excellent service, and a shopping experience they can trust.
-                </p>
+                {aboutParagraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
               </div>
 
               <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-neutral-800">
@@ -92,13 +83,14 @@ export default function AboutPage() {
                   size={16}
                   className="shrink-0 text-[#D4AF37]"
                 />
-                <span>Made for fans. Driven by passion.</span>
+                <span>{pageContentValue(content, 'cms.about.tagline')}</span>
               </div>
             </div>
 
             <div className="relative mx-auto aspect-[4/3] w-full max-w-[520px] overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 shadow-sm">
               <Image
-                src="/about-maillot-store.png"
+                src={resolveContentImage(pageContentValue(content, 'cms.about.image'))}
+                unoptimized
                 alt="Maillot Store sports merchandise and jerseys"
                 fill
                 priority
@@ -134,11 +126,11 @@ export default function AboutPage() {
                 />
 
                 <h2 className="mt-3 text-[10px] font-extrabold sm:text-xs">
-                  {title}
+                  {pageContentValue(content, `cms.about.feature${index + 1}.title`) || title}
                 </h2>
 
                 <p className="mt-1 max-w-[150px] text-[10px] leading-4 text-neutral-600">
-                  {description}
+                  {pageContentValue(content, `cms.about.feature${index + 1}.description`) || description}
                 </p>
               </div>
             ))}

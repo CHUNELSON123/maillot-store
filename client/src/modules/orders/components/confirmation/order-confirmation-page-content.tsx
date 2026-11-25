@@ -15,6 +15,7 @@ import type { OrderConfirmationData } from "../../services/order-confirmation-st
 
 import { OrderConfirmationSummary } from "./order-confirmation-summary";
 import { OrderConfirmationTimeline } from "./order-confirmation-timeline";
+import { OrderReceipt } from "../order-receipt";
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -235,6 +236,29 @@ export function OrderConfirmationPageContent() {
 
         {/* Main Content */}
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <OrderReceipt data={{
+              orderNumber: confirmation.orderNumber,
+              orderDate: confirmation.orderDate,
+              customerName: confirmation.customer.fullName,
+              email: confirmation.customer.email,
+              phone: confirmation.customer.phone,
+              fulfillment: confirmation.delivery.method === "delivery" ? "Delivery" : "Store pickup",
+              paymentMethod: getPaymentLabel(confirmation.paymentMethod),
+              paymentStatus: confirmation.paymentStatus,
+              items: confirmation.items.map((item) => ({
+                name: item.product.name,
+                variant: [item.variant?.size, item.variant?.color].filter(Boolean).join(" / "),
+                sku: item.variant?.sku,
+                quantity: item.quantity,
+                unitPrice: item.product.price,
+              })),
+              subtotal: confirmation.subtotal,
+              discount: confirmation.discount,
+              deliveryFee: confirmation.deliveryFee,
+              total: confirmation.total,
+            }} />
+          </div>
           <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
             <div className="space-y-8">
               {/* Order Details */}

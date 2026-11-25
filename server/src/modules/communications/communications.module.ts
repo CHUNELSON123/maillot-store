@@ -5,6 +5,7 @@ import { SubscribeNewsletterUseCase } from './application/subscribe-newsletter.u
 import { CommunicationsRepository } from './domain/communications.repository';
 import { PrismaCommunicationsRepository } from './infrastructure/prisma-communications.repository';
 import { CommunicationsController } from './presentation/communications.controller';
+import { WhatsAppNotificationService } from './infrastructure/whatsapp-notification.service';
 
 @Module({
   controllers: [CommunicationsController],
@@ -12,10 +13,12 @@ import { CommunicationsController } from './presentation/communications.controll
     PrismaService,
     SubmitContactMessageUseCase,
     SubscribeNewsletterUseCase,
+    WhatsAppNotificationService,
     {
       provide: CommunicationsRepository,
       useClass: PrismaCommunicationsRepository,
     },
   ],
+  exports: [WhatsAppNotificationService],
 })
 export class CommunicationsModule {}

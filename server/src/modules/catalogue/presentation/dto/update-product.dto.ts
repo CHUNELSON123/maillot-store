@@ -14,7 +14,7 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsUUID()
-  brandId?: string;
+  brandId?: string | null;
 
   @IsOptional()
   @IsString()
@@ -25,6 +25,16 @@ export class UpdateProductDto {
   @IsString()
   @Length(0, 1000)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 30)
+  season?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 100)
+  edition?: string | null;
 
   @IsOptional()
   @IsNumber()

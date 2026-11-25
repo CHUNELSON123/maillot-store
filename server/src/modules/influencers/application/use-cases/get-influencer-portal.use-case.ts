@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InfluencerRepository } from '../../domain/repositories/influencer.repository';
 import { CommissionRepository } from '../../domain/repositories/commission.repository';
 import { WithdrawalRepository } from '../../domain/repositories/withdrawal.repository';
@@ -14,10 +14,14 @@ export class GetInfluencerPortalUseCase {
   async execute(userId: string) {
     const profile = await this.influencers.findProfileByUserId(userId);
     if (!profile) throw new NotFoundException('Influencer profile not found');
-    const [referrals, commissions, withdrawals] = await Promise.all([
+    if (profile.status !== 'ACTIVE') {
+      throw new ForbiddenException('Your influencer application must be approved before opening the portal');
+    }
+    const [referrals, commissions, withdrawals, minimumWithdrawalAmount] = await Promise.all([
       this.influencers.findReferralsByInfluencer(profile.id),
       this.commissions.findByInfluencer(profile.id),
       this.withdrawals.findByInfluencer(profile.id),
+      this.withdrawals.getMinimumWithdrawalAmount(),
     ]);
     const approved = commissions.filter((item) => item.status === 'APPROVED').reduce((sum, item) => sum + item.amount, 0);
     const reserved = withdrawals.filter((item) => ['PENDING', 'APPROVED', 'PAID'].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
@@ -31,7 +35,7 @@ export class GetInfluencerPortalUseCase {
       const rows = referrals.filter((item) => item.createdAt >= day && item.createdAt < next);
       return {
         date: day.toISOString().slice(0, 10),
-        clicks: rows.length,
+        clicks: rows.filter((item) => item.status === 'CLICKED').length,
         orders: rows.filter((item) => item.orderId !== null).length,
         sales: rows.reduce((sum, item) => sum + (item.saleAmount ?? 0), 0),
       };
@@ -42,7 +46,7 @@ export class GetInfluencerPortalUseCase {
       commissions,
       withdrawals,
       metrics: {
-        clicks: referrals.length,
+        clicks: referrals.filter((item) => item.status === 'CLICKED').length,
         orders: referrals.filter((item) => item.orderId !== null).length,
         sales: referrals.reduce((sum, item) => sum + (item.saleAmount ?? 0), 0),
         totalEarnings: commissions.reduce((sum, item) => sum + item.amount, 0),
@@ -50,6 +54,7 @@ export class GetInfluencerPortalUseCase {
         availableBalance: Math.max(0, approved - reserved),
         totalWithdrawn: withdrawals.filter((item) => item.status === 'PAID').reduce((sum, item) => sum + item.amount, 0),
       },
+      minimumWithdrawalAmount,
       activity,
     };
   }

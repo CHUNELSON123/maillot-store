@@ -22,11 +22,11 @@ export const influencerService = {
       body: JSON.stringify(data),
     });
   },
-  requestWithdrawal(amount: number) {
+  requestWithdrawal(amount: number, payoutMethod: 'MTN' | 'ORANGE', payoutPhone: string) {
     return apiClient('/withdrawals/me', {
       method: 'POST',
       token: token(),
-      body: JSON.stringify({ amount }),
+      body: JSON.stringify({ amount, payoutMethod, payoutPhone }),
     });
   },
   async uploadProfilePhoto(file: File) {
@@ -41,7 +41,7 @@ export const influencerService = {
     return response.json() as Promise<InfluencerProfile>;
   },
   trackReferralClick(referralCode: string) {
-    return apiClient<{ attributionToken: string }>('/influencers/referrals/click', {
+    return apiClient<{ attributionToken: string; customerDiscountRate: number }>('/influencers/referrals/click', {
       method: 'POST',
       body: JSON.stringify({ referralCode }),
     });
@@ -50,17 +50,23 @@ export const influencerService = {
 
 export const referralAttributionStorage = {
   key: 'maillot_influencer_attribution',
-  get(): { referralCode: string; attributionToken: string } | null {
+  get(): { referralCode: string; attributionToken: string; customerDiscountRate?: number } | null {
     if (typeof window === 'undefined') return null;
     try {
-      const value = sessionStorage.getItem(this.key);
-      return value ? JSON.parse(value) as { referralCode: string; attributionToken: string } : null;
+      const value = localStorage.getItem(this.key) ?? sessionStorage.getItem(this.key);
+      if (!value) return null;
+      const attribution = JSON.parse(value) as { referralCode: string; attributionToken: string; customerDiscountRate?: number };
+      localStorage.setItem(this.key, JSON.stringify(attribution));
+      return attribution;
     } catch { return null; }
   },
-  set(value: { referralCode: string; attributionToken: string }) {
-    if (typeof window !== 'undefined') sessionStorage.setItem(this.key, JSON.stringify(value));
+  set(value: { referralCode: string; attributionToken: string; customerDiscountRate?: number }) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.key, JSON.stringify(value));
+      window.dispatchEvent(new Event('maillot-referral-attribution-updated'));
+    }
   },
   clear() {
-    if (typeof window !== 'undefined') sessionStorage.removeItem(this.key);
+    if (typeof window !== 'undefined') { localStorage.removeItem(this.key); sessionStorage.removeItem(this.key); }
   },
 };

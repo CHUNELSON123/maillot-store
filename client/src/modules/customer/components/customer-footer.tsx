@@ -1,26 +1,37 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { cmsService } from "@/modules/cms/services/cms.service";
 
 const socialLinks = [
-  {
-    name: "TikTok",
-    label: "♪",
-  },
-  {
-    name: "Facebook",
-    label: "f",
-  },
-  {
-    name: "Snapchat",
-    label: "👻",
-  },
-  {
-    name: "X",
-    label: "𝕏",
-  },
+  { name: "TikTok", key: "store.social_tiktok", label: "♪" },
+  { name: "Facebook", key: "store.social_facebook", label: "f" },
+  { name: "Snapchat", key: "store.social_snapchat", label: "👻" },
+  { name: "X", key: "store.social_x", label: "𝕏" },
 ];
 
 export function CustomerFooter() {
+  const [siteName, setSiteName] = useState("Maillot Store");
+  const [siteTagline, setSiteTagline] = useState("Your number one destination for sports jerseys and merchandise.");
+  const [siteLogoUrl, setSiteLogoUrl] = useState("/maillotstore-logo.jpg");
+  const [socialUrls, setSocialUrls] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let mounted = true;
+    void cmsService.getPublicContent().then((content) => {
+      if (!mounted) return;
+      if (content["store.site_name"]) setSiteName(content["store.site_name"]);
+      if (content["store.site_tagline"]) setSiteTagline(content["store.site_tagline"]);
+      setSocialUrls(Object.fromEntries(socialLinks.map(({ name, key }) => [name, content[key] ?? ""])));
+      if (content["store.site_logo_url"]) {
+        const path = content["store.site_logo_url"];
+        const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/v1").replace(/\/v1\/?$/, "");
+        setSiteLogoUrl(path.startsWith("/") ? `${apiBase}${path}` : path);
+      }
+    }).catch(() => undefined);
+    return () => { mounted = false; };
+  }, []);
   return (
     <footer className="border-t border-neutral-900 bg-[#050505] text-white">
       <div className="mx-auto max-w-[1200px] px-5 pt-3 sm:px-8 lg:px-4">
@@ -30,33 +41,32 @@ export function CustomerFooter() {
           <div className="col-span-2 sm:col-span-1">
             <Link
               href="/"
-              aria-label="Maillot Store"
+              aria-label={siteName}
               className="relative block h-[55px] w-[105px]"
             >
               <Image
-                src="/maillotstore-logo.jpg"
-                alt="Maillot Store"
+                src={siteLogoUrl}
+                alt={siteName}
                 fill
+                unoptimized
                 sizes="105px"
                 className="object-contain mix-blend-screen"
               />
             </Link>
 
             <p className="mt-1 max-w-[175px] text-[9px] leading-3 text-neutral-500">
-              Your number one destination
-              <br />
-              for sports jerseys and
-              <br />
-              merchandise.
+              {siteTagline}
             </p>
 
             {/* Social icons */}
             <div className="mt-2 flex items-center gap-2">
-              {socialLinks.map((social) => (
+              {socialLinks.filter((social) => socialUrls[social.name]).map((social) => (
                 <a
                   key={social.name}
-                  href="#"
+                  href={socialUrls[social.name]}
                   aria-label={social.name}
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex h-5 w-5 items-center justify-center text-[10px] font-bold text-neutral-300 transition hover:text-[#D4AF37]"
                 >
                   {social.label}
@@ -73,14 +83,14 @@ export function CustomerFooter() {
 
             <div className="mt-2 space-y-1 text-[9px] text-neutral-400">
               <Link
-                href="/shop"
+                href="/categories"
                 className="block transition hover:text-white"
               >
                 Shop
               </Link>
 
               <Link
-                href="/shop"
+                href="/promotions"
                 className="block transition hover:text-white"
               >
                 Categories
@@ -110,7 +120,7 @@ export function CustomerFooter() {
 
             <div className="mt-2 space-y-1 text-[9px] text-neutral-400">
               <Link
-                href="/account"
+                href="/contact"
                 className="block transition hover:text-white"
               >
                 My Account
@@ -138,7 +148,7 @@ export function CustomerFooter() {
               </Link>
 
               <Link
-                href="/account"
+                href="/contact"
                 className="block transition hover:text-white"
               >
                 Returns & Exchanges
@@ -175,7 +185,7 @@ export function CustomerFooter() {
               </Link>
 
               <Link
-                href="/faqs"
+                href="/contact"
                 className="block transition hover:text-white"
               >
                 FAQs
@@ -190,33 +200,7 @@ export function CustomerFooter() {
             </h3>
 
             <div className="mt-2 space-y-1 text-[9px] text-neutral-400">
-              <a
-                href="#"
-                className="block transition hover:text-white"
-              >
-                TikTok
-              </a>
-
-              <a
-                href="#"
-                className="block transition hover:text-white"
-              >
-                Facebook
-              </a>
-
-              <a
-                href="#"
-                className="block transition hover:text-white"
-              >
-                Snapchat
-              </a>
-
-              <a
-                href="#"
-                className="block transition hover:text-white"
-              >
-                X
-              </a>
+              {socialLinks.filter((social) => socialUrls[social.name]).map((social) => <a key={social.name} href={socialUrls[social.name]} target="_blank" rel="noreferrer" className="block transition hover:text-white">{social.name}</a>)}
             </div>
           </div>
 
@@ -287,7 +271,7 @@ export function CustomerFooter() {
         {/* BOTTOM BAR */}
         <div className="flex flex-col gap-2 border-t border-neutral-800 py-2 text-[8px] text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © 2024 Maillot Store. All Rights Reserved.
+            © {new Date().getFullYear()} {siteName}. All Rights Reserved.
           </p>
 
           <div className="flex items-center gap-2">

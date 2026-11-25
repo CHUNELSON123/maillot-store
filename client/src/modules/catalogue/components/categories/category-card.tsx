@@ -14,15 +14,19 @@ export function CategoryCard({
   count,
   imageUrl,
 }: CategoryCardProps) {
+  const resolvedImageUrl = imageUrl?.startsWith("/uploads")
+    ? `${(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000/v1").replace(/\/v1\/?$/, "")}${imageUrl}`
+    : imageUrl;
+
   return (
     <Link
       href={`/shop?category=${encodeURIComponent(name)}`}
       className="group block"
     >
       <div className="relative h-[118px] overflow-hidden rounded-[5px] bg-neutral-100 sm:h-[135px]">
-        {imageUrl ? (
+        {resolvedImageUrl ? (
           <Image
-            src={imageUrl}
+            src={resolvedImageUrl}
             alt={name}
             fill
             sizes="(max-width: 640px) 50vw, 33vw"
